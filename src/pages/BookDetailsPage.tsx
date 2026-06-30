@@ -100,12 +100,14 @@ export function BookDetailsPage() {
           <p>{book.author}</p>
 
           {/* EDIT */}
-          <button
-            onClick={() => navigate(`/book/${id}/edit`)}
-            style={{ marginTop: 10 }}
-          >
-            Editar libro ✏️
-          </button>
+          {isOwner && (
+            <button
+              onClick={() => navigate(`/book/${id}/edit`)}
+              style={{ marginTop: 10 }}
+            >
+              Editar libro ✏️
+            </button>
+          )}
 
           {/* OWNER */}
           <p style={{ marginTop: 15 }}>
@@ -171,7 +173,7 @@ export function BookDetailsPage() {
                   >
                     <option value="">Selecciona usuario</option>
 
-                    {users.map((u) => (
+                    {users.filter((u) => u.id !== user?.id).map((u) => (
                       <option key={u.id} value={u.id}>
                         {u.name}
                       </option>

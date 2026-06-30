@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Navigate } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../services/supabaseClient'
+import { useAuth } from '../contexts/AuthContext'
 import { useBook } from '../services/queries'
 
 export function EditBookPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { user } = useAuth()
 
   const { data: book, isLoading } = useBook(id)
 
@@ -61,6 +63,7 @@ export function EditBookPage() {
   }
 
   if (isLoading || !book) return <p>Cargando...</p>
+  if (book.owner_id !== user?.id) return <Navigate to={`/book/${id}`} replace />
 
   return (
     <div style={{ padding: 20, maxWidth: 500 }}>

@@ -92,7 +92,7 @@ export function BookCard({ book }: { book: Book }) {
               >
                 <option value="">Prestar a...</option>
 
-                {users.map((u) => (
+                {users.filter((u) => u.id !== user?.id).map((u) => (
                   <option key={u.id} value={u.id}>
                     {u.name}
                   </option>
