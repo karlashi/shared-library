@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from './supabaseClient'
 import { getBooks } from './books'
 import { getProfile } from './profiles'
-import { lendBook } from './loans'
+import { lendBook, returnBook } from './loans'
 import type { Book } from '../types/Books'
 import type { Profile } from '../types/Profile'
 import type { Loan } from '../types/Loan'
@@ -73,6 +73,44 @@ export function useLendBook() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['books'] })
       queryClient.invalidateQueries({ queryKey: ['loans'] })
+    },
+  })
+}
+
+export function useAllLoans() {
+  return useQuery({
+    queryKey: ['loans', 'all'],
+    queryFn: async (): Promise<Loan[]> => {
+      const { data, error } = await supabase.from('loans').select('*')
+      if (error) throw error
+      return data ?? []
+    },
+  })
+}
+
+export function useReturnBook() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (loanId: string) => returnBook(loanId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['books'] })
+      queryClient.invalidateQueries({ queryKey: ['loans'] })
+    },
+  })
+}
+
+export function useUpdateProfile() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (vars: { userId: string; name: string }) => {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ name: vars.name })
+        .eq('id', vars.userId)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profiles'] })
     },
   })
 }

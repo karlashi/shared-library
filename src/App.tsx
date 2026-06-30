@@ -5,6 +5,7 @@ import { useBooks } from './services/queries'
 import { BookCard } from './components/BookCard'
 import { RequireAuth } from './components/RequireAuth'
 import { LoginPage } from './pages/LoginPage'
+import { ProfilePage } from './pages/ProfilePage'
 import { AddBookPage } from './pages/AddBookPage'
 import { BookDetailsPage } from './pages/BookDetailsPage'
 import { EditBookPage } from './pages/EditBookPage'
@@ -44,6 +45,9 @@ function Home() {
       {/* USER */}
       <div style={{ marginBottom: 15 }}>
         <p>👤 {profile?.name ?? user?.email}</p>
+        <Link to="/profile">
+          <button>Mi perfil</button>
+        </Link>{' '}
         <button onClick={logout}>Cerrar sesión</button>
       </div>
 
@@ -109,6 +113,7 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/" element={<RequireAuth><Home /></RequireAuth>} />
+          <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth>} />
           <Route path="/add" element={<RequireAuth><AddBookPage /></RequireAuth>} />
           <Route path="/book/:id" element={<RequireAuth><BookDetailsPage /></RequireAuth>} />
           <Route path="/book/:id/edit" element={<RequireAuth><EditBookPage /></RequireAuth>} />

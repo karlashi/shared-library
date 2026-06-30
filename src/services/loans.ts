@@ -8,3 +8,12 @@ export async function lendBook(bookId: string, borrowerId: string) {
 
   if (error) throw error
 }
+
+export async function returnBook(loanId: string) {
+  const { error } = await supabase
+    .from('loans')
+    .update({ returned_at: new Date().toISOString() })
+    .eq('id', loanId)
+
+  if (error) throw error
+}
