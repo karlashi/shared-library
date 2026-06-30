@@ -15,6 +15,8 @@ export function EditBookPage() {
 
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
+  const [description, setDescription] = useState('')
+  const [isbn, setIsbn] = useState('')
   const [cover_url, setCoverUrl] = useState('')
   const [collection, setCollection] = useState('')
   const [age_recommendation, setAge] = useState('')
@@ -26,6 +28,8 @@ export function EditBookPage() {
 
     setTitle(book.title)
     setAuthor(book.author)
+    setDescription(book.description || '')
+    setIsbn(book.isbn || '')
     setCoverUrl(book.cover_url || '')
     setCollection(book.collection || '')
     setAge(book.age_recommendation || '')
@@ -40,6 +44,8 @@ export function EditBookPage() {
         .update({
           title,
           author,
+          description,
+          isbn,
           cover_url,
           collection,
           age_recommendation,
@@ -79,6 +85,16 @@ export function EditBookPage() {
         <label>
           Autor
           <input value={author} onChange={e => setAuthor(e.target.value)} />
+        </label>
+
+        <label>
+          Descripción
+          <textarea value={description} onChange={e => setDescription(e.target.value)} rows={4} />
+        </label>
+
+        <label>
+          ISBN
+          <input value={isbn} onChange={e => setIsbn(e.target.value)} />
         </label>
 
 <label>

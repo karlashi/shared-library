@@ -193,8 +193,16 @@ export function BookDetailsPage() {
 
           {/* EXTRA INFO */}
           <div style={{ marginTop: 15 }}>
+            {book.description && (
+              <p style={{ marginBottom: 10 }}>{book.description}</p>
+            )}
+
             <p><b>Colección:</b> {book.collection}</p>
             <p><b>Edad recomendada:</b> {book.age_recommendation}</p>
+
+            {book.isbn && (
+              <p><b>ISBN:</b> {book.isbn}</p>
+            )}
 
             {book.tags && (
               <p><b>Etiquetas:</b> {book.tags.join(', ')}</p>

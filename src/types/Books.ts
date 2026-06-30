@@ -9,6 +9,8 @@ export type Book = {
   link?: string
   age_recommendation?: string
   tags?: string[]
+  isbn?: string
+  description?: string
 
   isBorrowed?: boolean
   borrowedBy?: string | null
