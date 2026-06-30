@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '../services/supabaseClient'
-import { getProfile } from '../services/profiles'
+import { getOrCreateProfile } from '../services/profiles'
 import type { Profile } from '../types/Profile'
 
 type AuthContextValue = {
@@ -26,7 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (isMounted) setProfile(null)
         return
       }
-      const profileData = await getProfile(currentUser.id)
+      const profileData = await getOrCreateProfile(currentUser)
       if (isMounted) setProfile(profileData)
     }
 

@@ -3,6 +3,8 @@ import { useState } from 'react'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { useBooks } from './services/queries'
 import { BookCard } from './components/BookCard'
+import { RequireAuth } from './components/RequireAuth'
+import { LoginPage } from './pages/LoginPage'
 import { AddBookPage } from './pages/AddBookPage'
 import { BookDetailsPage } from './pages/BookDetailsPage'
 import { EditBookPage } from './pages/EditBookPage'
@@ -41,14 +43,8 @@ function Home() {
 
       {/* USER */}
       <div style={{ marginBottom: 15 }}>
-        {user && profile ? (
-          <>
-            <p>👤 {profile.name}</p>
-            <button onClick={logout}>Cerrar sesión</button>
-          </>
-        ) : (
-          <p>🔐 No hay sesión iniciada</p>
-        )}
+        <p>👤 {profile?.name ?? user?.email}</p>
+        <button onClick={logout}>Cerrar sesión</button>
       </div>
 
       <Link to="/add">
@@ -111,10 +107,11 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/add" element={<AddBookPage />} />
-          <Route path="/book/:id" element={<BookDetailsPage />} />
-          <Route path="/book/:id/edit" element={<EditBookPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/" element={<RequireAuth><Home /></RequireAuth>} />
+          <Route path="/add" element={<RequireAuth><AddBookPage /></RequireAuth>} />
+          <Route path="/book/:id" element={<RequireAuth><BookDetailsPage /></RequireAuth>} />
+          <Route path="/book/:id/edit" element={<RequireAuth><EditBookPage /></RequireAuth>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
