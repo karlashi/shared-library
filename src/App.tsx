@@ -1,122 +1,146 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { supabase } from './services/supabaseClient'
+import { getBooks } from './services/books'
+import { getProfile } from './services/profiles'
+import type { Book } from './types/Book'
+import { BookCard } from './components/BookCard'
+import { AddBookPage } from './pages/AddBookPage'
+import { BookDetailsPage } from './pages/BookDetailsPage'
+import { EditBookPage } from './pages/EditBookPage'
 
-function App() {
-  const [count, setCount] = useState(0)
+function Home() {
+  const [books, setBooks] = useState<Book[]>([])
+
+  const [user, setUser] = useState<any>(null)
+  const [profile, setProfile] = useState<any>(null)
+
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
+
+  // 👤 AUTH LOADER
+  const loadUser = async () => {
+    const { data } = await supabase.auth.getUser()
+
+    const user = data.user
+    setUser(user)
+
+    if (user) {
+      const profileData = await getProfile(user.id)
+      setProfile(profileData)
+    }
+  }
+
+  // 📚 LOAD BOOKS
+  const loadBooks = async () => {
+    const data = await getBooks()
+    setBooks(data)
+  }
+
+  useEffect(() => {
+    loadUser()
+    loadBooks()
+  }, [])
+
+  const logout = async () => {
+    await supabase.auth.signOut()
+    setUser(null)
+    setProfile(null)
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
+    <div style={{ padding: 20 }}>
+      <h1>📚 Biblioteca Compartida</h1>
+
+      {/* USER INFO */}
+      <div style={{ marginBottom: 10 }}>
+        {profile ? (
+          <>
+            <p>👤 {profile.name}</p>
+            <button onClick={logout}>Cerrar sesión</button>
+          </>
+        ) : (
+          <p>🔐 No hay sesión iniciada</p>
+        )}
+      </div>
+
+      <Link to="/add">
+        <button>➕ Añadir libro</button>
+      </Link>
+
+      {/* SEARCH + FILTERS */}
+      <div style={{ marginTop: 20, marginBottom: 20 }}>
+
+        <input
+          placeholder="Buscar por título o autor..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{
+            padding: 8,
+            width: 260,
+            marginRight: 10
+          }}
+        />
+
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          style={{ padding: 8 }}
         >
-          Count is {count}
-        </button>
-      </section>
+          <option value="all">Todos</option>
+          <option value="available">Disponibles</option>
+          <option value="borrowed">Prestados</option>
+          <option value="blocked">Fuera de circulación</option>
+        </select>
 
-      <div className="ticks"></div>
+      </div>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      {/* BOOK GRID */}
+      <div
+        style={{
+          display: 'flex',
+          gap: 12,
+          flexWrap: 'wrap'
+        }}
+      >
+        {books
+          .filter(book => {
+            const matchesSearch =
+              book.title.toLowerCase().includes(search.toLowerCase()) ||
+              book.author.toLowerCase().includes(search.toLowerCase())
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+            const matchesStatus =
+              statusFilter === 'all' ||
+              (statusFilter === 'available' &&
+                !book.isBorrowed &&
+                book.status !== 'Fuera de circulación') ||
+              (statusFilter === 'borrowed' && book.isBorrowed) ||
+              (statusFilter === 'blocked' &&
+                book.status === 'Fuera de circulación')
+
+            return matchesSearch && matchesStatus
+          })
+          .map(book => (
+            <BookCard
+              key={book.id}
+              book={book}
+              onAction={loadBooks}
+            />
+          ))}
+      </div>
+    </div>
   )
 }
 
-export default App
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/add" element={<AddBookPage />} />
+        <Route path="/book/:id" element={<BookDetailsPage />} />
+        <Route path="/book/:id/edit" element={<EditBookPage />} />
+      </Routes>
+    </BrowserRouter>
+  )
+}
