@@ -26,6 +26,12 @@ export function ProfilePage() {
   const getBookById = (id: string) => books.find((b) => b.id === id)
   const getProfileName = (id: string) =>
     profiles.find((p) => p.id === id)?.name ?? 'Desconocido'
+  const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString('de-DE', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    })
 
   const myBooks = books.filter((b) => b.owner_id === user?.id)
 
@@ -109,6 +115,9 @@ export function ProfilePage() {
                 Propietario: {book ? getProfileName(book.owner_id ?? '') : 'Desconocido'}
                 {' · '}
                 {loan.returned_at ? 'Devuelto' : 'Activo'}
+                {' · '}
+                Prestado: {formatDate(loan.borrowed_at)}
+                {loan.returned_at && ` · Devuelto: ${formatDate(loan.returned_at)}`}
               </li>
             )
           })}
@@ -143,6 +152,9 @@ export function ProfilePage() {
                     </button>
                   </>
                 )}
+                {' · '}
+                Prestado: {formatDate(loan.borrowed_at)}
+                {loan.returned_at && ` · Devuelto: ${formatDate(loan.returned_at)}`}
               </li>
             )
           })}

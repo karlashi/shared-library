@@ -23,7 +23,8 @@ export async function getBooks(): Promise<Book[]> {
     return {
       ...book,
       isBorrowed: !!activeLoan,
-      borrowedBy: activeLoan?.borrower_id || null
+      borrowedBy: activeLoan?.borrower_id || null,
+      loanId: activeLoan?.id || null
     }
   })
 

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { useBook, useProfile, useProfiles, useBookLoan, useLendBook } from '../services/queries'
+import { useBook, useProfile, useProfiles, useBookLoan, useLendBook, useReturnBook } from '../services/queries'
 
 export function BookDetailsPage() {
   const { id } = useParams()
@@ -14,6 +14,7 @@ export function BookDetailsPage() {
   const { data: borrower } = useProfile(loan?.borrower_id)
   const { data: users = [] } = useProfiles()
   const lendBook = useLendBook()
+  const returnBook = useReturnBook()
 
   const [selectedUser, setSelectedUser] = useState('')
 
@@ -48,6 +49,17 @@ export function BookDetailsPage() {
         },
       }
     )
+  }
+
+  const markAsReturned = () => {
+    if (!loan) return
+
+    returnBook.mutate(loan.id, {
+      onError: (error) => {
+        console.error(error)
+        alert('Error al marcar el libro como devuelto')
+      },
+    })
   }
 
   return (
@@ -141,32 +153,39 @@ export function BookDetailsPage() {
             )}
           </div>
 
-          {/* OWNER LENDING CONTROL */}
+          {/* OWNER LENDING / RETURN CONTROL */}
           {isOwner && (
             <div style={{ marginTop: 20 }}>
+              {isBorrowed ? (
+                <button onClick={markAsReturned} disabled={returnBook.isPending}>
+                  Marcar como devuelto
+                </button>
+              ) : (
+                <>
+                  <h4>Prestar a usuario</h4>
 
-              <h4>Prestar a usuario</h4>
+                  <select
+                    value={selectedUser}
+                    onChange={(e) => setSelectedUser(e.target.value)}
+                    style={{ padding: 6, width: '100%' }}
+                  >
+                    <option value="">Selecciona usuario</option>
 
-              <select
-                value={selectedUser}
-                onChange={(e) => setSelectedUser(e.target.value)}
-                style={{ padding: 6, width: '100%' }}
-              >
-                <option value="">Selecciona usuario</option>
+                    {users.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.name}
+                      </option>
+                    ))}
+                  </select>
 
-                {users.map((u) => (
-                  <option key={u.id} value={u.id}>
-                    {u.name}
-                  </option>
-                ))}
-              </select>
-
-              <button
-                onClick={lendToUser}
-                style={{ marginTop: 8 }}
-              >
-                Prestar 📖
-              </button>
+                  <button
+                    onClick={lendToUser}
+                    style={{ marginTop: 8 }}
+                  >
+                    Prestar 📖
+                  </button>
+                </>
+              )}
             </div>
           )}
 

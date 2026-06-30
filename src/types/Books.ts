@@ -12,4 +12,5 @@ export type Book = {
 
   isBorrowed?: boolean
   borrowedBy?: string | null
+  loanId?: string | null
 }

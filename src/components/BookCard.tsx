@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { useProfiles, useLendBook } from '../services/queries'
+import { useProfiles, useLendBook, useReturnBook } from '../services/queries'
 import type { Book } from '../types/Books'
 
 export function BookCard({ book }: { book: Book }) {
@@ -10,9 +10,11 @@ export function BookCard({ book }: { book: Book }) {
   const { user } = useAuth()
   const { data: users = [] } = useProfiles()
   const lendBook = useLendBook()
+  const returnBook = useReturnBook()
   const [selectedUser, setSelectedUser] = useState('')
 
   const isOwner = book.owner_id === user?.id
+  const borrowerName = users.find((u) => u.id === book.borrowedBy)?.name ?? 'alguien'
 
   const lendToUser = () => {
     if (!selectedUser) return alert('Selecciona un usuario')
@@ -27,6 +29,17 @@ export function BookCard({ book }: { book: Book }) {
         },
       }
     )
+  }
+
+  const markAsReturned = () => {
+    if (!book.loanId) return
+
+    returnBook.mutate(book.loanId, {
+      onError: (error) => {
+        console.error(error)
+        alert('Error al marcar el libro como devuelto')
+      },
+    })
   }
 
   return (
@@ -52,30 +65,48 @@ export function BookCard({ book }: { book: Book }) {
         )}
       </div>
 
-      {/* OWNER LEND CONTROL */}
+      {/* BORROWED STATUS */}
+      {book.isBorrowed && (
+        <p style={{ marginTop: 10, fontSize: 13 }}>
+          📕 Prestado a: {borrowerName}
+        </p>
+      )}
+
+      {/* OWNER LEND / RETURN CONTROL */}
       {isOwner && (
         <div style={{ marginTop: 10 }}>
+          {book.isBorrowed ? (
+            <button
+              onClick={markAsReturned}
+              disabled={returnBook.isPending}
+              style={{ width: '100%' }}
+            >
+              Marcar como devuelto
+            </button>
+          ) : (
+            <>
+              <select
+                value={selectedUser}
+                onChange={(e) => setSelectedUser(e.target.value)}
+                style={{ width: '100%', marginTop: 6 }}
+              >
+                <option value="">Prestar a...</option>
 
-          <select
-            value={selectedUser}
-            onChange={(e) => setSelectedUser(e.target.value)}
-            style={{ width: '100%', marginTop: 6 }}
-          >
-            <option value="">Prestar a...</option>
+                {users.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.name}
+                  </option>
+                ))}
+              </select>
 
-            {users.map((u) => (
-              <option key={u.id} value={u.id}>
-                {u.name}
-              </option>
-            ))}
-          </select>
-
-          <button
-            onClick={lendToUser}
-            style={{ width: '100%', marginTop: 6 }}
-          >
-            Prestar 📖
-          </button>
+              <button
+                onClick={lendToUser}
+                style={{ width: '100%', marginTop: 6 }}
+              >
+                Prestar 📖
+              </button>
+            </>
+          )}
         </div>
       )}
     </div>
