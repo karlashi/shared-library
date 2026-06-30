@@ -1,74 +1,27 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { supabase } from '../services/supabaseClient'
-import { getProfile } from '../services/profiles'
+import { useAuth } from '../contexts/AuthContext'
+import { useBook, useProfile, useProfiles, useBookLoan, useLendBook } from '../services/queries'
 
 export function BookDetailsPage() {
   const { id } = useParams()
   const navigate = useNavigate()
 
-  const [book, setBook] = useState<any>(null)
-  const [ownerName, setOwnerName] = useState('')
-  const [borrowerName, setBorrowerName] = useState<string | null>(null)
-  const [users, setUsers] = useState<any[]>([])
+  const { user } = useAuth()
+  const { data: book, isLoading: isBookLoading } = useBook(id)
+  const { data: owner } = useProfile(book?.owner_id)
+  const { data: loan } = useBookLoan(id)
+  const { data: borrower } = useProfile(loan?.borrower_id)
+  const { data: users = [] } = useProfiles()
+  const lendBook = useLendBook()
+
   const [selectedUser, setSelectedUser] = useState('')
-  const [user, setUser] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    const load = async () => {
-      // 👤 current user
-      const { data: auth } = await supabase.auth.getUser()
-      setUser(auth.user)
-
-      // 📚 book
-      const { data, error } = await supabase
-        .from('books')
-        .select('*')
-        .eq('id', id)
-        .single()
-
-      if (error || !data) {
-        setLoading(false)
-        return
-      }
-
-      setBook(data)
-
-      // 👤 owner
-      if (data.owner_id) {
-        const owner = await getProfile(data.owner_id)
-        setOwnerName(owner?.name || 'Desconocido')
-      }
-
-      // 📕 current borrower
-      const { data: loan } = await supabase
-        .from('loans')
-        .select('*')
-        .eq('book_id', id)
-        .is('returned_at', null)
-        .maybeSingle()
-
-      if (loan?.borrower_id) {
-        const borrower = await getProfile(loan.borrower_id)
-        setBorrowerName(borrower?.name || 'Desconocido')
-      }
-
-      // 👥 users list (for owner lending)
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('*')
-
-      setUsers(profiles || [])
-
-      setLoading(false)
-    }
-
-    load()
-  }, [id])
-
-  if (loading) return <p>Cargando...</p>
+  if (isBookLoading) return <p>Cargando...</p>
   if (!book) return <p>Libro no encontrado</p>
+
+  const ownerName = owner?.name || 'Desconocido'
+  const borrowerName = loan ? borrower?.name || 'Desconocido' : null
 
   const isBorrowed = !!borrowerName
   const isBlocked = book.status === 'Fuera de circulación'
@@ -82,21 +35,19 @@ export function BookDetailsPage() {
 
   const status = getStatus()
 
-  const lendToUser = async () => {
-    if (!selectedUser) return alert('Selecciona un usuario')
+  const lendToUser = () => {
+    if (!selectedUser || !id) return alert('Selecciona un usuario')
 
-    const { error } = await supabase.from('loans').insert({
-      book_id: id,
-      borrower_id: selectedUser
-    })
-
-    if (error) {
-      console.error(error)
-      return alert('Error al prestar libro')
-    }
-
-    alert('Libro prestado correctamente')
-    window.location.reload()
+    lendBook.mutate(
+      { bookId: id, borrowerId: selectedUser },
+      {
+        onSuccess: () => alert('Libro prestado correctamente'),
+        onError: (error) => {
+          console.error(error)
+          alert('Error al prestar libro')
+        },
+      }
+    )
   }
 
   return (

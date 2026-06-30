@@ -1,9 +1,13 @@
 import { useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../services/supabaseClient'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 
 export function AddBookPage() {
   const navigate = useNavigate()
+  const { user } = useAuth()
+  const queryClient = useQueryClient()
 
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
@@ -12,7 +16,6 @@ export function AddBookPage() {
   const [age, setAge] = useState('')
   const [tags, setTags] = useState('')
   const [file, setFile] = useState<File | null>(null)
-  const [loading, setLoading] = useState(false)
 
   const uploadImage = async (file: File) => {
     const fileName = `${crypto.randomUUID()}-${file.name}`
@@ -30,20 +33,10 @@ export function AddBookPage() {
     return data.publicUrl
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
+  const addBook = useMutation({
+    mutationFn: async () => {
+      if (!user) throw new Error('Debes iniciar sesión')
 
-    const { data: userData } = await supabase.auth.getUser()
-    const user = userData.user
-
-    if (!user) {
-      alert('Debes iniciar sesión')
-      setLoading(false)
-      return
-    }
-
-    try {
       let coverUrl = ''
 
       if (file) {
@@ -62,22 +55,22 @@ export function AddBookPage() {
         status: 'Disponible'
       })
 
-      if (error) {
-        console.error(error)
-        alert('Error al guardar el libro')
-        setLoading(false)
-        return
-      }
-
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['books'] })
       alert('Libro creado 📚')
-
       navigate('/')
-    } catch (err) {
+    },
+    onError: (err) => {
       console.error(err)
-      alert('Error inesperado')
-    } finally {
-      setLoading(false)
-    }
+      alert(err instanceof Error && err.message === 'Debes iniciar sesión' ? err.message : 'Error al guardar el libro')
+    },
+  })
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    addBook.mutate()
   }
 
   return (
@@ -162,8 +155,8 @@ export function AddBookPage() {
           />
         </label>
 
-        <button type="submit" disabled={loading}>
-          {loading ? 'Guardando...' : 'Guardar libro'}
+        <button type="submit" disabled={addBook.isPending}>
+          {addBook.isPending ? 'Guardando...' : 'Guardar libro'}
         </button>
 
       </form>

@@ -1,61 +1,21 @@
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
-import { useEffect, useState } from 'react'
-import { supabase } from './services/supabaseClient'
-import { getBooks } from './services/books'
-import { getProfile } from './services/profiles'
-import type { Book } from './types/Books'
+import { useState } from 'react'
+import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { useBooks } from './services/queries'
 import { BookCard } from './components/BookCard'
 import { AddBookPage } from './pages/AddBookPage'
 import { BookDetailsPage } from './pages/BookDetailsPage'
 import { EditBookPage } from './pages/EditBookPage'
 
 function Home() {
-  const [books, setBooks] = useState<Book[]>([])
-  const [user, setUser] = useState<any>(null)
-  const [profile, setProfile] = useState<any>(null)
+  const { user, profile, signOut } = useAuth()
+  const { data: books = [] } = useBooks()
 
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
 
-  // 👤 Load logged-in user
-  const loadUser = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    setUser(user)
-
-    if (user) {
-      const profileData = await getProfile(user.id)
-      setProfile(profileData)
-    } else {
-      setProfile(null)
-    }
-  }
-
-  // 📚 Load books
-  const loadBooks = async () => {
-    const data = await getBooks()
-    setBooks(data)
-  }
-
-  useEffect(() => {
-    loadUser()
-    loadBooks()
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(() => {
-      loadUser()
-    })
-
-    return () => subscription.unsubscribe()
-  }, [])
-
   const logout = async () => {
-    await supabase.auth.signOut()
-    setUser(null)
-    setProfile(null)
+    await signOut()
   }
 
   const filteredBooks = books.filter((book) => {
@@ -139,7 +99,6 @@ function Home() {
           <BookCard
             key={book.id}
             book={book}
-            onAction={loadBooks}
           />
         ))}
       </div>
@@ -149,13 +108,15 @@ function Home() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/add" element={<AddBookPage />} />
-        <Route path="/book/:id" element={<BookDetailsPage />} />
-        <Route path="/book/:id/edit" element={<EditBookPage />} />
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/add" element={<AddBookPage />} />
+          <Route path="/book/:id" element={<BookDetailsPage />} />
+          <Route path="/book/:id/edit" element={<EditBookPage />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   )
 }

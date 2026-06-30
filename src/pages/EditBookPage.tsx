@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../services/supabaseClient'
+import { useBook } from '../services/queries'
 
 export function EditBookPage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
 
-  const [loading, setLoading] = useState(true)
+  const { data: book, isLoading } = useBook(id)
 
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
@@ -17,60 +20,53 @@ export function EditBookPage() {
   const [tags, setTags] = useState('')
 
   useEffect(() => {
-    const loadBook = async () => {
-      const { data, error } = await supabase
+    if (!book) return
+
+    setTitle(book.title)
+    setAuthor(book.author)
+    setCoverUrl(book.cover_url || '')
+    setCollection(book.collection || '')
+    setAge(book.age_recommendation || '')
+    setLink(book.link || '')
+    setTags((book.tags || []).join(', '))
+  }, [book])
+
+  const updateBook = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
         .from('books')
-        .select('*')
+        .update({
+          title,
+          author,
+          cover_url,
+          collection,
+          age_recommendation,
+          link,
+          tags: tags.split(',').map(t => t.trim())
+        })
         .eq('id', id)
-        .single()
 
-      if (error || !data) return
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['books'] })
+      navigate(`/book/${id}`)
+    },
+    onError: () => alert('Error al actualizar libro'),
+  })
 
-      setTitle(data.title)
-      setAuthor(data.author)
-      setCoverUrl(data.cover_url || '')
-      setCollection(data.collection || '')
-      setAge(data.age_recommendation || '')
-      setLink(data.link || '')
-      setTags((data.tags || []).join(', '))
-
-      setLoading(false)
-    }
-
-    loadBook()
-  }, [id])
-
-  const updateBook = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-
-    const { error } = await supabase
-      .from('books')
-      .update({
-        title,
-        author,
-        cover_url,
-        collection,
-        age_recommendation,
-        link,
-        tags: tags.split(',').map(t => t.trim())
-      })
-      .eq('id', id)
-
-    if (error) {
-      alert('Error al actualizar libro')
-      return
-    }
-
-    navigate(`/book/${id}`)
+    updateBook.mutate()
   }
 
-  if (loading) return <p>Cargando...</p>
+  if (isLoading || !book) return <p>Cargando...</p>
 
   return (
     <div style={{ padding: 20, maxWidth: 500 }}>
       <h1>Editar libro</h1>
 
-      <form onSubmit={updateBook} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
 
         <label>
           Título
@@ -92,7 +88,7 @@ export function EditBookPage() {
       const file = e.target.files?.[0]
       if (!file) return
 
-      const fileName = `${Date.now()}-${file.name}`
+      const fileName = `${crypto.randomUUID()}-${file.name}`
 
       const { error } = await supabase.storage
         .from('book-covers')
@@ -140,7 +136,9 @@ export function EditBookPage() {
           <input value={tags} onChange={e => setTags(e.target.value)} />
         </label>
 
-        <button type="submit">Guardar cambios</button>
+        <button type="submit" disabled={updateBook.isPending}>
+          {updateBook.isPending ? 'Guardando...' : 'Guardar cambios'}
+        </button>
 
         <button type="button" onClick={() => navigate(-1)}>
           Cancelar

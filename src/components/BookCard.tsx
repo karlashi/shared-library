@@ -1,46 +1,32 @@
-import { useEffect, useState } from 'react'
-import { supabase } from '../services/supabaseClient'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
+import { useProfiles, useLendBook } from '../services/queries'
+import type { Book } from '../types/Books'
 
-export function BookCard({ book, onAction }: any) {
+export function BookCard({ book }: { book: Book }) {
   const navigate = useNavigate()
 
-  const [user, setUser] = useState<any>(null)
-  const [users, setUsers] = useState<any[]>([])
+  const { user } = useAuth()
+  const { data: users = [] } = useProfiles()
+  const lendBook = useLendBook()
   const [selectedUser, setSelectedUser] = useState('')
-
-  useEffect(() => {
-    const load = async () => {
-      const { data } = await supabase.auth.getUser()
-      setUser(data.user)
-
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('*')
-
-      setUsers(profiles || [])
-    }
-
-    load()
-  }, [])
 
   const isOwner = book.owner_id === user?.id
 
-  const lendToUser = async () => {
+  const lendToUser = () => {
     if (!selectedUser) return alert('Selecciona un usuario')
 
-    const { error } = await supabase.from('loans').insert({
-      book_id: book.id,
-      borrower_id: selectedUser
-    })
-
-    if (error) {
-      console.error(error)
-      return alert('Error al prestar')
-    }
-
-    alert('Libro prestado')
-    onAction?.()
+    lendBook.mutate(
+      { bookId: book.id, borrowerId: selectedUser },
+      {
+        onSuccess: () => alert('Libro prestado'),
+        onError: (error) => {
+          console.error(error)
+          alert('Error al prestar')
+        },
+      }
+    )
   }
 
   return (

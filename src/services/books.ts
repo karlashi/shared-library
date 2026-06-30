@@ -1,6 +1,7 @@
 import { supabase } from './supabaseClient'
+import type { Book } from '../types/Books'
 
-export async function getBooks() {
+export async function getBooks(): Promise<Book[]> {
   const { data: books, error: booksError } = await supabase
     .from('books')
     .select('*')
@@ -10,14 +11,14 @@ export async function getBooks() {
     .select('*')
     .is('returned_at', null)
 
-  if (booksError || loansError) {
+  if (booksError || loansError || !books) {
     console.error(booksError || loansError)
     return []
   }
 
   // attach loan info to each book
   const enriched = books.map(book => {
-    const activeLoan = loans.find(l => l.book_id === book.id)
+    const activeLoan = loans?.find(l => l.book_id === book.id)
 
     return {
       ...book,

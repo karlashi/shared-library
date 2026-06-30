@@ -5,8 +5,11 @@ export type Book = {
   cover_url?: string
   status?: string
   owner_id?: string
+  collection?: string
+  link?: string
+  age_recommendation?: string
+  tags?: string[]
 
-  // NEW FIELDS
   isBorrowed?: boolean
   borrowedBy?: string | null
 }
