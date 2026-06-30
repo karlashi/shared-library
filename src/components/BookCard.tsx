@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../services/supabaseClient'
-import { getProfile } from '../services/profiles'
 import { useNavigate } from 'react-router-dom'
 
 export function BookCard({ book, onAction }: any) {

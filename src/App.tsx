@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from './services/supabaseClient'
 import { getBooks } from './services/books'
 import { getProfile } from './services/profiles'
-import type { Book } from './types/Book'
+import type { Book } from './types/Books'
 import { BookCard } from './components/BookCard'
 import { AddBookPage } from './pages/AddBookPage'
 import { BookDetailsPage } from './pages/BookDetailsPage'
@@ -12,7 +12,7 @@ import { EditBookPage } from './pages/EditBookPage'
 function Home() {
   const [books, setBooks] = useState<Book[]>([])
 
-  const [user, setUser] = useState<any>(null)
+
   const [profile, setProfile] = useState<any>(null)
 
   const [search, setSearch] = useState('')
