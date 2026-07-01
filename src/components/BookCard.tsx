@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/AuthContext'
 import { useProfiles, useLendBook, useReturnBook } from '../services/queries'
+import { isBookIncomplete } from '../utils/bookCompleteness'
 import type { Book } from '../types/Books'
 
 export function BookCard({ book }: { book: Book }) {
@@ -49,7 +50,14 @@ export function BookCard({ book }: { book: Book }) {
     <div className="rounded-lg border border-gray-200 p-3 shadow-sm">
       {/* CLICK CARD */}
       <div onClick={() => navigate(`/book/${book.id}`)} className="cursor-pointer">
-        <h4 className="font-semibold text-gray-900 truncate">{book.title}</h4>
+        <div className="flex items-start justify-between gap-1">
+          <h4 className="font-semibold text-gray-900 truncate">{book.title}</h4>
+          {!book.archived && isBookIncomplete(book) && (
+            <span title={t('bookCard.incompleteLabel')} aria-label={t('bookCard.incompleteLabel')}>
+              ⚠️
+            </span>
+          )}
+        </div>
         <p className="text-sm text-gray-600 truncate">{book.author}</p>
 
         {book.cover_url && (

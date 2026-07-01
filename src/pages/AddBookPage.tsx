@@ -1,11 +1,11 @@
-import { useState, lazy, Suspense } from 'react'
+import { useState, useRef, lazy, Suspense } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm, Controller } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../services/supabaseClient'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { lookupByIsbn } from '../services/googleBooks'
+import { lookupBookInfo } from '../services/bookLookup'
 import { validateImageFile, uploadCoverImage } from '../services/storage'
 import { useAllTags } from '../services/queries'
 import { TagInput } from '../components/TagInput'
@@ -36,6 +36,7 @@ export function AddBookPage() {
   const [lookupCoverUrl, setLookupCoverUrl] = useState('')
   const [file, setFile] = useState<File | null>(null)
   const [showScanner, setShowScanner] = useState(false)
+  const isbnInputRef = useRef<HTMLInputElement | null>(null)
 
   const {
     register,
@@ -43,6 +44,7 @@ export function AddBookPage() {
     control,
     setValue,
     getValues,
+    reset,
     formState: { errors },
   } = useForm<FormValues>({
     defaultValues: {
@@ -51,13 +53,15 @@ export function AddBookPage() {
     },
   })
 
+  const { ref: isbnRegisterRef, ...isbnRegisterRest } = register('isbn')
+
   const handleIsbnLookup = async () => {
     const isbn = getValues('isbn').trim()
     if (!isbn) return
 
     setIsLookingUp(true)
     try {
-      const result = await lookupByIsbn(isbn)
+      const result = await lookupBookInfo(isbn)
 
       if (!result) {
         alert(t('addBook.isbnNotFound'))
@@ -109,20 +113,40 @@ export function AddBookPage() {
         if (tagsError) throw tagsError
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['books'] })
-      queryClient.invalidateQueries({ queryKey: ['tags'] })
-      alert(t('addBook.createdSuccess'))
-      navigate('/')
-    },
-    onError: (err) => {
-      console.error(err)
-      alert(err instanceof Error && err.message === t('addBook.mustBeLoggedIn') ? err.message : t('addBook.saveError'))
-    },
   })
 
+  const invalidateAfterSave = () => {
+    queryClient.invalidateQueries({ queryKey: ['books'] })
+    queryClient.invalidateQueries({ queryKey: ['tags'] })
+  }
+
+  const handleSaveError = (err: unknown) => {
+    console.error(err)
+    alert(err instanceof Error && err.message === t('addBook.mustBeLoggedIn') ? err.message : t('addBook.saveError'))
+  }
+
   const onSubmit = (values: FormValues) => {
-    addBook.mutate(values)
+    addBook.mutate(values, {
+      onSuccess: () => {
+        invalidateAfterSave()
+        alert(t('addBook.createdSuccess'))
+        navigate('/')
+      },
+      onError: handleSaveError,
+    })
+  }
+
+  const onSaveAndAddAnother = (values: FormValues) => {
+    addBook.mutate(values, {
+      onSuccess: () => {
+        invalidateAfterSave()
+        reset()
+        setLookupCoverUrl('')
+        setFile(null)
+        isbnInputRef.current?.focus()
+      },
+      onError: handleSaveError,
+    })
   }
 
   return (
@@ -142,7 +166,11 @@ export function AddBookPage() {
             <span className="mb-1 block text-sm font-medium text-gray-700">{t('addBook.isbn')}</span>
             <div className="flex gap-2">
               <input
-                {...register('isbn')}
+                {...isbnRegisterRest}
+                ref={(el) => {
+                  isbnRegisterRef(el)
+                  isbnInputRef.current = el
+                }}
                 className="flex-1 rounded-md border border-gray-300 px-3 py-2"
               />
               <button
@@ -265,13 +293,24 @@ export function AddBookPage() {
             />
           </label>
 
-          <button
-            type="submit"
-            disabled={addBook.isPending}
-            className="rounded-md bg-brand px-4 py-2 font-medium text-white hover:opacity-90 disabled:opacity-50"
-          >
-            {addBook.isPending ? t('addBook.saving') : t('addBook.save')}
-          </button>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <button
+              type="submit"
+              disabled={addBook.isPending}
+              className="flex-1 rounded-md bg-brand px-4 py-2 font-medium text-white hover:opacity-90 disabled:opacity-50"
+            >
+              {addBook.isPending ? t('addBook.saving') : t('addBook.save')}
+            </button>
+
+            <button
+              type="button"
+              onClick={handleSubmit(onSaveAndAddAnother)}
+              disabled={addBook.isPending}
+              className="flex-1 rounded-md bg-gray-100 px-4 py-2 font-medium text-gray-800 hover:bg-gray-200 disabled:opacity-50"
+            >
+              {addBook.isPending ? t('addBook.saving') : t('addBook.saveAndAddAnother')}
+            </button>
+          </div>
         </form>
       </div>
     </div>

@@ -96,6 +96,7 @@
     "tags": "Etiquetas",
     "cover": "Portada",
     "save": "Guardar libro",
+    "saveAndAddAnother": "Guardar y añadir otro",
     "saving": "Guardando...",
     "createdSuccess": "Libro creado 📚",
     "mustBeLoggedIn": "Debes iniciar sesión",
@@ -172,7 +173,8 @@
     "lendError": "Error al prestar",
     "markReturnedError": "Error al marcar el libro como devuelto",
     "gift": "🎁 Para regalar",
-    "sale": "💰 En venta"
+    "sale": "💰 En venta",
+    "incompleteLabel": "Incompleto"
   },
   "stats": {
     "heading": "📊 Estadísticas",
@@ -195,17 +197,35 @@
   },
   "home": {
     "addBook": "➕ Añadir libro",
+    "bulkEdit": "✏️ Completar libros",
     "searchPlaceholder": "Buscar por título, autor o etiqueta...",
     "all": "Todos",
     "available": "Disponibles",
     "borrowed": "Prestados",
     "blocked": "Fuera de circulación",
     "sortRecent": "Más recientes",
-    "sortTitle": "Título (A-Z)"
+    "sortTitle": "Título (A-Z)",
+    "incompleteOnly": "Solo incompletos"
   },
   "errorBoundary": {
     "heading": "Algo salió mal",
     "message": "Ha ocurrido un error inesperado. Intenta recargar la página.",
     "reload": "Recargar página"
+  },
+  "bulkEdit": {
+    "heading": "✏️ Completar libros",
+    "backToLibrary": "← Volver a la biblioteca",
+    "noIncompleteBooks": "No hay libros incompletos. ¡Todo al día! 🎉",
+    "missingCover": "⚠️ Sin portada",
+    "editCoverLink": "Editar portada",
+    "description": "Descripción",
+    "ageRecommendation": "Edad recomendada",
+    "tags": "Etiquetas",
+    "fetchData": "🔄 Buscar datos",
+    "fetchingData": "Buscando...",
+    "saveAll": "Guardar todos los cambios",
+    "savingAll": "Guardando...",
+    "saveSummary": "Guardados {{saved}} de {{total}} libros.",
+    "saveAllError": "Hubo un error al guardar algunos libros."
   }
 }

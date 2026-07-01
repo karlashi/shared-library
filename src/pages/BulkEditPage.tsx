@@ -1,0 +1,222 @@
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
+import { useAuth } from '../contexts/AuthContext'
+import { useBooks, useAllTags } from '../services/queries'
+import { supabase } from '../services/supabaseClient'
+import { lookupBookInfo } from '../services/bookLookup'
+import { isBookIncomplete } from '../utils/bookCompleteness'
+import { TagInput } from '../components/TagInput'
+import { Header } from '../components/Header'
+import type { Book } from '../types/Books'
+
+type RowState = {
+  description: string
+  age: string
+  tags: string[]
+  cover_url: string
+}
+
+function defaultRowState(book: Book): RowState {
+  return {
+    description: book.description ?? '',
+    age: book.age_recommendation ?? '',
+    tags: book.tags ?? [],
+    cover_url: book.cover_url ?? '',
+  }
+}
+
+export function BulkEditPage() {
+  const { t } = useTranslation()
+  const navigate = useNavigate()
+  const { user } = useAuth()
+  const queryClient = useQueryClient()
+  const { data: books = [] } = useBooks()
+  const { data: allTags = [] } = useAllTags()
+
+  const [edits, setEdits] = useState<Record<string, RowState>>({})
+  const [fetchingId, setFetchingId] = useState<string | null>(null)
+
+  const incompleteBooks = books.filter((b) => !b.archived && isBookIncomplete(b))
+
+  const getRowState = (book: Book): RowState => edits[book.id] ?? defaultRowState(book)
+
+  const updateRow = (book: Book, patch: Partial<RowState>) => {
+    setEdits((prev) => ({ ...prev, [book.id]: { ...getRowState(book), ...patch } }))
+  }
+
+  const handleFetchData = async (book: Book) => {
+    if (!book.isbn) return
+    setFetchingId(book.id)
+    try {
+      const result = await lookupBookInfo(book.isbn)
+      if (!result) return
+      const current = getRowState(book)
+      updateRow(book, {
+        description: current.description || result.description,
+        cover_url: current.cover_url || result.coverUrl,
+      })
+    } catch (err) {
+      console.error(err)
+      alert(t('bulkEdit.saveAllError'))
+    } finally {
+      setFetchingId(null)
+    }
+  }
+
+  const saveAll = useMutation({
+    mutationFn: async () => {
+      const dirtyBooks = Object.keys(edits)
+        .map((id) => incompleteBooks.find((b) => b.id === id))
+        .filter((b): b is Book => !!b)
+
+      const results = await Promise.allSettled(
+        dirtyBooks.map(async (book) => {
+          const state = getRowState(book)
+
+          const { error } = await supabase
+            .from('books')
+            .update({
+              description: state.description,
+              age_recommendation: state.age,
+              cover_url: state.cover_url,
+            })
+            .eq('id', book.id)
+          if (error) throw error
+
+          const existingTags = book.tags ?? []
+          const newTags = state.tags.filter((tag) => !existingTags.includes(tag))
+          if (newTags.length > 0 && user) {
+            const { error: tagsError } = await supabase
+              .from('book_tags')
+              .insert(newTags.map((tag) => ({ book_id: book.id, tag, added_by: user.id })))
+            if (tagsError) throw tagsError
+          }
+        })
+      )
+
+      const failed = results.filter((r) => r.status === 'rejected').length
+      return { total: dirtyBooks.length, failed }
+    },
+    onSuccess: ({ total, failed }) => {
+      queryClient.invalidateQueries({ queryKey: ['books'] })
+      queryClient.invalidateQueries({ queryKey: ['tags'] })
+      setEdits({})
+      if (failed > 0) {
+        alert(t('bulkEdit.saveAllError'))
+      } else {
+        alert(t('bulkEdit.saveSummary', { saved: total - failed, total }))
+      }
+    },
+    onError: (err) => {
+      console.error(err)
+      alert(t('bulkEdit.saveAllError'))
+    },
+  })
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
+        <Header />
+
+        <button
+          type="button"
+          onClick={() => navigate('/')}
+          className="mb-5 rounded-md bg-gray-100 px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-200"
+        >
+          {t('bulkEdit.backToLibrary')}
+        </button>
+
+        <h1 className="mb-5 text-2xl font-semibold text-gray-900">{t('bulkEdit.heading')}</h1>
+
+        {incompleteBooks.length === 0 ? (
+          <p className="text-gray-600">{t('bulkEdit.noIncompleteBooks')}</p>
+        ) : (
+          <>
+            <div className="space-y-4">
+              {incompleteBooks.map((book) => {
+                const state = getRowState(book)
+
+                return (
+                  <div key={book.id} className="flex gap-4 rounded-lg border border-gray-200 p-3">
+                    {state.cover_url ? (
+                      <img
+                        src={state.cover_url}
+                        className="h-24 w-16 shrink-0 rounded object-cover"
+                      />
+                    ) : (
+                      <Link
+                        to={`/book/${book.id}/edit`}
+                        className="flex h-24 w-16 shrink-0 flex-col items-center justify-center rounded border border-dashed border-gray-300 p-1 text-center text-[10px] text-gray-500 hover:bg-gray-50"
+                      >
+                        {t('bulkEdit.missingCover')}
+                      </Link>
+                    )}
+
+                    <div className="flex-1 space-y-2">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <Link to={`/book/${book.id}`} className="font-semibold text-gray-900 hover:underline">
+                          {book.title}
+                          <span className="font-normal text-gray-600"> — {book.author}</span>
+                        </Link>
+
+                        {book.isbn && (
+                          <button
+                            type="button"
+                            onClick={() => handleFetchData(book)}
+                            disabled={fetchingId === book.id}
+                            className="rounded-md bg-gray-100 px-2 py-1 text-xs text-gray-800 hover:bg-gray-200 disabled:opacity-50"
+                          >
+                            {fetchingId === book.id ? t('bulkEdit.fetchingData') : t('bulkEdit.fetchData')}
+                          </button>
+                        )}
+                      </div>
+
+                      <label className="block">
+                        <span className="mb-1 block text-xs font-medium text-gray-700">{t('bulkEdit.description')}</span>
+                        <textarea
+                          value={state.description}
+                          onChange={(e) => updateRow(book, { description: e.target.value })}
+                          rows={2}
+                          className="w-full rounded-md border border-gray-300 px-2 py-1 text-sm"
+                        />
+                      </label>
+
+                      <label className="block">
+                        <span className="mb-1 block text-xs font-medium text-gray-700">{t('bulkEdit.ageRecommendation')}</span>
+                        <input
+                          value={state.age}
+                          onChange={(e) => updateRow(book, { age: e.target.value })}
+                          className="w-full rounded-md border border-gray-300 px-2 py-1 text-sm"
+                        />
+                      </label>
+
+                      <label className="block">
+                        <span className="mb-1 block text-xs font-medium text-gray-700">{t('bulkEdit.tags')}</span>
+                        <TagInput
+                          value={state.tags}
+                          onChange={(tags) => updateRow(book, { tags })}
+                          suggestions={allTags}
+                        />
+                      </label>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => saveAll.mutate()}
+              disabled={saveAll.isPending || Object.keys(edits).length === 0}
+              className="mt-6 rounded-md bg-brand px-4 py-2 font-medium text-white hover:opacity-90 disabled:opacity-50"
+            >
+              {saveAll.isPending ? t('bulkEdit.savingAll') : t('bulkEdit.saveAll')}
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}

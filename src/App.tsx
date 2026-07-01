@@ -7,6 +7,7 @@ import { BookCard } from './components/BookCard'
 import { RequireAuth } from './components/RequireAuth'
 import { Header } from './components/Header'
 import { BackToTop } from './components/BackToTop'
+import { isBookIncomplete } from './utils/bookCompleteness'
 import { LoginPage } from './pages/LoginPage'
 import { AboutPage } from './pages/AboutPage'
 import { ChangelogPage } from './pages/ChangelogPage'
@@ -15,6 +16,7 @@ import { StatsPage } from './pages/StatsPage'
 import { AddBookPage } from './pages/AddBookPage'
 import { BookDetailsPage } from './pages/BookDetailsPage'
 import { EditBookPage } from './pages/EditBookPage'
+import { BulkEditPage } from './pages/BulkEditPage'
 
 function Home() {
   const { t } = useTranslation()
@@ -23,6 +25,7 @@ function Home() {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [sortBy, setSortBy] = useState<'recent' | 'title'>('recent')
+  const [incompleteOnly, setIncompleteOnly] = useState(false)
 
   const filteredBooks = books
     .filter((book) => !book.archived)
@@ -42,7 +45,9 @@ function Home() {
         (statusFilter === 'blocked' &&
           book.status === 'Fuera de circulación')
 
-      return matchesSearch && matchesStatus
+      const matchesIncomplete = !incompleteOnly || isBookIncomplete(book)
+
+      return matchesSearch && matchesStatus && matchesIncomplete
     })
     .sort((a, b) => {
       if (sortBy === 'title') return a.title.localeCompare(b.title, 'es')
@@ -54,14 +59,21 @@ function Home() {
       <div className="max-w-6xl mx-auto px-4 py-6 sm:px-6">
         <Header />
 
-        <Link to="/add">
-          <button className="mb-6 rounded-md bg-brand px-4 py-2 font-medium text-white hover:opacity-90">
-            {t('home.addBook')}
-          </button>
-        </Link>
+        <div className="mb-6 flex flex-wrap gap-2">
+          <Link to="/add">
+            <button className="rounded-md bg-brand px-4 py-2 font-medium text-white hover:opacity-90">
+              {t('home.addBook')}
+            </button>
+          </Link>
+          <Link to="/bulk-edit">
+            <button className="rounded-md bg-gray-100 px-4 py-2 font-medium text-gray-800 hover:bg-gray-200">
+              {t('home.bulkEdit')}
+            </button>
+          </Link>
+        </div>
 
         {/* SEARCH + FILTER */}
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
           <input
             placeholder={t('home.searchPlaceholder')}
             value={search}
@@ -88,6 +100,15 @@ function Home() {
             <option value="recent">{t('home.sortRecent')}</option>
             <option value="title">{t('home.sortTitle')}</option>
           </select>
+
+          <label className="flex items-center gap-1.5 text-sm text-gray-700">
+            <input
+              type="checkbox"
+              checked={incompleteOnly}
+              onChange={(e) => setIncompleteOnly(e.target.checked)}
+            />
+            {t('home.incompleteOnly')}
+          </label>
         </div>
 
         {/* BOOK GRID */}
@@ -116,6 +137,7 @@ export default function App() {
           <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth>} />
           <Route path="/stats" element={<RequireAuth><StatsPage /></RequireAuth>} />
           <Route path="/add" element={<RequireAuth><AddBookPage /></RequireAuth>} />
+          <Route path="/bulk-edit" element={<RequireAuth><BulkEditPage /></RequireAuth>} />
           <Route path="/book/:id" element={<RequireAuth><BookDetailsPage /></RequireAuth>} />
           <Route path="/book/:id/edit" element={<RequireAuth><EditBookPage /></RequireAuth>} />
         </Routes>
