@@ -17,12 +17,17 @@ export function BarcodeScannerModal({
   useEffect(() => {
     let cancelled = false
     let isRunning = false
+    let stopped = false
     const scanner = new Html5Qrcode(REGION_ID, {
       formatsToSupport: [Html5QrcodeSupportedFormats.EAN_13],
       verbose: false,
     })
 
-    const stopAndClear = () => scanner.stop().catch(() => {}).finally(() => scanner.clear())
+    const stopAndClear = () => {
+      if (stopped) return
+      stopped = true
+      scanner.stop().catch(() => {}).finally(() => scanner.clear())
+    }
 
     scanner
       .start(
