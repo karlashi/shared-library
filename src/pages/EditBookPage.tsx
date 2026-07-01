@@ -25,7 +25,8 @@ export function EditBookPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
+  const isAdmin = !!profile?.is_admin
 
   const { data: book, isLoading } = useBook(id)
   const deleteBook = useDeleteBook()
@@ -133,7 +134,7 @@ export function EditBookPage() {
   }
 
   if (isLoading || !book) return <p>{t('common.loading')}</p>
-  if (book.owner_id !== user?.id) return <Navigate to={`/book/${id}`} replace />
+  if (book.owner_id !== user?.id && !isAdmin) return <Navigate to={`/book/${id}`} replace />
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -23,7 +23,8 @@ export function BookDetailsPage() {
   const { id } = useParams()
   const navigate = useNavigate()
 
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
+  const isAdmin = !!profile?.is_admin
   const { data: book, isLoading: isBookLoading } = useBook(id)
   const { data: owner } = useProfile(book?.owner_id)
   const { data: loan } = useBookLoan(id)
@@ -164,7 +165,7 @@ export function BookDetailsPage() {
             <p className="text-gray-600">{book.author}</p>
 
             {/* EDIT */}
-            {isOwner && (
+            {(isOwner || isAdmin) && (
               <button
                 onClick={() => navigate(`/book/${id}/edit`)}
                 className="mt-3 rounded-md bg-gray-100 px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
@@ -233,43 +234,43 @@ export function BookDetailsPage() {
               </div>
             )}
 
-            {/* OWNER LENDING / RETURN CONTROL */}
-            {isOwner && (
+            {/* OWNER/ADMIN LENDING / RETURN CONTROL */}
+            {(isOwner || isAdmin) && isBorrowed && (
               <div className="mt-5">
-                {isBorrowed ? (
-                  <button
-                    onClick={markAsReturned}
-                    disabled={returnBook.isPending}
-                    className="rounded-md bg-gray-100 px-4 py-2 text-gray-800 hover:bg-gray-200 disabled:opacity-50"
-                  >
-                    {t('bookDetails.markReturned')}
-                  </button>
-                ) : (
-                  <>
-                    <h4 className="mb-2 font-medium text-gray-900">{t('bookDetails.lendToUser')}</h4>
+                <button
+                  onClick={markAsReturned}
+                  disabled={returnBook.isPending}
+                  className="rounded-md bg-gray-100 px-4 py-2 text-gray-800 hover:bg-gray-200 disabled:opacity-50"
+                >
+                  {t('bookDetails.markReturned')}
+                </button>
+              </div>
+            )}
 
-                    <select
-                      value={selectedUser}
-                      onChange={(e) => setSelectedUser(e.target.value)}
-                      className="w-full rounded-md border border-gray-300 px-3 py-2"
-                    >
-                      <option value="">{t('bookDetails.selectUser')}</option>
+            {isOwner && !isBorrowed && (
+              <div className="mt-5">
+                <h4 className="mb-2 font-medium text-gray-900">{t('bookDetails.lendToUser')}</h4>
 
-                      {users.filter((u) => u.id !== user?.id).map((u) => (
-                        <option key={u.id} value={u.id}>
-                          {u.name}
-                        </option>
-                      ))}
-                    </select>
+                <select
+                  value={selectedUser}
+                  onChange={(e) => setSelectedUser(e.target.value)}
+                  className="w-full rounded-md border border-gray-300 px-3 py-2"
+                >
+                  <option value="">{t('bookDetails.selectUser')}</option>
 
-                    <button
-                      onClick={lendToUser}
-                      className="mt-2 rounded-md bg-brand px-4 py-2 font-medium text-white hover:opacity-90"
-                    >
-                      {t('bookDetails.lend')}
-                    </button>
-                  </>
-                )}
+                  {users.filter((u) => u.id !== user?.id).map((u) => (
+                    <option key={u.id} value={u.id}>
+                      {u.name}
+                    </option>
+                  ))}
+                </select>
+
+                <button
+                  onClick={lendToUser}
+                  className="mt-2 rounded-md bg-brand px-4 py-2 font-medium text-white hover:opacity-90"
+                >
+                  {t('bookDetails.lend')}
+                </button>
               </div>
             )}
 

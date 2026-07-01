@@ -9,13 +9,14 @@ export function BookCard({ book }: { book: Book }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
 
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
   const { data: users = [] } = useProfiles()
   const lendBook = useLendBook()
   const returnBook = useReturnBook()
   const [selectedUser, setSelectedUser] = useState('')
 
   const isOwner = book.owner_id === user?.id
+  const isAdmin = !!profile?.is_admin
   const borrowerName = users.find((u) => u.id === book.borrowedBy)?.name ?? t('bookCard.someone')
 
   const lendToUser = () => {
@@ -82,41 +83,42 @@ export function BookCard({ book }: { book: Book }) {
         </p>
       )}
 
-      {/* OWNER LEND / RETURN CONTROL */}
-      {isOwner && (
+      {/* OWNER/ADMIN RETURN CONTROL */}
+      {(isOwner || isAdmin) && book.isBorrowed && (
         <div className="mt-2">
-          {book.isBorrowed ? (
-            <button
-              onClick={markAsReturned}
-              disabled={returnBook.isPending}
-              className="w-full rounded-md bg-gray-100 px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-200 disabled:opacity-50"
-            >
-              {t('bookCard.markReturned')}
-            </button>
-          ) : (
-            <>
-              <select
-                value={selectedUser}
-                onChange={(e) => setSelectedUser(e.target.value)}
-                className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm"
-              >
-                <option value="">{t('bookCard.lendToPlaceholder')}</option>
+          <button
+            onClick={markAsReturned}
+            disabled={returnBook.isPending}
+            className="w-full rounded-md bg-gray-100 px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-200 disabled:opacity-50"
+          >
+            {t('bookCard.markReturned')}
+          </button>
+        </div>
+      )}
 
-                {users.filter((u) => u.id !== user?.id).map((u) => (
-                  <option key={u.id} value={u.id}>
-                    {u.name}
-                  </option>
-                ))}
-              </select>
+      {/* OWNER LEND CONTROL */}
+      {isOwner && !book.isBorrowed && (
+        <div className="mt-2">
+          <select
+            value={selectedUser}
+            onChange={(e) => setSelectedUser(e.target.value)}
+            className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm"
+          >
+            <option value="">{t('bookCard.lendToPlaceholder')}</option>
 
-              <button
-                onClick={lendToUser}
-                className="mt-1.5 w-full rounded-md bg-brand px-3 py-1.5 text-sm font-medium text-white hover:opacity-90"
-              >
-                {t('bookCard.lend')}
-              </button>
-            </>
-          )}
+            {users.filter((u) => u.id !== user?.id).map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.name}
+              </option>
+            ))}
+          </select>
+
+          <button
+            onClick={lendToUser}
+            className="mt-1.5 w-full rounded-md bg-brand px-3 py-1.5 text-sm font-medium text-white hover:opacity-90"
+          >
+            {t('bookCard.lend')}
+          </button>
         </div>
       )}
     </div>

@@ -6,18 +6,37 @@ members, and keep track of who has what. Built with React, TypeScript, and Supab
 ## Features
 
 - **Accounts** — email/password login and registration, gated behind auth (no public
-  browsing)
-- **Books** — add, edit, and delete books you own, with cover image upload
+  browsing); self-service account deletion from the profile page (anonymizes your name,
+  archives your books, and disables login — see the privacy notice on the About page)
+- **Books** — add, edit, archive, or delete books you own, with cover image upload
 - **ISBN lookup** — fill in title, author, description, and cover automatically from an
-  ISBN via the Google Books API
-- **Tags** — autocomplete/suggestions from tags already used across the library
+  ISBN via the Google Books API, either typed in or scanned with your device's camera
+- **Tags** — collaborative: any member can tag any book, with autocomplete/suggestions
+  from tags already used across the library
 - **Lending** — owners lend books to other members and mark them returned; a book can't
   be lent out twice at once, and can't be deleted if it has any borrow history
   (protects everyone else's records)
-- **Profile page** — edit your display name, see your own books, and view your full
-  borrow/lending history
+- **Gift/sale marking** — mark a book as free-to-take or for sale, with an optional
+  comment, visible on its card and detail page
+- **Wishlist** — privately mark any book you'd like to borrow eventually; only you can
+  see your own list, from your profile page
+- **Profile page** — edit your display name, see your own books (including archived and
+  wishlisted ones), and view your full borrow/lending history
+- **Stats page** — a quick overview of the library: active/archived books, members,
+  and loan counts
 - **Search & sort** — search by title, author, or tag; sort by most recently added or
   alphabetically
+- **Admin roles** — designated admins can edit, archive, delete, or force-return any
+  book/loan in the library (for cleaning up after an inactive member), granted manually
+  via the database — there's no self-service way to become an admin
+- **Changelog page** — a public "Novedades" page summarizing what's shipped, linked next
+  to About
+- **Translatable UI** — all interactive text lives in `src/i18n/` as a dictionary
+  (`react-i18next`), currently shipping Spanish only. To add another language: copy
+  `src/i18n/locales/es.json` to e.g. `en.json`, translate the values, and register it in
+  the `resources` object in `src/i18n/index.ts`. (The About/Changelog pages' prose and the
+  `books.status` database values are intentionally left as plain Spanish rather than pulled
+  into the dictionary — that content is specific to this deployment, not reusable UI text.)
 
 ## Tech stack
 
@@ -27,6 +46,8 @@ members, and keep track of who has what. Built with React, TypeScript, and Supab
 - [Supabase](https://supabase.com/) — Postgres database, auth, and file storage
 - [TanStack Query](https://tanstack.com/query) for data fetching/caching
 - [react-hook-form](https://react-hook-form.com/) for form state and validation
+- [react-i18next](https://react.i18next.com/) for the translation dictionary
+- [html5-qrcode](https://github.com/mebjas/html5-qrcode) for the camera barcode scanner
 - [Vitest](https://vitest.dev/) + [React Testing Library](https://testing-library.com/)
   for tests
 
