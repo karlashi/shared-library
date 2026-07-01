@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/AuthContext'
 import { useBooks, useAllTags } from '../services/queries'
 import { supabase } from '../services/supabaseClient'
-import { lookupBookInfo } from '../services/bookLookup'
+import { lookupBookInfo, lookupBookInfoByTitleAuthor } from '../services/bookLookup'
 import { isBookIncomplete } from '../utils/bookCompleteness'
 import { TagInput } from '../components/TagInput'
 import { Header } from '../components/Header'
@@ -47,10 +47,12 @@ export function BulkEditPage() {
   }
 
   const handleFetchData = async (book: Book) => {
-    if (!book.isbn) return
+    if (!book.isbn && !(book.title && book.author)) return
     setFetchingId(book.id)
     try {
-      const result = await lookupBookInfo(book.isbn)
+      const result = book.isbn
+        ? await lookupBookInfo(book.isbn)
+        : await lookupBookInfoByTitleAuthor(book.title, book.author)
       if (!result) return
       const current = getRowState(book)
       updateRow(book, {
@@ -59,7 +61,7 @@ export function BulkEditPage() {
       })
     } catch (err) {
       console.error(err)
-      alert(t('bulkEdit.saveAllError'))
+      alert(err instanceof Error ? err.message : t('bulkEdit.fetchDataError'))
     } finally {
       setFetchingId(null)
     }
@@ -161,7 +163,7 @@ export function BulkEditPage() {
                           <span className="font-normal text-gray-600"> — {book.author}</span>
                         </Link>
 
-                        {book.isbn && (
+                        {(book.isbn || (book.title && book.author)) && (
                           <button
                             type="button"
                             onClick={() => handleFetchData(book)}

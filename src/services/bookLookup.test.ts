@@ -1,13 +1,18 @@
-import { describe, it, expect, vi } from 'vitest'
-import { lookupBookInfo } from './bookLookup'
-import { lookupByIsbn } from './googleBooks'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { lookupBookInfo, lookupBookInfoByTitleAuthor } from './bookLookup'
+import { lookupByIsbn, lookupByTitleAuthor } from './googleBooks'
 import { lookupOpenLibraryExtras } from './openLibrary'
 
-vi.mock('./googleBooks', () => ({ lookupByIsbn: vi.fn() }))
+vi.mock('./googleBooks', () => ({ lookupByIsbn: vi.fn(), lookupByTitleAuthor: vi.fn() }))
 vi.mock('./openLibrary', () => ({ lookupOpenLibraryExtras: vi.fn() }))
 
 const mockedLookupByIsbn = vi.mocked(lookupByIsbn)
+const mockedLookupByTitleAuthor = vi.mocked(lookupByTitleAuthor)
 const mockedLookupOpenLibraryExtras = vi.mocked(lookupOpenLibraryExtras)
+
+beforeEach(() => {
+  vi.clearAllMocks()
+})
 
 describe('lookupBookInfo', () => {
   it('returns null when Google Books has no result, without calling Open Library', async () => {
@@ -56,5 +61,41 @@ describe('lookupBookInfo', () => {
 
     expect(result?.coverUrl).toBe('')
     expect(result?.description).toBe('')
+  })
+})
+
+describe('lookupBookInfoByTitleAuthor', () => {
+  it('returns null when Google Books has no match', async () => {
+    mockedLookupByTitleAuthor.mockResolvedValue(null)
+
+    const result = await lookupBookInfoByTitleAuthor('Some Title', 'Some Author')
+
+    expect(result).toBeNull()
+    expect(mockedLookupOpenLibraryExtras).not.toHaveBeenCalled()
+  })
+
+  it('augments with Open Library using the ISBN Google Books found via search', async () => {
+    mockedLookupByTitleAuthor.mockResolvedValue({
+      title: 'Some Title', author: 'Some Author', description: '', coverUrl: '', isbn: '2222222222',
+    })
+    mockedLookupOpenLibraryExtras.mockResolvedValue({
+      coverUrl: 'https://covers.openlibrary.org/b/isbn/2222222222-L.jpg',
+    })
+
+    const result = await lookupBookInfoByTitleAuthor('Some Title', 'Some Author')
+
+    expect(mockedLookupOpenLibraryExtras).toHaveBeenCalledWith('2222222222')
+    expect(result?.coverUrl).toBe('https://covers.openlibrary.org/b/isbn/2222222222-L.jpg')
+  })
+
+  it('skips Open Library entirely when the search result has no ISBN', async () => {
+    mockedLookupByTitleAuthor.mockResolvedValue({
+      title: 'Some Title', author: 'Some Author', description: '', coverUrl: '',
+    })
+
+    const result = await lookupBookInfoByTitleAuthor('Some Title', 'Some Author')
+
+    expect(mockedLookupOpenLibraryExtras).not.toHaveBeenCalled()
+    expect(result?.coverUrl).toBe('')
   })
 })

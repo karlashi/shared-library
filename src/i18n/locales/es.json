@@ -224,6 +224,7 @@
     "tags": "Etiquetas",
     "fetchData": "🔄 Buscar datos",
     "fetchingData": "Buscando...",
+    "fetchDataError": "Error al buscar datos para este libro.",
     "saveAll": "Guardar todos los cambios",
     "savingAll": "Guardando...",
     "saveSummary": "Guardados {{saved}} de {{total}} libros.",

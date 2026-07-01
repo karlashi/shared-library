@@ -28,6 +28,7 @@ function Home() {
   const [sortBy, setSortBy] = useState<'recent' | 'title'>('recent')
   const [incompleteOnly, setIncompleteOnly] = useState(false)
   const [hideMyBooks, setHideMyBooks] = useState(true)
+  const [listingFilter, setListingFilter] = useState<'all' | 'gift' | 'sale'>('all')
 
   const filteredBooks = books
     .filter((book) => !book.archived)
@@ -49,8 +50,9 @@ function Home() {
 
       const matchesIncomplete = !incompleteOnly || isBookIncomplete(book)
       const matchesOwnBooks = !hideMyBooks || book.owner_id !== user?.id
+      const matchesListing = listingFilter === 'all' || book.listing_type === listingFilter
 
-      return matchesSearch && matchesStatus && matchesIncomplete && matchesOwnBooks
+      return matchesSearch && matchesStatus && matchesIncomplete && matchesOwnBooks && matchesListing
     })
     .sort((a, b) => {
       if (sortBy === 'title') return a.title.localeCompare(b.title, 'es')
@@ -102,6 +104,16 @@ function Home() {
           >
             <option value="recent">{t('home.sortRecent')}</option>
             <option value="title">{t('home.sortTitle')}</option>
+          </select>
+
+          <select
+            value={listingFilter}
+            onChange={(e) => setListingFilter(e.target.value as 'all' | 'gift' | 'sale')}
+            className="rounded-md border border-gray-300 px-3 py-2"
+          >
+            <option value="all">{t('home.all')}</option>
+            <option value="gift">{t('bookCard.gift')}</option>
+            <option value="sale">{t('bookCard.sale')}</option>
           </select>
 
           <label className="flex items-center gap-1.5 text-sm text-gray-700">
