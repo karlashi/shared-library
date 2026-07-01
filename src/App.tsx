@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AuthProvider } from './contexts/AuthContext'
+import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { useBooks } from './services/queries'
 import { BookCard } from './components/BookCard'
 import { RequireAuth } from './components/RequireAuth'
@@ -20,12 +20,14 @@ import { BulkEditPage } from './pages/BulkEditPage'
 
 function Home() {
   const { t } = useTranslation()
+  const { user } = useAuth()
   const { data: books = [] } = useBooks()
 
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [sortBy, setSortBy] = useState<'recent' | 'title'>('recent')
   const [incompleteOnly, setIncompleteOnly] = useState(false)
+  const [hideMyBooks, setHideMyBooks] = useState(true)
 
   const filteredBooks = books
     .filter((book) => !book.archived)
@@ -46,8 +48,9 @@ function Home() {
           book.status === 'Fuera de circulación')
 
       const matchesIncomplete = !incompleteOnly || isBookIncomplete(book)
+      const matchesOwnBooks = !hideMyBooks || book.owner_id !== user?.id
 
-      return matchesSearch && matchesStatus && matchesIncomplete
+      return matchesSearch && matchesStatus && matchesIncomplete && matchesOwnBooks
     })
     .sort((a, b) => {
       if (sortBy === 'title') return a.title.localeCompare(b.title, 'es')
@@ -108,6 +111,15 @@ function Home() {
               onChange={(e) => setIncompleteOnly(e.target.checked)}
             />
             {t('home.incompleteOnly')}
+          </label>
+
+          <label className="flex items-center gap-1.5 text-sm text-gray-700">
+            <input
+              type="checkbox"
+              checked={hideMyBooks}
+              onChange={(e) => setHideMyBooks(e.target.checked)}
+            />
+            {t('home.hideMyBooks')}
           </label>
         </div>
 

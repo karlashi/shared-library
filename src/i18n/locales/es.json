@@ -205,7 +205,8 @@
     "blocked": "Fuera de circulación",
     "sortRecent": "Más recientes",
     "sortTitle": "Título (A-Z)",
-    "incompleteOnly": "Solo incompletos"
+    "incompleteOnly": "Solo incompletos",
+    "hideMyBooks": "Ocultar mis libros"
   },
   "errorBoundary": {
     "heading": "Algo salió mal",
