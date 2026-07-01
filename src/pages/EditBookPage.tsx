@@ -3,7 +3,8 @@ import { useParams, useNavigate, Navigate } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../services/supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
-import { useBook } from '../services/queries'
+import { useBook, useAllTags } from '../services/queries'
+import { TagInput } from '../components/TagInput'
 
 export function EditBookPage() {
   const { id } = useParams()
@@ -12,6 +13,7 @@ export function EditBookPage() {
   const { user } = useAuth()
 
   const { data: book, isLoading } = useBook(id)
+  const { data: allTags = [] } = useAllTags()
 
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
@@ -21,7 +23,7 @@ export function EditBookPage() {
   const [collection, setCollection] = useState('')
   const [age_recommendation, setAge] = useState('')
   const [link, setLink] = useState('')
-  const [tags, setTags] = useState('')
+  const [tags, setTags] = useState<string[]>([])
 
   useEffect(() => {
     if (!book) return
@@ -34,7 +36,7 @@ export function EditBookPage() {
     setCollection(book.collection || '')
     setAge(book.age_recommendation || '')
     setLink(book.link || '')
-    setTags((book.tags || []).join(', '))
+    setTags(book.tags || [])
   }, [book])
 
   const updateBook = useMutation({
@@ -50,7 +52,7 @@ export function EditBookPage() {
           collection,
           age_recommendation,
           link,
-          tags: tags.split(',').map(t => t.trim())
+          tags
         })
         .eq('id', id)
 
@@ -151,8 +153,8 @@ export function EditBookPage() {
         </label>
 
         <label>
-          Etiquetas (separadas por coma)
-          <input value={tags} onChange={e => setTags(e.target.value)} />
+          Etiquetas
+          <TagInput value={tags} onChange={setTags} suggestions={allTags} />
         </label>
 
         <button type="submit" disabled={updateBook.isPending}>

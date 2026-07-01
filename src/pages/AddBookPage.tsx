@@ -4,11 +4,14 @@ import { supabase } from '../services/supabaseClient'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { lookupByIsbn } from '../services/googleBooks'
+import { useAllTags } from '../services/queries'
+import { TagInput } from '../components/TagInput'
 
 export function AddBookPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const queryClient = useQueryClient()
+  const { data: allTags = [] } = useAllTags()
 
   const [isbn, setIsbn] = useState('')
   const [isLookingUp, setIsLookingUp] = useState(false)
@@ -20,7 +23,7 @@ export function AddBookPage() {
   const [collection, setCollection] = useState('')
   const [link, setLink] = useState('')
   const [age, setAge] = useState('')
-  const [tags, setTags] = useState('')
+  const [tags, setTags] = useState<string[]>([])
   const [file, setFile] = useState<File | null>(null)
 
   const handleIsbnLookup = async () => {
@@ -81,7 +84,7 @@ export function AddBookPage() {
         collection,
         link,
         age_recommendation: age,
-        tags: tags.split(',').map(t => t.trim()),
+        tags,
         cover_url: coverUrl,
         owner_id: user.id,
         status: 'Disponible'
@@ -201,12 +204,10 @@ export function AddBookPage() {
         </label>
 
         <label>
-          Etiquetas (separadas por coma)
-          <input
-            value={tags}
-            onChange={e => setTags(e.target.value)}
-            style={{ width: '100%', marginBottom: 10 }}
-          />
+          Etiquetas
+          <div style={{ marginBottom: 10 }}>
+            <TagInput value={tags} onChange={setTags} suggestions={allTags} />
+          </div>
         </label>
 
         <label>

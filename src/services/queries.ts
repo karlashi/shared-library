@@ -99,6 +99,18 @@ export function useReturnBook() {
   })
 }
 
+export function useAllTags() {
+  return useQuery({
+    queryKey: ['tags'],
+    queryFn: async (): Promise<string[]> => {
+      const { data, error } = await supabase.from('books').select('tags')
+      if (error) throw error
+      const all = (data ?? []).flatMap((b) => b.tags ?? [])
+      return Array.from(new Set(all)).sort((a, b) => a.localeCompare(b, 'es'))
+    },
+  })
+}
+
 export function useUpdateProfile() {
   const queryClient = useQueryClient()
   return useMutation({
