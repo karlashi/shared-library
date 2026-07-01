@@ -9,6 +9,7 @@ import {
   useUpdateProfile,
   useReturnBook,
   useDeleteAccount,
+  useWishlist,
 } from '../services/queries'
 import { BookCard } from '../components/BookCard'
 import { Header } from '../components/Header'
@@ -24,6 +25,7 @@ export function ProfilePage() {
   const { data: books = [] } = useBooks()
   const { data: profiles = [] } = useProfiles()
   const { data: loans = [] } = useAllLoans()
+  const { data: wishlist = [] } = useWishlist(user?.id)
 
   const updateProfile = useUpdateProfile()
   const returnBook = useReturnBook()
@@ -52,6 +54,7 @@ export function ProfilePage() {
 
   const myBooks = books.filter((b) => b.owner_id === user?.id && !b.archived)
   const myArchivedBooks = books.filter((b) => b.owner_id === user?.id && b.archived)
+  const wishlistedBooks = books.filter((b) => wishlist.includes(b.id))
 
   const borrowedByMe = loans.filter((l) => l.borrower_id === user?.id)
 
@@ -149,6 +152,20 @@ export function ProfilePage() {
               ))}
             </div>
           </>
+        )}
+
+        {/* WISHLIST */}
+        <h2 className="mb-3 text-lg font-semibold text-gray-900">⭐ Mi lista de deseos</h2>
+        {wishlistedBooks.length === 0 ? (
+          <p className="mb-8 text-gray-600">
+            Todavía no has añadido ningún libro a tu lista de deseos.
+          </p>
+        ) : (
+          <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+            {wishlistedBooks.map((book) => (
+              <BookCard key={book.id} book={book} />
+            ))}
+          </div>
         )}
 
         {/* HISTORY: BORROWED BY ME */}

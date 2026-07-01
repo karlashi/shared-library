@@ -12,6 +12,8 @@ import {
   useAllTags,
   useAddTag,
   useRemoveTag,
+  useWishlist,
+  useToggleWishlist,
 } from '../services/queries'
 import { TagInput } from '../components/TagInput'
 
@@ -31,6 +33,8 @@ export function BookDetailsPage() {
   const returnBook = useReturnBook()
   const addTag = useAddTag()
   const removeTag = useRemoveTag()
+  const { data: wishlist = [] } = useWishlist(user?.id)
+  const toggleWishlist = useToggleWishlist()
 
   const [selectedUser, setSelectedUser] = useState('')
 
@@ -43,6 +47,7 @@ export function BookDetailsPage() {
   const isBorrowed = !!borrowerName
   const isBlocked = book.status === 'Fuera de circulación'
   const isOwner = book.owner_id === user?.id
+  const isWishlisted = wishlist.includes(book.id)
 
   const getStatus = () => {
     if (isBlocked) return 'blocked'
@@ -76,6 +81,20 @@ export function BookDetailsPage() {
         alert('Error al marcar el libro como devuelto')
       },
     })
+  }
+
+  const handleToggleWishlist = () => {
+    if (!user || !id) return
+
+    toggleWishlist.mutate(
+      { bookId: id, userId: user.id, wishlisted: isWishlisted },
+      {
+        onError: (error) => {
+          console.error(error)
+          alert('Error al actualizar tu lista de deseos')
+        },
+      }
+    )
   }
 
   const tagNames = bookTags.map((t) => t.tag)
@@ -161,6 +180,17 @@ export function BookDetailsPage() {
             <p className="text-gray-700">
               📕 <b>Prestado a:</b> {borrowerName || 'Nadie'}
             </p>
+
+            {/* WISHLIST TOGGLE */}
+            {!isOwner && !book.archived && (
+              <button
+                onClick={handleToggleWishlist}
+                disabled={toggleWishlist.isPending}
+                className="mt-3 rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-50 disabled:opacity-50"
+              >
+                {isWishlisted ? '⭐ En mi lista de deseos' : '☆ Añadir a mi lista de deseos'}
+              </button>
+            )}
 
             {/* STATUS */}
             <div className="mt-3">

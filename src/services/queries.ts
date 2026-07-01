@@ -192,6 +192,45 @@ export function useRemoveTag() {
   })
 }
 
+export function useWishlist(userId: string | undefined) {
+  return useQuery({
+    queryKey: ['wishlist', userId],
+    queryFn: async (): Promise<string[]> => {
+      const { data, error } = await supabase
+        .from('wishlist')
+        .select('book_id')
+        .eq('user_id', userId)
+      if (error) throw error
+      return (data ?? []).map((row) => row.book_id)
+    },
+    enabled: !!userId,
+  })
+}
+
+export function useToggleWishlist() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (vars: { bookId: string; userId: string; wishlisted: boolean }) => {
+      if (vars.wishlisted) {
+        const { error } = await supabase
+          .from('wishlist')
+          .delete()
+          .eq('book_id', vars.bookId)
+          .eq('user_id', vars.userId)
+        if (error) throw error
+      } else {
+        const { error } = await supabase
+          .from('wishlist')
+          .insert({ book_id: vars.bookId, user_id: vars.userId })
+        if (error && error.code !== '23505') throw error
+      }
+    },
+    onSuccess: (_data, vars) => {
+      queryClient.invalidateQueries({ queryKey: ['wishlist', vars.userId] })
+    },
+  })
+}
+
 export function useDeleteAccount() {
   return useMutation({
     mutationFn: async () => {
