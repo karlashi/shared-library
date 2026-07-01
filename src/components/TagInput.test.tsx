@@ -53,4 +53,58 @@ describe('TagInput', () => {
     expect(screen.getByText('fantasía')).toBeInTheDocument()
     expect(screen.getAllByText('infantil')).toHaveLength(1) // only the existing chip, not a suggestion too
   })
+
+  it('Tab highlights a suggestion and Enter confirms the highlighted one, not the raw text', async () => {
+    const user = userEvent.setup()
+    const handleChange = vi.fn()
+    render(
+      <TagInput
+        value={[]}
+        onChange={handleChange}
+        suggestions={['aventura', 'fantasía']}
+      />
+    )
+
+    await user.type(screen.getByPlaceholderText(placeholder), 'a')
+    await user.tab()
+    await user.keyboard('{Enter}')
+
+    expect(handleChange).toHaveBeenCalledWith(['aventura'])
+  })
+
+  it('Tab cycles forward through suggestions and wraps back to the first', async () => {
+    const user = userEvent.setup()
+    const handleChange = vi.fn()
+    render(
+      <TagInput
+        value={[]}
+        onChange={handleChange}
+        suggestions={['aventura', 'fantasía']}
+      />
+    )
+
+    await user.type(screen.getByPlaceholderText(placeholder), 'a')
+    await user.tab() // highlights "aventura"
+    await user.tab() // highlights "fantasía"
+    await user.tab() // wraps back to "aventura"
+    await user.keyboard('{Enter}')
+
+    expect(handleChange).toHaveBeenCalledWith(['aventura'])
+  })
+
+  it('falls back to the typed text on Enter when nothing is highlighted', async () => {
+    const user = userEvent.setup()
+    const handleChange = vi.fn()
+    render(
+      <TagInput
+        value={[]}
+        onChange={handleChange}
+        suggestions={['aventura', 'fantasía']}
+      />
+    )
+
+    await user.type(screen.getByPlaceholderText(placeholder), 'ciencia{Enter}')
+
+    expect(handleChange).toHaveBeenCalledWith(['ciencia'])
+  })
 })
