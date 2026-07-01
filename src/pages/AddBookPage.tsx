@@ -8,6 +8,7 @@ import { lookupByIsbn } from '../services/googleBooks'
 import { validateImageFile, uploadCoverImage } from '../services/storage'
 import { useAllTags } from '../services/queries'
 import { TagInput } from '../components/TagInput'
+import { BarcodeScannerModal } from '../components/BarcodeScannerModal'
 
 type FormValues = {
   title: string
@@ -29,6 +30,7 @@ export function AddBookPage() {
   const [isLookingUp, setIsLookingUp] = useState(false)
   const [lookupCoverUrl, setLookupCoverUrl] = useState('')
   const [file, setFile] = useState<File | null>(null)
+  const [showScanner, setShowScanner] = useState(false)
 
   const {
     register,
@@ -71,6 +73,12 @@ export function AddBookPage() {
     } finally {
       setIsLookingUp(false)
     }
+  }
+
+  const handleScanResult = (isbn: string) => {
+    setShowScanner(false)
+    setValue('isbn', isbn)
+    handleIsbnLookup()
   }
 
   const addBook = useMutation({
@@ -144,8 +152,20 @@ export function AddBookPage() {
               >
                 {isLookingUp ? 'Buscando...' : 'Buscar'}
               </button>
+              <button
+                type="button"
+                onClick={() => setShowScanner(true)}
+                aria-label="Escanear código de barras"
+                className="rounded-md bg-gray-100 px-3 py-2 text-gray-800 hover:bg-gray-200"
+              >
+                📷
+              </button>
             </div>
           </label>
+
+          {showScanner && (
+            <BarcodeScannerModal onScan={handleScanResult} onClose={() => setShowScanner(false)} />
+          )}
 
           {lookupCoverUrl && (
             <img src={lookupCoverUrl} className="w-24 rounded-md" />
