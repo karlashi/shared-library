@@ -4,6 +4,7 @@ import { supabase } from '../services/supabaseClient'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { lookupByIsbn } from '../services/googleBooks'
+import { validateImageFile, uploadCoverImage } from '../services/storage'
 import { useAllTags } from '../services/queries'
 import { TagInput } from '../components/TagInput'
 
@@ -54,27 +55,11 @@ export function AddBookPage() {
     }
   }
 
-  const uploadImage = async (file: File) => {
-    const fileName = `${crypto.randomUUID()}-${file.name}`
-
-    const { error } = await supabase.storage
-      .from('book-covers')
-      .upload(fileName, file)
-
-    if (error) throw error
-
-    const { data } = supabase.storage
-      .from('book-covers')
-      .getPublicUrl(fileName)
-
-    return data.publicUrl
-  }
-
   const addBook = useMutation({
     mutationFn: async () => {
       if (!user) throw new Error('Debes iniciar sesión')
 
-      const coverUrl = file ? await uploadImage(file) : lookupCoverUrl
+      const coverUrl = file ? await uploadCoverImage(file) : lookupCoverUrl
 
       const { error } = await supabase.from('books').insert({
         title,
@@ -214,7 +199,20 @@ export function AddBookPage() {
           Portada
           <input
             type="file"
-            onChange={e => setFile(e.target.files?.[0] || null)}
+            accept="image/*"
+            onChange={e => {
+              const selected = e.target.files?.[0]
+              if (!selected) return
+
+              const validationError = validateImageFile(selected)
+              if (validationError) {
+                alert(validationError)
+                e.target.value = ''
+                return
+              }
+
+              setFile(selected)
+            }}
             style={{ marginBottom: 10 }}
           />
         </label>

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from './supabaseClient'
-import { getBooks } from './books'
+import { getBooks, deleteBook } from './books'
 import { getProfile } from './profiles'
 import { lendBook, returnBook } from './loans'
 import type { Book } from '../types/Books'
@@ -95,6 +95,17 @@ export function useReturnBook() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['books'] })
       queryClient.invalidateQueries({ queryKey: ['loans'] })
+    },
+  })
+}
+
+export function useDeleteBook() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (vars: { bookId: string; coverUrl?: string | null }) =>
+      deleteBook(vars.bookId, vars.coverUrl),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['books'] })
     },
   })
 }

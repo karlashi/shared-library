@@ -3,7 +3,8 @@ import { useParams, useNavigate, Navigate } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../services/supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
-import { useBook, useAllTags } from '../services/queries'
+import { useBook, useAllTags, useDeleteBook } from '../services/queries'
+import { validateImageFile, uploadCoverImage, deleteCoverImage } from '../services/storage'
 import { TagInput } from '../components/TagInput'
 
 export function EditBookPage() {
@@ -14,6 +15,7 @@ export function EditBookPage() {
 
   const { data: book, isLoading } = useBook(id)
   const { data: allTags = [] } = useAllTags()
+  const deleteBook = useDeleteBook()
 
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
@@ -70,6 +72,27 @@ export function EditBookPage() {
     updateBook.mutate()
   }
 
+  const handleDelete = () => {
+    if (!id) return
+    if (!window.confirm('¿Seguro que quieres eliminar este libro? Esta acción no se puede deshacer.')) {
+      return
+    }
+
+    deleteBook.mutate(
+      { bookId: id, coverUrl: cover_url },
+      {
+        onSuccess: () => {
+          alert('Libro eliminado')
+          navigate('/')
+        },
+        onError: (error) => {
+          console.error(error)
+          alert(error instanceof Error ? error.message : 'Error al eliminar el libro')
+        },
+      }
+    )
+  }
+
   if (isLoading || !book) return <p>Cargando...</p>
   if (book.owner_id !== user?.id) return <Navigate to={`/book/${id}`} replace />
 
@@ -109,22 +132,26 @@ export function EditBookPage() {
       const file = e.target.files?.[0]
       if (!file) return
 
-      const fileName = `${crypto.randomUUID()}-${file.name}`
-
-      const { error } = await supabase.storage
-        .from('book-covers')
-        .upload(fileName, file)
-
-      if (error) {
-        alert('Error subiendo imagen')
+      const validationError = validateImageFile(file)
+      if (validationError) {
+        alert(validationError)
+        e.target.value = ''
         return
       }
 
-      const { data } = supabase.storage
-        .from('book-covers')
-        .getPublicUrl(fileName)
+      const previousCoverUrl = cover_url
 
-      setCoverUrl(data.publicUrl)
+      try {
+        const newCoverUrl = await uploadCoverImage(file)
+        setCoverUrl(newCoverUrl)
+
+        if (previousCoverUrl) {
+          await deleteCoverImage(previousCoverUrl)
+        }
+      } catch (err) {
+        console.error(err)
+        alert('Error subiendo imagen')
+      }
     }}
   />
 
@@ -163,6 +190,15 @@ export function EditBookPage() {
 
         <button type="button" onClick={() => navigate(-1)}>
           Cancelar
+        </button>
+
+        <button
+          type="button"
+          onClick={handleDelete}
+          disabled={deleteBook.isPending}
+          style={{ color: '#991b1b' }}
+        >
+          {deleteBook.isPending ? 'Eliminando...' : 'Eliminar libro 🗑️'}
         </button>
       </form>
     </div>
