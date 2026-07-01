@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, lazy, Suspense } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm, Controller } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
@@ -9,7 +9,10 @@ import { lookupByIsbn } from '../services/googleBooks'
 import { validateImageFile, uploadCoverImage } from '../services/storage'
 import { useAllTags } from '../services/queries'
 import { TagInput } from '../components/TagInput'
-import { BarcodeScannerModal } from '../components/BarcodeScannerModal'
+
+const BarcodeScannerModal = lazy(() =>
+  import('../components/BarcodeScannerModal').then((m) => ({ default: m.BarcodeScannerModal }))
+)
 
 type FormValues = {
   title: string
@@ -162,7 +165,17 @@ export function AddBookPage() {
           </label>
 
           {showScanner && (
-            <BarcodeScannerModal onScan={handleScanResult} onClose={() => setShowScanner(false)} />
+            <Suspense
+              fallback={
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+                  <div className="w-full max-w-sm rounded-lg bg-white p-4 text-center text-gray-700">
+                    {t('common.loading')}
+                  </div>
+                </div>
+              }
+            >
+              <BarcodeScannerModal onScan={handleScanResult} onClose={() => setShowScanner(false)} />
+            </Suspense>
           )}
 
           {lookupCoverUrl && (

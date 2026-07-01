@@ -202,5 +202,10 @@
     "blocked": "Fuera de circulación",
     "sortRecent": "Más recientes",
     "sortTitle": "Título (A-Z)"
+  },
+  "errorBoundary": {
+    "heading": "Algo salió mal",
+    "message": "Ha ocurrido un error inesperado. Intenta recargar la página.",
+    "reload": "Recargar página"
   }
 }
