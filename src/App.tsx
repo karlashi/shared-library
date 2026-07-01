@@ -8,6 +8,7 @@ import { Header } from './components/Header'
 import { BackToTop } from './components/BackToTop'
 import { LoginPage } from './pages/LoginPage'
 import { AboutPage } from './pages/AboutPage'
+import { ChangelogPage } from './pages/ChangelogPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { StatsPage } from './pages/StatsPage'
 import { AddBookPage } from './pages/AddBookPage'
@@ -108,6 +109,7 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/changelog" element={<ChangelogPage />} />
           <Route path="/" element={<RequireAuth><Home /></RequireAuth>} />
           <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth>} />
           <Route path="/stats" element={<RequireAuth><StatsPage /></RequireAuth>} />

@@ -6,6 +6,7 @@ const navItems = [
   { to: '/', label: 'Inicio' },
   { to: '/profile', label: 'Mi perfil' },
   { to: '/stats', label: 'Estadísticas' },
+  { to: '/changelog', label: 'Novedades' },
   { to: '/about', label: 'Acerca de' },
 ]
 
