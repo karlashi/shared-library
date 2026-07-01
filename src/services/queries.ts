@@ -110,6 +110,22 @@ export function useDeleteBook() {
   })
 }
 
+export function useSetArchived() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (vars: { bookId: string; archived: boolean }) => {
+      const { error } = await supabase
+        .from('books')
+        .update({ archived: vars.archived })
+        .eq('id', vars.bookId)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['books'] })
+    },
+  })
+}
+
 export function useAllTags() {
   return useQuery({
     queryKey: ['tags'],

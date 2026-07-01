@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm, Controller } from 'react-hook-form'
 import { supabase } from '../services/supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
-import { useBook, useAllTags, useDeleteBook } from '../services/queries'
+import { useBook, useAllTags, useDeleteBook, useSetArchived } from '../services/queries'
 import { validateImageFile, uploadCoverImage, deleteCoverImage } from '../services/storage'
 import { TagInput } from '../components/TagInput'
 
@@ -17,6 +17,8 @@ type FormValues = {
   age_recommendation: string
   link: string
   tags: string[]
+  listing_type: '' | 'gift' | 'sale'
+  listing_comment: string
 }
 
 export function EditBookPage() {
@@ -28,6 +30,7 @@ export function EditBookPage() {
   const { data: book, isLoading } = useBook(id)
   const { data: allTags = [] } = useAllTags()
   const deleteBook = useDeleteBook()
+  const setArchived = useSetArchived()
 
   const [cover_url, setCoverUrl] = useState('')
 
@@ -36,13 +39,17 @@ export function EditBookPage() {
     handleSubmit,
     control,
     reset,
+    watch,
     formState: { errors },
   } = useForm<FormValues>({
     defaultValues: {
       title: '', author: '', description: '', isbn: '',
       collection: '', age_recommendation: '', link: '', tags: [],
+      listing_type: '', listing_comment: '',
     },
   })
+
+  const listingType = watch('listing_type')
 
   useEffect(() => {
     if (!book) return
@@ -56,6 +63,8 @@ export function EditBookPage() {
       age_recommendation: book.age_recommendation || '',
       link: book.link || '',
       tags: book.tags || [],
+      listing_type: book.listing_type || '',
+      listing_comment: book.listing_comment || '',
     })
     setCoverUrl(book.cover_url || '')
   }, [book, reset])
@@ -73,7 +82,9 @@ export function EditBookPage() {
           collection: values.collection,
           age_recommendation: values.age_recommendation,
           link: values.link,
-          tags: values.tags
+          tags: values.tags,
+          listing_type: values.listing_type || null,
+          listing_comment: values.listing_type ? values.listing_comment : null,
         })
         .eq('id', id)
 
@@ -106,6 +117,20 @@ export function EditBookPage() {
         onError: (error) => {
           console.error(error)
           alert(error instanceof Error ? error.message : 'Error al eliminar el libro')
+        },
+      }
+    )
+  }
+
+  const handleToggleArchived = () => {
+    if (!id) return
+
+    setArchived.mutate(
+      { bookId: id, archived: !book?.archived },
+      {
+        onError: (error) => {
+          console.error(error)
+          alert('Error al actualizar el libro')
         },
       }
     )
@@ -229,6 +254,30 @@ export function EditBookPage() {
             />
           </label>
 
+          <label className="block">
+            <span className="mb-1 block text-sm font-medium text-gray-700">¿Regalar o vender?</span>
+            <select
+              {...register('listing_type')}
+              className="w-full rounded-md border border-gray-300 px-3 py-2"
+            >
+              <option value="">Ninguno</option>
+              <option value="gift">Regalar</option>
+              <option value="sale">Vender</option>
+            </select>
+          </label>
+
+          {listingType && (
+            <label className="block">
+              <span className="mb-1 block text-sm font-medium text-gray-700">Comentario</span>
+              <textarea
+                {...register('listing_comment')}
+                rows={2}
+                placeholder={listingType === 'gift' ? 'Ej: libre para quien lo quiera' : 'Ej: 5€, contactar por WhatsApp'}
+                className="w-full rounded-md border border-gray-300 px-3 py-2"
+              />
+            </label>
+          )}
+
           <button
             type="submit"
             disabled={updateBook.isPending}
@@ -243,6 +292,19 @@ export function EditBookPage() {
             className="rounded-md bg-gray-100 px-4 py-2 text-gray-800 hover:bg-gray-200"
           >
             Cancelar
+          </button>
+
+          <button
+            type="button"
+            onClick={handleToggleArchived}
+            disabled={setArchived.isPending}
+            className="rounded-md bg-gray-100 px-4 py-2 text-gray-800 hover:bg-gray-200 disabled:opacity-50"
+          >
+            {setArchived.isPending
+              ? 'Guardando...'
+              : book.archived
+                ? 'Restaurar libro'
+                : 'Archivar libro 📦'}
           </button>
 
           <button

@@ -12,6 +12,9 @@ export type Book = {
   isbn?: string
   description?: string
   created_at?: string
+  listing_type?: 'gift' | 'sale' | null
+  listing_comment?: string | null
+  archived?: boolean
 
   isBorrowed?: boolean
   borrowedBy?: string | null

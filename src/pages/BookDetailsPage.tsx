@@ -128,6 +128,24 @@ export function BookDetailsPage() {
               )}
             </div>
 
+            {/* LISTING (GIFT/SALE) STATUS */}
+            {book.listing_type && (
+              <div className="mt-3">
+                <span
+                  className={
+                    book.listing_type === 'gift'
+                      ? 'rounded-md bg-purple-100 px-2 py-1 text-purple-800'
+                      : 'rounded-md bg-amber-100 px-2 py-1 text-amber-800'
+                  }
+                >
+                  {book.listing_type === 'gift' ? '🎁 Para regalar' : '💰 En venta'}
+                </span>
+                {book.listing_comment && (
+                  <p className="mt-1 text-sm text-gray-600">{book.listing_comment}</p>
+                )}
+              </div>
+            )}
+
             {/* OWNER LENDING / RETURN CONTROL */}
             {isOwner && (
               <div className="mt-5">

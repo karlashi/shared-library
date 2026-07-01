@@ -64,6 +64,22 @@ export function BookCard({ book }: { book: Book }) {
         </p>
       )}
 
+      {/* LISTING (GIFT/SALE) STATUS */}
+      {book.listing_type && (
+        <p className="mt-2 text-xs">
+          <span
+            className={
+              book.listing_type === 'gift'
+                ? 'rounded bg-purple-100 px-1.5 py-0.5 text-purple-800'
+                : 'rounded bg-amber-100 px-1.5 py-0.5 text-amber-800'
+            }
+          >
+            {book.listing_type === 'gift' ? '🎁 Para regalar' : '💰 En venta'}
+          </span>
+          {book.listing_comment && <span className="ml-1 text-gray-600">{book.listing_comment}</span>}
+        </p>
+      )}
+
       {/* OWNER LEND / RETURN CONTROL */}
       {isOwner && (
         <div className="mt-2">

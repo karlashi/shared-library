@@ -1,29 +1,28 @@
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import { useState } from 'react'
-import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { AuthProvider } from './contexts/AuthContext'
 import { useBooks } from './services/queries'
 import { BookCard } from './components/BookCard'
 import { RequireAuth } from './components/RequireAuth'
+import { Header } from './components/Header'
+import { BackToTop } from './components/BackToTop'
 import { LoginPage } from './pages/LoginPage'
 import { AboutPage } from './pages/AboutPage'
 import { ProfilePage } from './pages/ProfilePage'
+import { StatsPage } from './pages/StatsPage'
 import { AddBookPage } from './pages/AddBookPage'
 import { BookDetailsPage } from './pages/BookDetailsPage'
 import { EditBookPage } from './pages/EditBookPage'
 
 function Home() {
-  const { user, profile, signOut } = useAuth()
   const { data: books = [] } = useBooks()
 
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [sortBy, setSortBy] = useState<'recent' | 'title'>('recent')
 
-  const logout = async () => {
-    await signOut()
-  }
-
   const filteredBooks = books
+    .filter((book) => !book.archived)
     .filter((book) => {
       const searchTerm = search.toLowerCase()
       const matchesSearch =
@@ -50,30 +49,7 @@ function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-6xl mx-auto px-4 py-6 sm:px-6">
-        <h1 className="text-2xl font-semibold text-gray-900 mb-5">📚 Biblioteca Compartida</h1>
-
-        {/* USER + NAV */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
-          <p className="text-gray-700">👤 {profile?.name ?? user?.email}</p>
-          <div className="flex gap-2">
-            <Link to="/profile">
-              <button className="rounded-md bg-gray-100 px-4 py-2 text-gray-800 hover:bg-gray-200">
-                Mi perfil
-              </button>
-            </Link>
-            <Link to="/about">
-              <button className="rounded-md bg-gray-100 px-4 py-2 text-gray-800 hover:bg-gray-200">
-                Acerca de
-              </button>
-            </Link>
-            <button
-              onClick={logout}
-              className="rounded-md bg-gray-100 px-4 py-2 text-gray-800 hover:bg-gray-200"
-            >
-              Cerrar sesión
-            </button>
-          </div>
-        </div>
+        <Header />
 
         <Link to="/add">
           <button className="mb-6 rounded-md bg-brand px-4 py-2 font-medium text-white hover:opacity-90">
@@ -134,10 +110,12 @@ export default function App() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/" element={<RequireAuth><Home /></RequireAuth>} />
           <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth>} />
+          <Route path="/stats" element={<RequireAuth><StatsPage /></RequireAuth>} />
           <Route path="/add" element={<RequireAuth><AddBookPage /></RequireAuth>} />
           <Route path="/book/:id" element={<RequireAuth><BookDetailsPage /></RequireAuth>} />
           <Route path="/book/:id/edit" element={<RequireAuth><EditBookPage /></RequireAuth>} />
         </Routes>
+        <BackToTop />
       </BrowserRouter>
     </AuthProvider>
   )

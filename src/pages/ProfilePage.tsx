@@ -1,5 +1,4 @@
 import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { useAuth } from '../contexts/AuthContext'
 import {
@@ -10,13 +9,13 @@ import {
   useReturnBook,
 } from '../services/queries'
 import { BookCard } from '../components/BookCard'
+import { Header } from '../components/Header'
 
 type FormValues = {
   name: string
 }
 
 export function ProfilePage() {
-  const navigate = useNavigate()
   const { user, profile } = useAuth()
 
   const { data: books = [] } = useBooks()
@@ -47,7 +46,8 @@ export function ProfilePage() {
       year: 'numeric',
     })
 
-  const myBooks = books.filter((b) => b.owner_id === user?.id)
+  const myBooks = books.filter((b) => b.owner_id === user?.id && !b.archived)
+  const myArchivedBooks = books.filter((b) => b.owner_id === user?.id && b.archived)
 
   const borrowedByMe = loans.filter((l) => l.borrower_id === user?.id)
 
@@ -79,12 +79,7 @@ export function ProfilePage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
-        <button
-          onClick={() => navigate('/')}
-          className="mb-5 rounded-md bg-gray-100 px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-200"
-        >
-          ← Volver
-        </button>
+        <Header />
 
         <h1 className="mb-5 text-2xl font-semibold text-gray-900">👤 Mi perfil</h1>
 
@@ -117,6 +112,18 @@ export function ProfilePage() {
               <BookCard key={book.id} book={book} />
             ))}
           </div>
+        )}
+
+        {/* ARCHIVED BOOKS */}
+        {myArchivedBooks.length > 0 && (
+          <>
+            <h2 className="mb-3 text-lg font-semibold text-gray-900">📦 Archivados</h2>
+            <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+              {myArchivedBooks.map((book) => (
+                <BookCard key={book.id} book={book} />
+              ))}
+            </div>
+          </>
         )}
 
         {/* HISTORY: BORROWED BY ME */}

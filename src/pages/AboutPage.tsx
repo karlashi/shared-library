@@ -1,10 +1,10 @@
-import { Link } from 'react-router-dom'
+import { Header } from '../components/Header'
 
 export function AboutPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
-        <h1 className="mb-2 text-2xl font-semibold text-gray-900">📚 Biblioteca Compartida</h1>
+        <Header />
         <p className="mb-6 text-gray-600">Acerca de este sitio</p>
 
         <div className="space-y-4 text-gray-700">
@@ -34,13 +34,6 @@ export function AboutPage() {
             Contacto: <span className="text-gray-500">(próximamente)</span>
           </p>
         </div>
-
-        <Link
-          to="/"
-          className="mt-8 inline-block rounded-md bg-gray-100 px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-        >
-          ← Volver a la biblioteca
-        </Link>
       </div>
     </div>
   )
