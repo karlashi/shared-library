@@ -94,134 +94,132 @@ export function AddBookPage() {
   }
 
   return (
-    <div style={{ padding: 20, maxWidth: 500 }}>
+    <div className="min-h-screen bg-gray-50">
+      <div className="mx-auto max-w-lg px-4 py-6 sm:px-6">
         <button
-  type="button"
-  onClick={() => navigate('/')}
-  style={{
-    marginBottom: 20,
-    background: '#eee',
-    padding: '6px 10px',
-    borderRadius: 6,
-    cursor: 'pointer'
-  }}
->
-  ← Volver a la biblioteca
-</button>
-      <h1>➕ Añadir libro</h1>
-
-      <form onSubmit={handleSubmit}>
-
-        <label>
-          ISBN
-          <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
-            <input
-              value={isbn}
-              onChange={e => setIsbn(e.target.value)}
-              style={{ flex: 1 }}
-            />
-            <button type="button" onClick={handleIsbnLookup} disabled={isLookingUp}>
-              {isLookingUp ? 'Buscando...' : 'Buscar'}
-            </button>
-          </div>
-        </label>
-
-        {lookupCoverUrl && (
-          <img
-            src={lookupCoverUrl}
-            style={{ width: 100, marginBottom: 10, borderRadius: 6 }}
-          />
-        )}
-
-        <label>
-          Título
-          <input
-            value={title}
-            onChange={e => setTitle(e.target.value)}
-            style={{ width: '100%', marginBottom: 10 }}
-          />
-        </label>
-
-        <label>
-          Autor
-          <input
-            value={author}
-            onChange={e => setAuthor(e.target.value)}
-            style={{ width: '100%', marginBottom: 10 }}
-          />
-        </label>
-
-        <label>
-          Descripción
-          <textarea
-            value={description}
-            onChange={e => setDescription(e.target.value)}
-            rows={4}
-            style={{ width: '100%', marginBottom: 10 }}
-          />
-        </label>
-
-        <label>
-          Colección
-          <input
-            value={collection}
-            onChange={e => setCollection(e.target.value)}
-            style={{ width: '100%', marginBottom: 10 }}
-          />
-        </label>
-
-        <label>
-          Link
-          <input
-            value={link}
-            onChange={e => setLink(e.target.value)}
-            style={{ width: '100%', marginBottom: 10 }}
-          />
-        </label>
-
-        <label>
-          Edad recomendada
-          <input
-            value={age}
-            onChange={e => setAge(e.target.value)}
-            style={{ width: '100%', marginBottom: 10 }}
-          />
-        </label>
-
-        <label>
-          Etiquetas
-          <div style={{ marginBottom: 10 }}>
-            <TagInput value={tags} onChange={setTags} suggestions={allTags} />
-          </div>
-        </label>
-
-        <label>
-          Portada
-          <input
-            type="file"
-            accept="image/*"
-            onChange={e => {
-              const selected = e.target.files?.[0]
-              if (!selected) return
-
-              const validationError = validateImageFile(selected)
-              if (validationError) {
-                alert(validationError)
-                e.target.value = ''
-                return
-              }
-
-              setFile(selected)
-            }}
-            style={{ marginBottom: 10 }}
-          />
-        </label>
-
-        <button type="submit" disabled={addBook.isPending}>
-          {addBook.isPending ? 'Guardando...' : 'Guardar libro'}
+          type="button"
+          onClick={() => navigate('/')}
+          className="mb-5 rounded-md bg-gray-100 px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-200"
+        >
+          ← Volver a la biblioteca
         </button>
+        <h1 className="mb-5 text-2xl font-semibold text-gray-900">➕ Añadir libro</h1>
 
-      </form>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <label className="block">
+            <span className="mb-1 block text-sm font-medium text-gray-700">ISBN</span>
+            <div className="flex gap-2">
+              <input
+                value={isbn}
+                onChange={e => setIsbn(e.target.value)}
+                className="flex-1 rounded-md border border-gray-300 px-3 py-2"
+              />
+              <button
+                type="button"
+                onClick={handleIsbnLookup}
+                disabled={isLookingUp}
+                className="rounded-md bg-gray-100 px-4 py-2 text-gray-800 hover:bg-gray-200 disabled:opacity-50"
+              >
+                {isLookingUp ? 'Buscando...' : 'Buscar'}
+              </button>
+            </div>
+          </label>
+
+          {lookupCoverUrl && (
+            <img src={lookupCoverUrl} className="w-24 rounded-md" />
+          )}
+
+          <label className="block">
+            <span className="mb-1 block text-sm font-medium text-gray-700">Título</span>
+            <input
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              className="w-full rounded-md border border-gray-300 px-3 py-2"
+            />
+          </label>
+
+          <label className="block">
+            <span className="mb-1 block text-sm font-medium text-gray-700">Autor</span>
+            <input
+              value={author}
+              onChange={e => setAuthor(e.target.value)}
+              className="w-full rounded-md border border-gray-300 px-3 py-2"
+            />
+          </label>
+
+          <label className="block">
+            <span className="mb-1 block text-sm font-medium text-gray-700">Descripción</span>
+            <textarea
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              rows={4}
+              className="w-full rounded-md border border-gray-300 px-3 py-2"
+            />
+          </label>
+
+          <label className="block">
+            <span className="mb-1 block text-sm font-medium text-gray-700">Colección</span>
+            <input
+              value={collection}
+              onChange={e => setCollection(e.target.value)}
+              className="w-full rounded-md border border-gray-300 px-3 py-2"
+            />
+          </label>
+
+          <label className="block">
+            <span className="mb-1 block text-sm font-medium text-gray-700">Link</span>
+            <input
+              value={link}
+              onChange={e => setLink(e.target.value)}
+              className="w-full rounded-md border border-gray-300 px-3 py-2"
+            />
+          </label>
+
+          <label className="block">
+            <span className="mb-1 block text-sm font-medium text-gray-700">Edad recomendada</span>
+            <input
+              value={age}
+              onChange={e => setAge(e.target.value)}
+              className="w-full rounded-md border border-gray-300 px-3 py-2"
+            />
+          </label>
+
+          <label className="block">
+            <span className="mb-1 block text-sm font-medium text-gray-700">Etiquetas</span>
+            <TagInput value={tags} onChange={setTags} suggestions={allTags} />
+          </label>
+
+          <label className="block">
+            <span className="mb-1 block text-sm font-medium text-gray-700">Portada</span>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={e => {
+                const selected = e.target.files?.[0]
+                if (!selected) return
+
+                const validationError = validateImageFile(selected)
+                if (validationError) {
+                  alert(validationError)
+                  e.target.value = ''
+                  return
+                }
+
+                setFile(selected)
+              }}
+              className="block w-full text-sm"
+            />
+          </label>
+
+          <button
+            type="submit"
+            disabled={addBook.isPending}
+            className="rounded-md bg-brand px-4 py-2 font-medium text-white hover:opacity-90 disabled:opacity-50"
+          >
+            {addBook.isPending ? 'Guardando...' : 'Guardar libro'}
+          </button>
+        </form>
+      </div>
     </div>
   )
 }

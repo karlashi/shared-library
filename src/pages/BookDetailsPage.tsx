@@ -63,160 +63,137 @@ export function BookDetailsPage() {
   }
 
   return (
-    <div style={{ padding: 20 }}>
+    <div className="min-h-screen bg-gray-50">
+      <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
+        {/* BACK */}
+        <button
+          onClick={() => navigate('/')}
+          className="mb-5 rounded-md bg-gray-100 px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-200"
+        >
+          ← Volver
+        </button>
 
-      {/* BACK */}
-      <button onClick={() => navigate('/')}>
-        ← Volver
-      </button>
-
-      {/* MAIN LAYOUT */}
-      <div
-        style={{
-          display: 'flex',
-          gap: 30,
-          marginTop: 20,
-          flexWrap: 'wrap'
-        }}
-      >
-
-        {/* LEFT: COVER */}
-        <div style={{ minWidth: 240 }}>
-          {book.cover_url && (
-            <img
-              src={book.cover_url}
-              style={{
-                width: 220,
-                borderRadius: 8
-              }}
-            />
-          )}
-        </div>
-
-        {/* RIGHT: INFO */}
-        <div style={{ flex: 1, minWidth: 250 }}>
-
-          <h1>{book.title}</h1>
-          <p>{book.author}</p>
-
-          {/* EDIT */}
-          {isOwner && (
-            <button
-              onClick={() => navigate(`/book/${id}/edit`)}
-              style={{ marginTop: 10 }}
-            >
-              Editar libro ✏️
-            </button>
-          )}
-
-          {/* OWNER */}
-          <p style={{ marginTop: 15 }}>
-            👤 <b>Propietario:</b> {ownerName}
-          </p>
-
-          {/* BORROWER */}
-          <p>
-            📕 <b>Prestado a:</b> {borrowerName || 'Nadie'}
-          </p>
-
-          {/* STATUS */}
-          <div style={{ marginTop: 10 }}>
-            {status === 'available' && (
-              <span style={{
-                background: '#d1fae5',
-                color: '#065f46',
-                padding: '4px 8px',
-                borderRadius: 6
-              }}>
-                🟢 Disponible
-              </span>
-            )}
-
-            {status === 'borrowed' && (
-              <span style={{
-                background: '#fee2e2',
-                color: '#991b1b',
-                padding: '4px 8px',
-                borderRadius: 6
-              }}>
-                🔴 Prestado
-              </span>
-            )}
-
-            {status === 'blocked' && (
-              <span style={{
-                background: '#fef3c7',
-                color: '#92400e',
-                padding: '4px 8px',
-                borderRadius: 6
-              }}>
-                🟡 Fuera de circulación
-              </span>
+        {/* MAIN LAYOUT */}
+        <div className="flex flex-col gap-6 md:flex-row">
+          {/* LEFT: COVER */}
+          <div className="md:w-56 md:shrink-0">
+            {book.cover_url && (
+              <img src={book.cover_url} className="w-40 rounded-lg sm:w-56 md:w-full" />
             )}
           </div>
 
-          {/* OWNER LENDING / RETURN CONTROL */}
-          {isOwner && (
-            <div style={{ marginTop: 20 }}>
-              {isBorrowed ? (
-                <button onClick={markAsReturned} disabled={returnBook.isPending}>
-                  Marcar como devuelto
-                </button>
-              ) : (
-                <>
-                  <h4>Prestar a usuario</h4>
+          {/* RIGHT: INFO */}
+          <div className="flex-1">
+            <h1 className="text-2xl font-semibold text-gray-900">{book.title}</h1>
+            <p className="text-gray-600">{book.author}</p>
 
-                  <select
-                    value={selectedUser}
-                    onChange={(e) => setSelectedUser(e.target.value)}
-                    style={{ padding: 6, width: '100%' }}
-                  >
-                    <option value="">Selecciona usuario</option>
+            {/* EDIT */}
+            {isOwner && (
+              <button
+                onClick={() => navigate(`/book/${id}/edit`)}
+                className="mt-3 rounded-md bg-gray-100 px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+              >
+                Editar libro ✏️
+              </button>
+            )}
 
-                    {users.filter((u) => u.id !== user?.id).map((u) => (
-                      <option key={u.id} value={u.id}>
-                        {u.name}
-                      </option>
-                    ))}
-                  </select>
+            {/* OWNER */}
+            <p className="mt-4 text-gray-700">
+              👤 <b>Propietario:</b> {ownerName}
+            </p>
 
-                  <button
-                    onClick={lendToUser}
-                    style={{ marginTop: 8 }}
-                  >
-                    Prestar 📖
-                  </button>
-                </>
+            {/* BORROWER */}
+            <p className="text-gray-700">
+              📕 <b>Prestado a:</b> {borrowerName || 'Nadie'}
+            </p>
+
+            {/* STATUS */}
+            <div className="mt-3">
+              {status === 'available' && (
+                <span className="rounded-md bg-green-100 px-2 py-1 text-green-800">
+                  🟢 Disponible
+                </span>
+              )}
+
+              {status === 'borrowed' && (
+                <span className="rounded-md bg-red-100 px-2 py-1 text-red-800">
+                  🔴 Prestado
+                </span>
+              )}
+
+              {status === 'blocked' && (
+                <span className="rounded-md bg-amber-100 px-2 py-1 text-amber-800">
+                  🟡 Fuera de circulación
+                </span>
               )}
             </div>
-          )}
 
-          {/* EXTRA INFO */}
-          <div style={{ marginTop: 15 }}>
-            {book.description && (
-              <p style={{ marginBottom: 10 }}>{book.description}</p>
+            {/* OWNER LENDING / RETURN CONTROL */}
+            {isOwner && (
+              <div className="mt-5">
+                {isBorrowed ? (
+                  <button
+                    onClick={markAsReturned}
+                    disabled={returnBook.isPending}
+                    className="rounded-md bg-gray-100 px-4 py-2 text-gray-800 hover:bg-gray-200 disabled:opacity-50"
+                  >
+                    Marcar como devuelto
+                  </button>
+                ) : (
+                  <>
+                    <h4 className="mb-2 font-medium text-gray-900">Prestar a usuario</h4>
+
+                    <select
+                      value={selectedUser}
+                      onChange={(e) => setSelectedUser(e.target.value)}
+                      className="w-full rounded-md border border-gray-300 px-3 py-2"
+                    >
+                      <option value="">Selecciona usuario</option>
+
+                      {users.filter((u) => u.id !== user?.id).map((u) => (
+                        <option key={u.id} value={u.id}>
+                          {u.name}
+                        </option>
+                      ))}
+                    </select>
+
+                    <button
+                      onClick={lendToUser}
+                      className="mt-2 rounded-md bg-brand px-4 py-2 font-medium text-white hover:opacity-90"
+                    >
+                      Prestar 📖
+                    </button>
+                  </>
+                )}
+              </div>
             )}
 
-            <p><b>Colección:</b> {book.collection}</p>
-            <p><b>Edad recomendada:</b> {book.age_recommendation}</p>
+            {/* EXTRA INFO */}
+            <div className="mt-4 space-y-1 text-gray-700">
+              {book.description && (
+                <p className="mb-2 whitespace-pre-line">{book.description}</p>
+              )}
 
-            {book.isbn && (
-              <p><b>ISBN:</b> {book.isbn}</p>
-            )}
+              <p><b>Colección:</b> {book.collection}</p>
+              <p><b>Edad recomendada:</b> {book.age_recommendation}</p>
 
-            {book.tags && (
-              <p><b>Etiquetas:</b> {book.tags.join(', ')}</p>
-            )}
+              {book.isbn && (
+                <p><b>ISBN:</b> {book.isbn}</p>
+              )}
 
-            {book.link && (
-              <p>
-                🔗 <a href={book.link} target="_blank">
-                  Ver enlace
-                </a>
-              </p>
-            )}
+              {book.tags && (
+                <p><b>Etiquetas:</b> {book.tags.join(', ')}</p>
+              )}
+
+              {book.link && (
+                <p>
+                  🔗 <a href={book.link} target="_blank" className="text-brand hover:underline">
+                    Ver enlace
+                  </a>
+                </p>
+              )}
+            </div>
           </div>
-
         </div>
       </div>
     </div>

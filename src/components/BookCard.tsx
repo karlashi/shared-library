@@ -43,43 +43,35 @@ export function BookCard({ book }: { book: Book }) {
   }
 
   return (
-    <div
-      style={{
-        border: '1px solid #ddd',
-        padding: 10,
-        width: 180,
-        borderRadius: 8
-      }}
-    >
-
+    <div className="rounded-lg border border-gray-200 p-3 shadow-sm">
       {/* CLICK CARD */}
-      <div onClick={() => navigate(`/book/${book.id}`)}>
-        <h4>{book.title}</h4>
-        <p>{book.author}</p>
+      <div onClick={() => navigate(`/book/${book.id}`)} className="cursor-pointer">
+        <h4 className="font-semibold text-gray-900 truncate">{book.title}</h4>
+        <p className="text-sm text-gray-600 truncate">{book.author}</p>
 
         {book.cover_url && (
           <img
             src={book.cover_url}
-            style={{ width: '100%', borderRadius: 6 }}
+            className="mt-2 w-full rounded-md aspect-[2/3] object-cover"
           />
         )}
       </div>
 
       {/* BORROWED STATUS */}
       {book.isBorrowed && (
-        <p style={{ marginTop: 10, fontSize: 13 }}>
+        <p className="mt-2 text-xs text-gray-600">
           📕 Prestado a: {borrowerName}
         </p>
       )}
 
       {/* OWNER LEND / RETURN CONTROL */}
       {isOwner && (
-        <div style={{ marginTop: 10 }}>
+        <div className="mt-2">
           {book.isBorrowed ? (
             <button
               onClick={markAsReturned}
               disabled={returnBook.isPending}
-              style={{ width: '100%' }}
+              className="w-full rounded-md bg-gray-100 px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-200 disabled:opacity-50"
             >
               Marcar como devuelto
             </button>
@@ -88,7 +80,7 @@ export function BookCard({ book }: { book: Book }) {
               <select
                 value={selectedUser}
                 onChange={(e) => setSelectedUser(e.target.value)}
-                style={{ width: '100%', marginTop: 6 }}
+                className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm"
               >
                 <option value="">Prestar a...</option>
 
@@ -101,7 +93,7 @@ export function BookCard({ book }: { book: Book }) {
 
               <button
                 onClick={lendToUser}
-                style={{ width: '100%', marginTop: 6 }}
+                className="mt-1.5 w-full rounded-md bg-brand px-3 py-1.5 text-sm font-medium text-white hover:opacity-90"
               >
                 Prestar 📖
               </button>

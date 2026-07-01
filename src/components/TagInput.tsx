@@ -39,42 +39,18 @@ export function TagInput({ value, onChange, suggestions }: TagInputProps) {
   }
 
   return (
-    <div style={{ position: 'relative' }}>
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: 6,
-          border: '1px solid #ccc',
-          borderRadius: 6,
-          padding: 6,
-        }}
-      >
+    <div className="relative">
+      <div className="flex flex-wrap gap-1.5 rounded-md border border-gray-300 p-1.5">
         {value.map((tag) => (
           <span
             key={tag}
-            style={{
-              background: '#eee',
-              borderRadius: 4,
-              padding: '2px 6px',
-              fontSize: 13,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 4,
-            }}
+            className="flex items-center gap-1 rounded bg-gray-100 px-2 py-0.5 text-sm text-gray-800"
           >
             {tag}
             <button
               type="button"
               onClick={() => removeTag(tag)}
-              style={{
-                border: 'none',
-                background: 'none',
-                cursor: 'pointer',
-                padding: 0,
-                fontSize: 13,
-                lineHeight: 1,
-              }}
+              className="border-0 bg-transparent p-0 text-sm leading-none text-gray-500 hover:text-gray-800"
             >
               ×
             </button>
@@ -86,30 +62,17 @@ export function TagInput({ value, onChange, suggestions }: TagInputProps) {
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Añadir etiqueta..."
-          style={{ border: 'none', outline: 'none', flex: 1, minWidth: 100 }}
+          className="min-w-[100px] flex-1 border-0 outline-none"
         />
       </div>
 
       {matches.length > 0 && (
-        <ul
-          style={{
-            position: 'absolute',
-            zIndex: 1,
-            background: '#fff',
-            border: '1px solid #ccc',
-            borderRadius: 6,
-            marginTop: 4,
-            padding: 4,
-            listStyle: 'none',
-            width: '100%',
-            boxSizing: 'border-box',
-          }}
-        >
+        <ul className="absolute z-10 mt-1 w-full list-none rounded-md border border-gray-300 bg-white p-1 shadow-md box-border">
           {matches.map((m) => (
             <li
               key={m}
               onMouseDown={() => addTag(m)}
-              style={{ padding: '4px 8px', cursor: 'pointer' }}
+              className="cursor-pointer rounded px-2 py-1 hover:bg-gray-100"
             >
               {m}
             </li>

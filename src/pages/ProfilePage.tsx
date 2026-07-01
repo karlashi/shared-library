@@ -64,102 +64,111 @@ export function ProfilePage() {
   }
 
   return (
-    <div style={{ padding: 20 }}>
-      <button onClick={() => navigate('/')} style={{ marginBottom: 20 }}>
-        ← Volver
-      </button>
-
-      <h1>👤 Mi perfil</h1>
-
-      {/* EDIT NAME */}
-      <form onSubmit={handleSaveName} style={{ marginBottom: 30, maxWidth: 300 }}>
-        <label>
-          Nombre
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            style={{ width: '100%', marginBottom: 10 }}
-          />
-        </label>
-        <button type="submit" disabled={updateProfile.isPending}>
-          {updateProfile.isPending ? 'Guardando...' : 'Guardar cambios'}
+    <div className="min-h-screen bg-gray-50">
+      <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
+        <button
+          onClick={() => navigate('/')}
+          className="mb-5 rounded-md bg-gray-100 px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-200"
+        >
+          ← Volver
         </button>
-      </form>
 
-      {/* MY BOOKS */}
-      <h2>📚 Mis libros</h2>
-      {myBooks.length === 0 ? (
-        <p>Todavía no has añadido ningún libro.</p>
-      ) : (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 30 }}>
-          {myBooks.map((book) => (
-            <BookCard key={book.id} book={book} />
-          ))}
-        </div>
-      )}
+        <h1 className="mb-5 text-2xl font-semibold text-gray-900">👤 Mi perfil</h1>
 
-      {/* HISTORY: BORROWED BY ME */}
-      <h2>📕 Libros que he pedido prestados</h2>
-      {borrowedByMe.length === 0 ? (
-        <p>No has pedido prestado ningún libro todavía.</p>
-      ) : (
-        <ul style={{ paddingLeft: 20, marginBottom: 30 }}>
-          {borrowedByMe.map((loan) => {
-            const book = getBookById(loan.book_id)
-            return (
-              <li key={loan.id} style={{ marginBottom: 6 }}>
-                <b>{book?.title ?? 'Libro desconocido'}</b>
-                {book && ` — ${book.author}`}
-                {' · '}
-                Propietario: {book ? getProfileName(book.owner_id ?? '') : 'Desconocido'}
-                {' · '}
-                {loan.returned_at ? 'Devuelto' : 'Activo'}
-                {' · '}
-                Prestado: {formatDate(loan.borrowed_at)}
-                {loan.returned_at && ` · Devuelto: ${formatDate(loan.returned_at)}`}
-              </li>
-            )
-          })}
-        </ul>
-      )}
+        {/* EDIT NAME */}
+        <form onSubmit={handleSaveName} className="mb-8 max-w-xs">
+          <label className="block">
+            <span className="mb-1 block text-sm font-medium text-gray-700">Nombre</span>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              className="mb-2 w-full rounded-md border border-gray-300 px-3 py-2"
+            />
+          </label>
+          <button
+            type="submit"
+            disabled={updateProfile.isPending}
+            className="rounded-md bg-brand px-4 py-2 font-medium text-white hover:opacity-90 disabled:opacity-50"
+          >
+            {updateProfile.isPending ? 'Guardando...' : 'Guardar cambios'}
+          </button>
+        </form>
 
-      {/* HISTORY: LENT BY ME */}
-      <h2>📗 Libros que he prestado</h2>
-      {lentByMe.length === 0 ? (
-        <p>No has prestado ningún libro todavía.</p>
-      ) : (
-        <ul style={{ paddingLeft: 20 }}>
-          {lentByMe.map((loan) => {
-            const book = getBookById(loan.book_id)
-            return (
-              <li key={loan.id} style={{ marginBottom: 6 }}>
-                <b>{book?.title ?? 'Libro desconocido'}</b>
-                {' · '}
-                Prestado a: {getProfileName(loan.borrower_id)}
-                {' · '}
-                {loan.returned_at ? (
-                  'Devuelto'
-                ) : (
-                  <>
-                    Activo{' '}
-                    <button
-                      onClick={() => handleReturn(loan.id)}
-                      disabled={returnBook.isPending}
-                      style={{ marginLeft: 8 }}
-                    >
-                      Marcar como devuelto
-                    </button>
-                  </>
-                )}
-                {' · '}
-                Prestado: {formatDate(loan.borrowed_at)}
-                {loan.returned_at && ` · Devuelto: ${formatDate(loan.returned_at)}`}
-              </li>
-            )
-          })}
-        </ul>
-      )}
+        {/* MY BOOKS */}
+        <h2 className="mb-3 text-lg font-semibold text-gray-900">📚 Mis libros</h2>
+        {myBooks.length === 0 ? (
+          <p className="mb-8 text-gray-600">Todavía no has añadido ningún libro.</p>
+        ) : (
+          <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+            {myBooks.map((book) => (
+              <BookCard key={book.id} book={book} />
+            ))}
+          </div>
+        )}
+
+        {/* HISTORY: BORROWED BY ME */}
+        <h2 className="mb-3 text-lg font-semibold text-gray-900">📕 Libros que he pedido prestados</h2>
+        {borrowedByMe.length === 0 ? (
+          <p className="mb-8 text-gray-600">No has pedido prestado ningún libro todavía.</p>
+        ) : (
+          <ul className="mb-8 space-y-1 pl-5 text-gray-700">
+            {borrowedByMe.map((loan) => {
+              const book = getBookById(loan.book_id)
+              return (
+                <li key={loan.id}>
+                  <b>{book?.title ?? 'Libro desconocido'}</b>
+                  {book && ` — ${book.author}`}
+                  {' · '}
+                  Propietario: {book ? getProfileName(book.owner_id ?? '') : 'Desconocido'}
+                  {' · '}
+                  {loan.returned_at ? 'Devuelto' : 'Activo'}
+                  {' · '}
+                  Prestado: {formatDate(loan.borrowed_at)}
+                  {loan.returned_at && ` · Devuelto: ${formatDate(loan.returned_at)}`}
+                </li>
+              )
+            })}
+          </ul>
+        )}
+
+        {/* HISTORY: LENT BY ME */}
+        <h2 className="mb-3 text-lg font-semibold text-gray-900">📗 Libros que he prestado</h2>
+        {lentByMe.length === 0 ? (
+          <p className="text-gray-600">No has prestado ningún libro todavía.</p>
+        ) : (
+          <ul className="space-y-1 pl-5 text-gray-700">
+            {lentByMe.map((loan) => {
+              const book = getBookById(loan.book_id)
+              return (
+                <li key={loan.id}>
+                  <b>{book?.title ?? 'Libro desconocido'}</b>
+                  {' · '}
+                  Prestado a: {getProfileName(loan.borrower_id)}
+                  {' · '}
+                  {loan.returned_at ? (
+                    'Devuelto'
+                  ) : (
+                    <>
+                      Activo{' '}
+                      <button
+                        onClick={() => handleReturn(loan.id)}
+                        disabled={returnBook.isPending}
+                        className="ml-2 rounded-md bg-gray-100 px-2 py-0.5 text-sm text-gray-800 hover:bg-gray-200 disabled:opacity-50"
+                      >
+                        Marcar como devuelto
+                      </button>
+                    </>
+                  )}
+                  {' · '}
+                  Prestado: {formatDate(loan.borrowed_at)}
+                  {loan.returned_at && ` · Devuelto: ${formatDate(loan.returned_at)}`}
+                </li>
+              )
+            })}
+          </ul>
+        )}
+      </div>
     </div>
   )
 }
