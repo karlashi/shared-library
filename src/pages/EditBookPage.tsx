@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Navigate } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { supabase } from '../services/supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
-import { useBook, useAllTags, useDeleteBook, useSetArchived } from '../services/queries'
+import { useBook, useDeleteBook, useSetArchived } from '../services/queries'
 import { validateImageFile, uploadCoverImage, deleteCoverImage } from '../services/storage'
-import { TagInput } from '../components/TagInput'
 
 type FormValues = {
   title: string
@@ -16,7 +15,6 @@ type FormValues = {
   collection: string
   age_recommendation: string
   link: string
-  tags: string[]
   listing_type: '' | 'gift' | 'sale'
   listing_comment: string
 }
@@ -28,7 +26,6 @@ export function EditBookPage() {
   const { user } = useAuth()
 
   const { data: book, isLoading } = useBook(id)
-  const { data: allTags = [] } = useAllTags()
   const deleteBook = useDeleteBook()
   const setArchived = useSetArchived()
 
@@ -37,14 +34,13 @@ export function EditBookPage() {
   const {
     register,
     handleSubmit,
-    control,
     reset,
     watch,
     formState: { errors },
   } = useForm<FormValues>({
     defaultValues: {
       title: '', author: '', description: '', isbn: '',
-      collection: '', age_recommendation: '', link: '', tags: [],
+      collection: '', age_recommendation: '', link: '',
       listing_type: '', listing_comment: '',
     },
   })
@@ -62,7 +58,6 @@ export function EditBookPage() {
       collection: book.collection || '',
       age_recommendation: book.age_recommendation || '',
       link: book.link || '',
-      tags: book.tags || [],
       listing_type: book.listing_type || '',
       listing_comment: book.listing_comment || '',
     })
@@ -82,7 +77,6 @@ export function EditBookPage() {
           collection: values.collection,
           age_recommendation: values.age_recommendation,
           link: values.link,
-          tags: values.tags,
           listing_type: values.listing_type || null,
           listing_comment: values.listing_type ? values.listing_comment : null,
         })
@@ -179,6 +173,11 @@ export function EditBookPage() {
             />
           </label>
 
+          <p className="text-sm text-gray-500">
+            Las etiquetas se gestionan desde la página del libro, donde cualquier miembro
+            puede añadir las suyas.
+          </p>
+
           <label className="block">
             <span className="mb-1 block text-sm font-medium text-gray-700">Portada (imagen)</span>
 
@@ -240,17 +239,6 @@ export function EditBookPage() {
             <input
               {...register('link')}
               className="w-full rounded-md border border-gray-300 px-3 py-2"
-            />
-          </label>
-
-          <label className="block">
-            <span className="mb-1 block text-sm font-medium text-gray-700">Etiquetas</span>
-            <Controller
-              name="tags"
-              control={control}
-              render={({ field }) => (
-                <TagInput value={field.value} onChange={field.onChange} suggestions={allTags} />
-              )}
             />
           </label>
 

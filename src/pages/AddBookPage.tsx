@@ -79,7 +79,7 @@ export function AddBookPage() {
 
       const coverUrl = file ? await uploadCoverImage(file) : lookupCoverUrl
 
-      const { error } = await supabase.from('books').insert({
+      const { data, error } = await supabase.from('books').insert({
         title: values.title,
         author: values.author,
         description: values.description,
@@ -87,16 +87,22 @@ export function AddBookPage() {
         collection: values.collection,
         link: values.link,
         age_recommendation: values.age,
-        tags: values.tags,
         cover_url: coverUrl,
         owner_id: user.id,
         status: 'Disponible'
-      })
+      }).select('id').single()
 
       if (error) throw error
+
+      if (values.tags.length > 0) {
+        const rows = values.tags.map((tag) => ({ book_id: data.id, tag, added_by: user.id }))
+        const { error: tagsError } = await supabase.from('book_tags').insert(rows)
+        if (tagsError) throw tagsError
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['books'] })
+      queryClient.invalidateQueries({ queryKey: ['tags'] })
       alert('Libro creado 📚')
       navigate('/')
     },

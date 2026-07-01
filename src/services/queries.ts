@@ -6,6 +6,7 @@ import { lendBook, returnBook } from './loans'
 import type { Book } from '../types/Books'
 import type { Profile } from '../types/Profile'
 import type { Loan } from '../types/Loan'
+import type { BookTag } from '../types/BookTag'
 
 export function useBooks() {
   return useQuery({
@@ -130,10 +131,63 @@ export function useAllTags() {
   return useQuery({
     queryKey: ['tags'],
     queryFn: async (): Promise<string[]> => {
-      const { data, error } = await supabase.from('books').select('tags')
+      const { data, error } = await supabase.from('book_tags').select('tag')
       if (error) throw error
-      const all = (data ?? []).flatMap((b) => b.tags ?? [])
+      const all = (data ?? []).map((row) => row.tag)
       return Array.from(new Set(all)).sort((a, b) => a.localeCompare(b, 'es'))
+    },
+  })
+}
+
+export function useBookTags(bookId: string | undefined) {
+  return useQuery({
+    queryKey: ['book_tags', bookId],
+    queryFn: async (): Promise<BookTag[]> => {
+      const { data, error } = await supabase
+        .from('book_tags')
+        .select('*')
+        .eq('book_id', bookId)
+      if (error) throw error
+      return data ?? []
+    },
+    enabled: !!bookId,
+  })
+}
+
+export function useAddTag() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (vars: { bookId: string; tag: string; userId: string }) => {
+      const { error } = await supabase.from('book_tags').insert({
+        book_id: vars.bookId,
+        tag: vars.tag,
+        added_by: vars.userId,
+      })
+      if (error && error.code !== '23505') throw error
+    },
+    onSuccess: (_data, vars) => {
+      queryClient.invalidateQueries({ queryKey: ['book_tags', vars.bookId] })
+      queryClient.invalidateQueries({ queryKey: ['books'] })
+      queryClient.invalidateQueries({ queryKey: ['tags'] })
+    },
+  })
+}
+
+export function useRemoveTag() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (vars: { bookId: string; tag: string }) => {
+      const { error } = await supabase
+        .from('book_tags')
+        .delete()
+        .eq('book_id', vars.bookId)
+        .eq('tag', vars.tag)
+      if (error) throw error
+    },
+    onSuccess: (_data, vars) => {
+      queryClient.invalidateQueries({ queryKey: ['book_tags', vars.bookId] })
+      queryClient.invalidateQueries({ queryKey: ['books'] })
+      queryClient.invalidateQueries({ queryKey: ['tags'] })
     },
   })
 }

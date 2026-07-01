@@ -12,20 +12,26 @@ export async function getBooks(): Promise<Book[]> {
     .select('*')
     .is('returned_at', null)
 
-  if (booksError || loansError || !books) {
-    console.error(booksError || loansError)
+  const { data: bookTags, error: tagsError } = await supabase
+    .from('book_tags')
+    .select('book_id, tag')
+
+  if (booksError || loansError || tagsError || !books) {
+    console.error(booksError || loansError || tagsError)
     return []
   }
 
-  // attach loan info to each book
+  // attach loan info and tags to each book
   const enriched = books.map(book => {
     const activeLoan = loans?.find(l => l.book_id === book.id)
+    const tags = (bookTags ?? []).filter(t => t.book_id === book.id).map(t => t.tag)
 
     return {
       ...book,
       isBorrowed: !!activeLoan,
       borrowedBy: activeLoan?.borrower_id || null,
-      loanId: activeLoan?.id || null
+      loanId: activeLoan?.id || null,
+      tags
     }
   })
 

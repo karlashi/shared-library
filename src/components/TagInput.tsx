@@ -4,9 +4,10 @@ type TagInputProps = {
   value: string[]
   onChange: (tags: string[]) => void
   suggestions: string[]
+  canRemove?: (tag: string) => boolean
 }
 
-export function TagInput({ value, onChange, suggestions }: TagInputProps) {
+export function TagInput({ value, onChange, suggestions, canRemove = () => true }: TagInputProps) {
   const [inputValue, setInputValue] = useState('')
 
   const matches = inputValue.trim()
@@ -34,7 +35,8 @@ export function TagInput({ value, onChange, suggestions }: TagInputProps) {
       e.preventDefault()
       addTag(inputValue)
     } else if (e.key === 'Backspace' && !inputValue && value.length > 0) {
-      removeTag(value[value.length - 1])
+      const lastTag = value[value.length - 1]
+      if (canRemove(lastTag)) removeTag(lastTag)
     }
   }
 
@@ -47,13 +49,15 @@ export function TagInput({ value, onChange, suggestions }: TagInputProps) {
             className="flex items-center gap-1 rounded bg-gray-100 px-2 py-0.5 text-sm text-gray-800"
           >
             {tag}
-            <button
-              type="button"
-              onClick={() => removeTag(tag)}
-              className="border-0 bg-transparent p-0 text-sm leading-none text-gray-500 hover:text-gray-800"
-            >
-              ×
-            </button>
+            {canRemove(tag) && (
+              <button
+                type="button"
+                onClick={() => removeTag(tag)}
+                className="border-0 bg-transparent p-0 text-sm leading-none text-gray-500 hover:text-gray-800"
+              >
+                ×
+              </button>
+            )}
           </span>
         ))}
 

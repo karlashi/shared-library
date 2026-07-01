@@ -1,7 +1,19 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { useBook, useProfile, useProfiles, useBookLoan, useLendBook, useReturnBook } from '../services/queries'
+import {
+  useBook,
+  useProfile,
+  useProfiles,
+  useBookLoan,
+  useLendBook,
+  useReturnBook,
+  useBookTags,
+  useAllTags,
+  useAddTag,
+  useRemoveTag,
+} from '../services/queries'
+import { TagInput } from '../components/TagInput'
 
 export function BookDetailsPage() {
   const { id } = useParams()
@@ -13,8 +25,12 @@ export function BookDetailsPage() {
   const { data: loan } = useBookLoan(id)
   const { data: borrower } = useProfile(loan?.borrower_id)
   const { data: users = [] } = useProfiles()
+  const { data: bookTags = [] } = useBookTags(id)
+  const { data: allTags = [] } = useAllTags()
   const lendBook = useLendBook()
   const returnBook = useReturnBook()
+  const addTag = useAddTag()
+  const removeTag = useRemoveTag()
 
   const [selectedUser, setSelectedUser] = useState('')
 
@@ -60,6 +76,45 @@ export function BookDetailsPage() {
         alert('Error al marcar el libro como devuelto')
       },
     })
+  }
+
+  const tagNames = bookTags.map((t) => t.tag)
+
+  const canRemoveTag = (tag: string) => {
+    const row = bookTags.find((t) => t.tag === tag)
+    if (!row) return false
+    return isOwner || row.added_by === user?.id
+  }
+
+  const handleTagsChange = (newTags: string[]) => {
+    if (!id || !user) return
+
+    const added = newTags.find((t) => !tagNames.includes(t))
+    if (added) {
+      addTag.mutate(
+        { bookId: id, tag: added, userId: user.id },
+        {
+          onError: (error) => {
+            console.error(error)
+            alert('Error al añadir la etiqueta')
+          },
+        }
+      )
+      return
+    }
+
+    const removed = tagNames.find((t) => !newTags.includes(t))
+    if (removed) {
+      removeTag.mutate(
+        { bookId: id, tag: removed },
+        {
+          onError: (error) => {
+            console.error(error)
+            alert('Error al eliminar la etiqueta')
+          },
+        }
+      )
+    }
   }
 
   return (
@@ -199,9 +254,17 @@ export function BookDetailsPage() {
                 <p><b>ISBN:</b> {book.isbn}</p>
               )}
 
-              {book.tags && (
-                <p><b>Etiquetas:</b> {book.tags.join(', ')}</p>
-              )}
+              <div>
+                <b>Etiquetas:</b>
+                <div className="mt-1 max-w-sm">
+                  <TagInput
+                    value={tagNames}
+                    onChange={handleTagsChange}
+                    suggestions={allTags}
+                    canRemove={canRemoveTag}
+                  />
+                </div>
+              </div>
 
               {book.link && (
                 <p>
