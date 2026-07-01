@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useForm, Controller } from 'react-hook-form'
 import { supabase } from '../services/supabaseClient'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
@@ -8,40 +9,57 @@ import { validateImageFile, uploadCoverImage } from '../services/storage'
 import { useAllTags } from '../services/queries'
 import { TagInput } from '../components/TagInput'
 
+type FormValues = {
+  title: string
+  author: string
+  description: string
+  isbn: string
+  collection: string
+  link: string
+  age: string
+  tags: string[]
+}
+
 export function AddBookPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const queryClient = useQueryClient()
   const { data: allTags = [] } = useAllTags()
 
-  const [isbn, setIsbn] = useState('')
   const [isLookingUp, setIsLookingUp] = useState(false)
   const [lookupCoverUrl, setLookupCoverUrl] = useState('')
-
-  const [title, setTitle] = useState('')
-  const [author, setAuthor] = useState('')
-  const [description, setDescription] = useState('')
-  const [collection, setCollection] = useState('')
-  const [link, setLink] = useState('')
-  const [age, setAge] = useState('')
-  const [tags, setTags] = useState<string[]>([])
   const [file, setFile] = useState<File | null>(null)
 
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    getValues,
+    formState: { errors },
+  } = useForm<FormValues>({
+    defaultValues: {
+      title: '', author: '', description: '', isbn: '',
+      collection: '', link: '', age: '', tags: [],
+    },
+  })
+
   const handleIsbnLookup = async () => {
-    if (!isbn.trim()) return
+    const isbn = getValues('isbn').trim()
+    if (!isbn) return
 
     setIsLookingUp(true)
     try {
-      const result = await lookupByIsbn(isbn.trim())
+      const result = await lookupByIsbn(isbn)
 
       if (!result) {
         alert('No se encontró ningún libro con ese ISBN. Completa los datos manualmente.')
         return
       }
 
-      setTitle(result.title)
-      setAuthor(result.author)
-      setDescription(result.description)
+      setValue('title', result.title)
+      setValue('author', result.author)
+      setValue('description', result.description)
       setLookupCoverUrl(result.coverUrl)
     } catch (err) {
       console.error(err)
@@ -56,20 +74,20 @@ export function AddBookPage() {
   }
 
   const addBook = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (values: FormValues) => {
       if (!user) throw new Error('Debes iniciar sesión')
 
       const coverUrl = file ? await uploadCoverImage(file) : lookupCoverUrl
 
       const { error } = await supabase.from('books').insert({
-        title,
-        author,
-        description,
-        isbn,
-        collection,
-        link,
-        age_recommendation: age,
-        tags,
+        title: values.title,
+        author: values.author,
+        description: values.description,
+        isbn: values.isbn,
+        collection: values.collection,
+        link: values.link,
+        age_recommendation: values.age,
+        tags: values.tags,
         cover_url: coverUrl,
         owner_id: user.id,
         status: 'Disponible'
@@ -88,9 +106,8 @@ export function AddBookPage() {
     },
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    addBook.mutate()
+  const onSubmit = (values: FormValues) => {
+    addBook.mutate(values)
   }
 
   return (
@@ -105,13 +122,12 @@ export function AddBookPage() {
         </button>
         <h1 className="mb-5 text-2xl font-semibold text-gray-900">➕ Añadir libro</h1>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <label className="block">
             <span className="mb-1 block text-sm font-medium text-gray-700">ISBN</span>
             <div className="flex gap-2">
               <input
-                value={isbn}
-                onChange={e => setIsbn(e.target.value)}
+                {...register('isbn')}
                 className="flex-1 rounded-md border border-gray-300 px-3 py-2"
               />
               <button
@@ -132,17 +148,16 @@ export function AddBookPage() {
           <label className="block">
             <span className="mb-1 block text-sm font-medium text-gray-700">Título</span>
             <input
-              value={title}
-              onChange={e => setTitle(e.target.value)}
+              {...register('title', { required: 'El título es obligatorio' })}
               className="w-full rounded-md border border-gray-300 px-3 py-2"
             />
+            {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>}
           </label>
 
           <label className="block">
             <span className="mb-1 block text-sm font-medium text-gray-700">Autor</span>
             <input
-              value={author}
-              onChange={e => setAuthor(e.target.value)}
+              {...register('author')}
               className="w-full rounded-md border border-gray-300 px-3 py-2"
             />
           </label>
@@ -150,8 +165,7 @@ export function AddBookPage() {
           <label className="block">
             <span className="mb-1 block text-sm font-medium text-gray-700">Descripción</span>
             <textarea
-              value={description}
-              onChange={e => setDescription(e.target.value)}
+              {...register('description')}
               rows={4}
               className="w-full rounded-md border border-gray-300 px-3 py-2"
             />
@@ -160,8 +174,7 @@ export function AddBookPage() {
           <label className="block">
             <span className="mb-1 block text-sm font-medium text-gray-700">Colección</span>
             <input
-              value={collection}
-              onChange={e => setCollection(e.target.value)}
+              {...register('collection')}
               className="w-full rounded-md border border-gray-300 px-3 py-2"
             />
           </label>
@@ -169,8 +182,7 @@ export function AddBookPage() {
           <label className="block">
             <span className="mb-1 block text-sm font-medium text-gray-700">Link</span>
             <input
-              value={link}
-              onChange={e => setLink(e.target.value)}
+              {...register('link')}
               className="w-full rounded-md border border-gray-300 px-3 py-2"
             />
           </label>
@@ -178,15 +190,20 @@ export function AddBookPage() {
           <label className="block">
             <span className="mb-1 block text-sm font-medium text-gray-700">Edad recomendada</span>
             <input
-              value={age}
-              onChange={e => setAge(e.target.value)}
+              {...register('age')}
               className="w-full rounded-md border border-gray-300 px-3 py-2"
             />
           </label>
 
           <label className="block">
             <span className="mb-1 block text-sm font-medium text-gray-700">Etiquetas</span>
-            <TagInput value={tags} onChange={setTags} suggestions={allTags} />
+            <Controller
+              name="tags"
+              control={control}
+              render={({ field }) => (
+                <TagInput value={field.value} onChange={field.onChange} suggestions={allTags} />
+              )}
+            />
           </label>
 
           <label className="block">

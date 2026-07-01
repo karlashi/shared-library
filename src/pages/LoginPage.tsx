@@ -1,7 +1,14 @@
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
+import { useForm } from 'react-hook-form'
 import { signIn, signUp } from '../services/auth'
+
+type FormValues = {
+  name?: string
+  email: string
+  password: string
+}
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -9,13 +16,16 @@ export function LoginPage() {
   const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname || '/'
 
   const [mode, setMode] = useState<'login' | 'register'>('login')
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
   const [info, setInfo] = useState('')
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormValues>()
+
   const loginMutation = useMutation({
-    mutationFn: () => signIn(email, password),
+    mutationFn: (values: FormValues) => signIn(values.email, values.password),
     onSuccess: () => navigate(from, { replace: true }),
     onError: (error) => {
       console.error(error)
@@ -24,7 +34,7 @@ export function LoginPage() {
   })
 
   const registerMutation = useMutation({
-    mutationFn: () => signUp(email, password, name),
+    mutationFn: (values: FormValues) => signUp(values.email, values.password, values.name ?? ''),
     onSuccess: (data) => {
       if (data.session) {
         navigate(from, { replace: true })
@@ -39,13 +49,12 @@ export function LoginPage() {
     },
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+  const onSubmit = (values: FormValues) => {
     setInfo('')
     if (mode === 'login') {
-      loginMutation.mutate()
+      loginMutation.mutate(values)
     } else {
-      registerMutation.mutate()
+      registerMutation.mutate(values)
     }
   }
 
@@ -63,16 +72,15 @@ export function LoginPage() {
 
         {info && <p className="mb-4 text-sm text-gray-700">{info}</p>}
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           {mode === 'register' && (
             <label className="block">
               <span className="mb-1 block text-sm font-medium text-gray-700">Nombre</span>
               <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
+                {...register('name', { required: 'El nombre es obligatorio' })}
                 className="w-full rounded-md border border-gray-300 px-3 py-2"
               />
+              {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
             </label>
           )}
 
@@ -80,23 +88,29 @@ export function LoginPage() {
             <span className="mb-1 block text-sm font-medium text-gray-700">Email</span>
             <input
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
+              {...register('email', {
+                required: 'El email es obligatorio',
+                pattern: {
+                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                  message: 'Introduce un email válido',
+                },
+              })}
               className="w-full rounded-md border border-gray-300 px-3 py-2"
             />
+            {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
           </label>
 
           <label className="block">
             <span className="mb-1 block text-sm font-medium text-gray-700">Contraseña</span>
             <input
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
+              {...register('password', {
+                required: 'La contraseña es obligatoria',
+                minLength: { value: 6, message: 'La contraseña debe tener al menos 6 caracteres' },
+              })}
               className="w-full rounded-md border border-gray-300 px-3 py-2"
             />
+            {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>}
           </label>
 
           <button

@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useForm } from 'react-hook-form'
 import { useAuth } from '../contexts/AuthContext'
 import {
   useBooks,
@@ -9,6 +10,10 @@ import {
   useReturnBook,
 } from '../services/queries'
 import { BookCard } from '../components/BookCard'
+
+type FormValues = {
+  name: string
+}
 
 export function ProfilePage() {
   const navigate = useNavigate()
@@ -21,7 +26,16 @@ export function ProfilePage() {
   const updateProfile = useUpdateProfile()
   const returnBook = useReturnBook()
 
-  const [name, setName] = useState(profile?.name ?? '')
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<FormValues>({ defaultValues: { name: profile?.name ?? '' } })
+
+  useEffect(() => {
+    if (profile) reset({ name: profile.name })
+  }, [profile, reset])
 
   const getBookById = (id: string) => books.find((b) => b.id === id)
   const getProfileName = (id: string) =>
@@ -39,12 +53,11 @@ export function ProfilePage() {
 
   const lentByMe = loans.filter((l) => getBookById(l.book_id)?.owner_id === user?.id)
 
-  const handleSaveName = (e: React.FormEvent) => {
-    e.preventDefault()
+  const onSaveName = (values: FormValues) => {
     if (!user) return
 
     updateProfile.mutate(
-      { userId: user.id, name },
+      { userId: user.id, name: values.name },
       {
         onError: (error) => {
           console.error(error)
@@ -76,15 +89,14 @@ export function ProfilePage() {
         <h1 className="mb-5 text-2xl font-semibold text-gray-900">👤 Mi perfil</h1>
 
         {/* EDIT NAME */}
-        <form onSubmit={handleSaveName} className="mb-8 max-w-xs">
+        <form onSubmit={handleSubmit(onSaveName)} className="mb-8 max-w-xs">
           <label className="block">
             <span className="mb-1 block text-sm font-medium text-gray-700">Nombre</span>
             <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
+              {...register('name', { required: 'El nombre es obligatorio' })}
               className="mb-2 w-full rounded-md border border-gray-300 px-3 py-2"
             />
+            {errors.name && <p className="mb-2 -mt-1 text-sm text-red-600">{errors.name.message}</p>}
           </label>
           <button
             type="submit"
