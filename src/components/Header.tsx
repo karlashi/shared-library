@@ -1,19 +1,23 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/AuthContext'
 
-const navItems = [
-  { to: '/', label: 'Inicio' },
-  { to: '/profile', label: 'Mi perfil' },
-  { to: '/stats', label: 'Estadísticas' },
-  { to: '/changelog', label: 'Novedades' },
-  { to: '/about', label: 'Acerca de' },
-]
+const navKeys = [
+  { to: '/', key: 'nav.home' },
+  { to: '/profile', key: 'nav.profile' },
+  { to: '/stats', key: 'nav.stats' },
+  { to: '/changelog', key: 'nav.changelog' },
+  { to: '/about', key: 'nav.about' },
+] as const
 
 export function Header() {
+  const { t } = useTranslation()
   const { user, profile, signOut } = useAuth()
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
+
+  const navItems = navKeys.map((item) => ({ to: item.to, label: t(item.key) }))
 
   const logout = async () => {
     setMenuOpen(false)
@@ -25,11 +29,11 @@ export function Header() {
     return (
       <div className="mb-6 flex items-center justify-between">
         <Link to="/" className="text-xl font-semibold text-gray-900">
-          📚 Biblioteca Compartida
+          {t('common.appName')}
         </Link>
         <Link to="/login">
           <button className="rounded-md bg-gray-100 px-4 py-2 text-gray-800 hover:bg-gray-200">
-            Iniciar sesión
+            {t('nav.login')}
           </button>
         </Link>
       </div>
@@ -39,7 +43,7 @@ export function Header() {
   return (
     <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
       <Link to="/" className="whitespace-nowrap text-xl font-semibold text-gray-900">
-        📚 Biblioteca Compartida
+        {t('common.appName')}
       </Link>
 
       {/* Desktop nav */}
@@ -56,7 +60,7 @@ export function Header() {
           onClick={logout}
           className="whitespace-nowrap rounded-md bg-gray-100 px-4 py-2 text-gray-800 hover:bg-gray-200"
         >
-          Cerrar sesión
+          {t('nav.logout')}
         </button>
       </div>
 
@@ -64,7 +68,7 @@ export function Header() {
       <div className="relative sm:hidden">
         <button
           onClick={() => setMenuOpen((o) => !o)}
-          aria-label="Abrir menú"
+          aria-label={t('nav.openMenu')}
           className="rounded-md bg-gray-100 px-3 py-2 text-lg text-gray-800 hover:bg-gray-200"
         >
           ☰
@@ -89,7 +93,7 @@ export function Header() {
                 onClick={logout}
                 className="mt-1 w-full rounded-md px-2 py-2 text-left text-gray-800 hover:bg-gray-100"
               >
-                Cerrar sesión
+                {t('nav.logout')}
               </button>
             </div>
           </>

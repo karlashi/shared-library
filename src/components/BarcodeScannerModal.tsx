@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode'
 
 const REGION_ID = 'barcode-scanner-region'
@@ -10,6 +11,7 @@ export function BarcodeScannerModal({
   onScan: (isbn: string) => void
   onClose: () => void
 }) {
+  const { t } = useTranslation()
   const [error, setError] = useState('')
   const onScanRef = useRef(onScan)
   onScanRef.current = onScan
@@ -47,7 +49,7 @@ export function BarcodeScannerModal({
         if (cancelled) stopAndClear()
       })
       .catch(() => {
-        if (!cancelled) setError('No se pudo acceder a la cámara. Revisa los permisos del navegador.')
+        if (!cancelled) setError(t('barcodeScanner.cameraError'))
       })
 
     return () => {
@@ -60,7 +62,7 @@ export function BarcodeScannerModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
       <div className="w-full max-w-sm rounded-lg bg-white p-4">
         <div className="mb-3 flex items-center justify-between">
-          <h3 className="font-semibold text-gray-900">Escanear código de barras</h3>
+          <h3 className="font-semibold text-gray-900">{t('barcodeScanner.heading')}</h3>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
             ✕
           </button>

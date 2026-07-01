@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Navigate } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '../services/supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
 import { useBook, useDeleteBook, useSetArchived } from '../services/queries'
@@ -20,6 +21,7 @@ type FormValues = {
 }
 
 export function EditBookPage() {
+  const { t } = useTranslation()
   const { id } = useParams()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -88,7 +90,7 @@ export function EditBookPage() {
       queryClient.invalidateQueries({ queryKey: ['books'] })
       navigate(`/book/${id}`)
     },
-    onError: () => alert('Error al actualizar libro'),
+    onError: () => alert(t('editBook.updateError')),
   })
 
   const onSubmit = (values: FormValues) => {
@@ -97,7 +99,7 @@ export function EditBookPage() {
 
   const handleDelete = () => {
     if (!id) return
-    if (!window.confirm('¿Seguro que quieres eliminar este libro? Esta acción no se puede deshacer.')) {
+    if (!window.confirm(t('editBook.deleteConfirm'))) {
       return
     }
 
@@ -105,12 +107,12 @@ export function EditBookPage() {
       { bookId: id, coverUrl: cover_url },
       {
         onSuccess: () => {
-          alert('Libro eliminado')
+          alert(t('editBook.deletedSuccess'))
           navigate('/')
         },
         onError: (error) => {
           console.error(error)
-          alert(error instanceof Error ? error.message : 'Error al eliminar el libro')
+          alert(error instanceof Error ? error.message : t('editBook.deleteError'))
         },
       }
     )
@@ -124,32 +126,32 @@ export function EditBookPage() {
       {
         onError: (error) => {
           console.error(error)
-          alert('Error al actualizar el libro')
+          alert(t('editBook.archiveError'))
         },
       }
     )
   }
 
-  if (isLoading || !book) return <p>Cargando...</p>
+  if (isLoading || !book) return <p>{t('common.loading')}</p>
   if (book.owner_id !== user?.id) return <Navigate to={`/book/${id}`} replace />
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-lg px-4 py-6 sm:px-6">
-        <h1 className="mb-5 text-2xl font-semibold text-gray-900">Editar libro</h1>
+        <h1 className="mb-5 text-2xl font-semibold text-gray-900">{t('editBook.heading')}</h1>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-gray-700">Título</span>
+            <span className="mb-1 block text-sm font-medium text-gray-700">{t('editBook.title')}</span>
             <input
-              {...register('title', { required: 'El título es obligatorio' })}
+              {...register('title', { required: t('editBook.titleRequired') })}
               className="w-full rounded-md border border-gray-300 px-3 py-2"
             />
             {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>}
           </label>
 
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-gray-700">Autor</span>
+            <span className="mb-1 block text-sm font-medium text-gray-700">{t('editBook.author')}</span>
             <input
               {...register('author')}
               className="w-full rounded-md border border-gray-300 px-3 py-2"
@@ -157,7 +159,7 @@ export function EditBookPage() {
           </label>
 
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-gray-700">Descripción</span>
+            <span className="mb-1 block text-sm font-medium text-gray-700">{t('editBook.description')}</span>
             <textarea
               {...register('description')}
               rows={4}
@@ -166,7 +168,7 @@ export function EditBookPage() {
           </label>
 
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-gray-700">ISBN</span>
+            <span className="mb-1 block text-sm font-medium text-gray-700">{t('editBook.isbn')}</span>
             <input
               {...register('isbn')}
               className="w-full rounded-md border border-gray-300 px-3 py-2"
@@ -174,12 +176,11 @@ export function EditBookPage() {
           </label>
 
           <p className="text-sm text-gray-500">
-            Las etiquetas se gestionan desde la página del libro, donde cualquier miembro
-            puede añadir las suyas.
+            {t('editBook.tagsHint')}
           </p>
 
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-gray-700">Portada (imagen)</span>
+            <span className="mb-1 block text-sm font-medium text-gray-700">{t('editBook.cover')}</span>
 
             <input
               type="file"
@@ -206,7 +207,7 @@ export function EditBookPage() {
                   }
                 } catch (err) {
                   console.error(err)
-                  alert('Error subiendo imagen')
+                  alert(t('editBook.uploadImageError'))
                 }
               }}
               className="block w-full text-sm"
@@ -219,7 +220,7 @@ export function EditBookPage() {
           </label>
 
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-gray-700">Colección</span>
+            <span className="mb-1 block text-sm font-medium text-gray-700">{t('editBook.collection')}</span>
             <input
               {...register('collection')}
               className="w-full rounded-md border border-gray-300 px-3 py-2"
@@ -227,7 +228,7 @@ export function EditBookPage() {
           </label>
 
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-gray-700">Edad recomendada</span>
+            <span className="mb-1 block text-sm font-medium text-gray-700">{t('editBook.ageRecommendation')}</span>
             <input
               {...register('age_recommendation')}
               className="w-full rounded-md border border-gray-300 px-3 py-2"
@@ -235,7 +236,7 @@ export function EditBookPage() {
           </label>
 
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-gray-700">Link</span>
+            <span className="mb-1 block text-sm font-medium text-gray-700">{t('editBook.link')}</span>
             <input
               {...register('link')}
               className="w-full rounded-md border border-gray-300 px-3 py-2"
@@ -243,24 +244,24 @@ export function EditBookPage() {
           </label>
 
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-gray-700">¿Regalar o vender?</span>
+            <span className="mb-1 block text-sm font-medium text-gray-700">{t('editBook.listingType')}</span>
             <select
               {...register('listing_type')}
               className="w-full rounded-md border border-gray-300 px-3 py-2"
             >
-              <option value="">Ninguno</option>
-              <option value="gift">Regalar</option>
-              <option value="sale">Vender</option>
+              <option value="">{t('editBook.listingTypeNone')}</option>
+              <option value="gift">{t('editBook.listingTypeGift')}</option>
+              <option value="sale">{t('editBook.listingTypeSale')}</option>
             </select>
           </label>
 
           {listingType && (
             <label className="block">
-              <span className="mb-1 block text-sm font-medium text-gray-700">Comentario</span>
+              <span className="mb-1 block text-sm font-medium text-gray-700">{t('editBook.comment')}</span>
               <textarea
                 {...register('listing_comment')}
                 rows={2}
-                placeholder={listingType === 'gift' ? 'Ej: libre para quien lo quiera' : 'Ej: 5€, contactar por WhatsApp'}
+                placeholder={listingType === 'gift' ? t('editBook.commentPlaceholderGift') : t('editBook.commentPlaceholderSale')}
                 className="w-full rounded-md border border-gray-300 px-3 py-2"
               />
             </label>
@@ -271,7 +272,7 @@ export function EditBookPage() {
             disabled={updateBook.isPending}
             className="rounded-md bg-brand px-4 py-2 font-medium text-white hover:opacity-90 disabled:opacity-50"
           >
-            {updateBook.isPending ? 'Guardando...' : 'Guardar cambios'}
+            {updateBook.isPending ? t('editBook.saving') : t('editBook.saveChanges')}
           </button>
 
           <button
@@ -279,7 +280,7 @@ export function EditBookPage() {
             onClick={() => navigate(-1)}
             className="rounded-md bg-gray-100 px-4 py-2 text-gray-800 hover:bg-gray-200"
           >
-            Cancelar
+            {t('common.cancel')}
           </button>
 
           <button
@@ -289,10 +290,10 @@ export function EditBookPage() {
             className="rounded-md bg-gray-100 px-4 py-2 text-gray-800 hover:bg-gray-200 disabled:opacity-50"
           >
             {setArchived.isPending
-              ? 'Guardando...'
+              ? t('editBook.saving')
               : book.archived
-                ? 'Restaurar libro'
-                : 'Archivar libro 📦'}
+                ? t('editBook.restoreBook')
+                : t('editBook.archiveBook')}
           </button>
 
           <button
@@ -301,7 +302,7 @@ export function EditBookPage() {
             disabled={deleteBook.isPending}
             className="rounded-md border border-red-300 px-4 py-2 text-red-700 hover:bg-red-50 disabled:opacity-50"
           >
-            {deleteBook.isPending ? 'Eliminando...' : 'Eliminar libro 🗑️'}
+            {deleteBook.isPending ? t('editBook.deleting') : t('editBook.deleteBook')}
           </button>
         </form>
       </div>

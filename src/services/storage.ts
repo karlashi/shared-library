@@ -1,11 +1,12 @@
 import { supabase } from './supabaseClient'
+import i18n from '../i18n'
 
 const BUCKET = 'book-covers'
 const MAX_SIZE = 5 * 1024 * 1024 // 5MB
 
 export function validateImageFile(file: File): string | null {
-  if (!file.type.startsWith('image/')) return 'El archivo debe ser una imagen.'
-  if (file.size > MAX_SIZE) return 'La imagen no debe superar 5MB.'
+  if (!file.type.startsWith('image/')) return i18n.t('errors.notAnImage')
+  if (file.size > MAX_SIZE) return i18n.t('errors.imageTooLarge')
   return null
 }
 

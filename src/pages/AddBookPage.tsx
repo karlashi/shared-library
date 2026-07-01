@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm, Controller } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '../services/supabaseClient'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
@@ -22,6 +23,7 @@ type FormValues = {
 }
 
 export function AddBookPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { user } = useAuth()
   const queryClient = useQueryClient()
@@ -55,7 +57,7 @@ export function AddBookPage() {
       const result = await lookupByIsbn(isbn)
 
       if (!result) {
-        alert('No se encontró ningún libro con ese ISBN. Completa los datos manualmente.')
+        alert(t('addBook.isbnNotFound'))
         return
       }
 
@@ -65,11 +67,7 @@ export function AddBookPage() {
       setLookupCoverUrl(result.coverUrl)
     } catch (err) {
       console.error(err)
-      alert(
-        err instanceof Error
-          ? err.message
-          : 'Error al buscar el libro. Intenta de nuevo o completa los datos manualmente.'
-      )
+      alert(err instanceof Error ? err.message : t('addBook.isbnLookupError'))
     } finally {
       setIsLookingUp(false)
     }
@@ -83,7 +81,7 @@ export function AddBookPage() {
 
   const addBook = useMutation({
     mutationFn: async (values: FormValues) => {
-      if (!user) throw new Error('Debes iniciar sesión')
+      if (!user) throw new Error(t('addBook.mustBeLoggedIn'))
 
       const coverUrl = file ? await uploadCoverImage(file) : lookupCoverUrl
 
@@ -111,12 +109,12 @@ export function AddBookPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['books'] })
       queryClient.invalidateQueries({ queryKey: ['tags'] })
-      alert('Libro creado 📚')
+      alert(t('addBook.createdSuccess'))
       navigate('/')
     },
     onError: (err) => {
       console.error(err)
-      alert(err instanceof Error && err.message === 'Debes iniciar sesión' ? err.message : 'Error al guardar el libro')
+      alert(err instanceof Error && err.message === t('addBook.mustBeLoggedIn') ? err.message : t('addBook.saveError'))
     },
   })
 
@@ -132,13 +130,13 @@ export function AddBookPage() {
           onClick={() => navigate('/')}
           className="mb-5 rounded-md bg-gray-100 px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-200"
         >
-          ← Volver a la biblioteca
+          {t('addBook.backToLibrary')}
         </button>
-        <h1 className="mb-5 text-2xl font-semibold text-gray-900">➕ Añadir libro</h1>
+        <h1 className="mb-5 text-2xl font-semibold text-gray-900">{t('addBook.heading')}</h1>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-gray-700">ISBN</span>
+            <span className="mb-1 block text-sm font-medium text-gray-700">{t('addBook.isbn')}</span>
             <div className="flex gap-2">
               <input
                 {...register('isbn')}
@@ -150,12 +148,12 @@ export function AddBookPage() {
                 disabled={isLookingUp}
                 className="rounded-md bg-gray-100 px-4 py-2 text-gray-800 hover:bg-gray-200 disabled:opacity-50"
               >
-                {isLookingUp ? 'Buscando...' : 'Buscar'}
+                {isLookingUp ? t('addBook.searching') : t('addBook.search')}
               </button>
               <button
                 type="button"
                 onClick={() => setShowScanner(true)}
-                aria-label="Escanear código de barras"
+                aria-label={t('addBook.scanBarcode')}
                 className="rounded-md bg-gray-100 px-3 py-2 text-gray-800 hover:bg-gray-200"
               >
                 📷
@@ -172,16 +170,16 @@ export function AddBookPage() {
           )}
 
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-gray-700">Título</span>
+            <span className="mb-1 block text-sm font-medium text-gray-700">{t('addBook.title')}</span>
             <input
-              {...register('title', { required: 'El título es obligatorio' })}
+              {...register('title', { required: t('addBook.titleRequired') })}
               className="w-full rounded-md border border-gray-300 px-3 py-2"
             />
             {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>}
           </label>
 
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-gray-700">Autor</span>
+            <span className="mb-1 block text-sm font-medium text-gray-700">{t('addBook.author')}</span>
             <input
               {...register('author')}
               className="w-full rounded-md border border-gray-300 px-3 py-2"
@@ -189,7 +187,7 @@ export function AddBookPage() {
           </label>
 
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-gray-700">Descripción</span>
+            <span className="mb-1 block text-sm font-medium text-gray-700">{t('addBook.description')}</span>
             <textarea
               {...register('description')}
               rows={4}
@@ -198,7 +196,7 @@ export function AddBookPage() {
           </label>
 
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-gray-700">Colección</span>
+            <span className="mb-1 block text-sm font-medium text-gray-700">{t('addBook.collection')}</span>
             <input
               {...register('collection')}
               className="w-full rounded-md border border-gray-300 px-3 py-2"
@@ -206,7 +204,7 @@ export function AddBookPage() {
           </label>
 
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-gray-700">Link</span>
+            <span className="mb-1 block text-sm font-medium text-gray-700">{t('addBook.link')}</span>
             <input
               {...register('link')}
               className="w-full rounded-md border border-gray-300 px-3 py-2"
@@ -214,7 +212,7 @@ export function AddBookPage() {
           </label>
 
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-gray-700">Edad recomendada</span>
+            <span className="mb-1 block text-sm font-medium text-gray-700">{t('addBook.ageRecommendation')}</span>
             <input
               {...register('age')}
               className="w-full rounded-md border border-gray-300 px-3 py-2"
@@ -222,7 +220,7 @@ export function AddBookPage() {
           </label>
 
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-gray-700">Etiquetas</span>
+            <span className="mb-1 block text-sm font-medium text-gray-700">{t('addBook.tags')}</span>
             <Controller
               name="tags"
               control={control}
@@ -233,7 +231,7 @@ export function AddBookPage() {
           </label>
 
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-gray-700">Portada</span>
+            <span className="mb-1 block text-sm font-medium text-gray-700">{t('addBook.cover')}</span>
             <input
               type="file"
               accept="image/*"
@@ -259,7 +257,7 @@ export function AddBookPage() {
             disabled={addBook.isPending}
             className="rounded-md bg-brand px-4 py-2 font-medium text-white hover:opacity-90 disabled:opacity-50"
           >
-            {addBook.isPending ? 'Guardando...' : 'Guardar libro'}
+            {addBook.isPending ? t('addBook.saving') : t('addBook.save')}
           </button>
         </form>
       </div>

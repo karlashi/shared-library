@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/AuthContext'
 import { useProfiles, useLendBook, useReturnBook } from '../services/queries'
 import type { Book } from '../types/Books'
 
 export function BookCard({ book }: { book: Book }) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
 
   const { user } = useAuth()
@@ -14,18 +16,18 @@ export function BookCard({ book }: { book: Book }) {
   const [selectedUser, setSelectedUser] = useState('')
 
   const isOwner = book.owner_id === user?.id
-  const borrowerName = users.find((u) => u.id === book.borrowedBy)?.name ?? 'alguien'
+  const borrowerName = users.find((u) => u.id === book.borrowedBy)?.name ?? t('bookCard.someone')
 
   const lendToUser = () => {
-    if (!selectedUser) return alert('Selecciona un usuario')
+    if (!selectedUser) return alert(t('bookCard.selectUserAlert'))
 
     lendBook.mutate(
       { bookId: book.id, borrowerId: selectedUser },
       {
-        onSuccess: () => alert('Libro prestado'),
+        onSuccess: () => alert(t('bookCard.lendSuccess')),
         onError: (error) => {
           console.error(error)
-          alert('Error al prestar')
+          alert(t('bookCard.lendError'))
         },
       }
     )
@@ -37,7 +39,7 @@ export function BookCard({ book }: { book: Book }) {
     returnBook.mutate(book.loanId, {
       onError: (error) => {
         console.error(error)
-        alert('Error al marcar el libro como devuelto')
+        alert(t('bookCard.markReturnedError'))
       },
     })
   }
@@ -60,7 +62,7 @@ export function BookCard({ book }: { book: Book }) {
       {/* BORROWED STATUS */}
       {book.isBorrowed && (
         <p className="mt-2 text-xs text-gray-600">
-          📕 Prestado a: {borrowerName}
+          📕 {t('bookCard.lentTo')} {borrowerName}
         </p>
       )}
 
@@ -74,7 +76,7 @@ export function BookCard({ book }: { book: Book }) {
                 : 'rounded bg-amber-100 px-1.5 py-0.5 text-amber-800'
             }
           >
-            {book.listing_type === 'gift' ? '🎁 Para regalar' : '💰 En venta'}
+            {book.listing_type === 'gift' ? t('bookCard.gift') : t('bookCard.sale')}
           </span>
           {book.listing_comment && <span className="ml-1 text-gray-600">{book.listing_comment}</span>}
         </p>
@@ -89,7 +91,7 @@ export function BookCard({ book }: { book: Book }) {
               disabled={returnBook.isPending}
               className="w-full rounded-md bg-gray-100 px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-200 disabled:opacity-50"
             >
-              Marcar como devuelto
+              {t('bookCard.markReturned')}
             </button>
           ) : (
             <>
@@ -98,7 +100,7 @@ export function BookCard({ book }: { book: Book }) {
                 onChange={(e) => setSelectedUser(e.target.value)}
                 className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm"
               >
-                <option value="">Prestar a...</option>
+                <option value="">{t('bookCard.lendToPlaceholder')}</option>
 
                 {users.filter((u) => u.id !== user?.id).map((u) => (
                   <option key={u.id} value={u.id}>
@@ -111,7 +113,7 @@ export function BookCard({ book }: { book: Book }) {
                 onClick={lendToUser}
                 className="mt-1.5 w-full rounded-md bg-brand px-3 py-1.5 text-sm font-medium text-white hover:opacity-90"
               >
-                Prestar 📖
+                {t('bookCard.lend')}
               </button>
             </>
           )}

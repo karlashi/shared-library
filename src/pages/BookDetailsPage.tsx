@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/AuthContext'
 import {
   useBook,
@@ -18,6 +19,7 @@ import {
 import { TagInput } from '../components/TagInput'
 
 export function BookDetailsPage() {
+  const { t } = useTranslation()
   const { id } = useParams()
   const navigate = useNavigate()
 
@@ -38,11 +40,11 @@ export function BookDetailsPage() {
 
   const [selectedUser, setSelectedUser] = useState('')
 
-  if (isBookLoading) return <p>Cargando...</p>
-  if (!book) return <p>Libro no encontrado</p>
+  if (isBookLoading) return <p>{t('common.loading')}</p>
+  if (!book) return <p>{t('bookDetails.notFound')}</p>
 
-  const ownerName = owner?.name || 'Desconocido'
-  const borrowerName = loan ? borrower?.name || 'Desconocido' : null
+  const ownerName = owner?.name || t('common.unknown')
+  const borrowerName = loan ? borrower?.name || t('common.unknown') : null
 
   const isBorrowed = !!borrowerName
   const isBlocked = book.status === 'Fuera de circulación'
@@ -58,15 +60,15 @@ export function BookDetailsPage() {
   const status = getStatus()
 
   const lendToUser = () => {
-    if (!selectedUser || !id) return alert('Selecciona un usuario')
+    if (!selectedUser || !id) return alert(t('bookDetails.selectUserAlert'))
 
     lendBook.mutate(
       { bookId: id, borrowerId: selectedUser },
       {
-        onSuccess: () => alert('Libro prestado correctamente'),
+        onSuccess: () => alert(t('bookDetails.lendSuccess')),
         onError: (error) => {
           console.error(error)
-          alert('Error al prestar libro')
+          alert(t('bookDetails.lendError'))
         },
       }
     )
@@ -78,7 +80,7 @@ export function BookDetailsPage() {
     returnBook.mutate(loan.id, {
       onError: (error) => {
         console.error(error)
-        alert('Error al marcar el libro como devuelto')
+        alert(t('bookDetails.markReturnedError'))
       },
     })
   }
@@ -91,16 +93,16 @@ export function BookDetailsPage() {
       {
         onError: (error) => {
           console.error(error)
-          alert('Error al actualizar tu lista de deseos')
+          alert(t('bookDetails.wishlistError'))
         },
       }
     )
   }
 
-  const tagNames = bookTags.map((t) => t.tag)
+  const tagNames = bookTags.map((bt) => bt.tag)
 
   const canRemoveTag = (tag: string) => {
-    const row = bookTags.find((t) => t.tag === tag)
+    const row = bookTags.find((bt) => bt.tag === tag)
     if (!row) return false
     return isOwner || row.added_by === user?.id
   }
@@ -108,28 +110,28 @@ export function BookDetailsPage() {
   const handleTagsChange = (newTags: string[]) => {
     if (!id || !user) return
 
-    const added = newTags.find((t) => !tagNames.includes(t))
+    const added = newTags.find((nt) => !tagNames.includes(nt))
     if (added) {
       addTag.mutate(
         { bookId: id, tag: added, userId: user.id },
         {
           onError: (error) => {
             console.error(error)
-            alert('Error al añadir la etiqueta')
+            alert(t('bookDetails.addTagError'))
           },
         }
       )
       return
     }
 
-    const removed = tagNames.find((t) => !newTags.includes(t))
+    const removed = tagNames.find((nt) => !newTags.includes(nt))
     if (removed) {
       removeTag.mutate(
         { bookId: id, tag: removed },
         {
           onError: (error) => {
             console.error(error)
-            alert('Error al eliminar la etiqueta')
+            alert(t('bookDetails.removeTagError'))
           },
         }
       )
@@ -144,7 +146,7 @@ export function BookDetailsPage() {
           onClick={() => navigate('/')}
           className="mb-5 rounded-md bg-gray-100 px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-200"
         >
-          ← Volver
+          {t('bookDetails.back')}
         </button>
 
         {/* MAIN LAYOUT */}
@@ -167,18 +169,18 @@ export function BookDetailsPage() {
                 onClick={() => navigate(`/book/${id}/edit`)}
                 className="mt-3 rounded-md bg-gray-100 px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
               >
-                Editar libro ✏️
+                {t('bookDetails.editBook')}
               </button>
             )}
 
             {/* OWNER */}
             <p className="mt-4 text-gray-700">
-              👤 <b>Propietario:</b> {ownerName}
+              👤 <b>{t('bookDetails.owner')}</b> {ownerName}
             </p>
 
             {/* BORROWER */}
             <p className="text-gray-700">
-              📕 <b>Prestado a:</b> {borrowerName || 'Nadie'}
+              📕 <b>{t('bookDetails.lentTo')}</b> {borrowerName || t('bookDetails.nobody')}
             </p>
 
             {/* WISHLIST TOGGLE */}
@@ -188,7 +190,7 @@ export function BookDetailsPage() {
                 disabled={toggleWishlist.isPending}
                 className="mt-3 rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-50 disabled:opacity-50"
               >
-                {isWishlisted ? '⭐ En mi lista de deseos' : '☆ Añadir a mi lista de deseos'}
+                {isWishlisted ? t('bookDetails.wishlistRemove') : t('bookDetails.wishlistAdd')}
               </button>
             )}
 
@@ -196,19 +198,19 @@ export function BookDetailsPage() {
             <div className="mt-3">
               {status === 'available' && (
                 <span className="rounded-md bg-green-100 px-2 py-1 text-green-800">
-                  🟢 Disponible
+                  🟢 {t('bookStatus.available')}
                 </span>
               )}
 
               {status === 'borrowed' && (
                 <span className="rounded-md bg-red-100 px-2 py-1 text-red-800">
-                  🔴 Prestado
+                  🔴 {t('bookStatus.borrowed')}
                 </span>
               )}
 
               {status === 'blocked' && (
                 <span className="rounded-md bg-amber-100 px-2 py-1 text-amber-800">
-                  🟡 Fuera de circulación
+                  🟡 {t('bookStatus.blocked')}
                 </span>
               )}
             </div>
@@ -223,7 +225,7 @@ export function BookDetailsPage() {
                       : 'rounded-md bg-amber-100 px-2 py-1 text-amber-800'
                   }
                 >
-                  {book.listing_type === 'gift' ? '🎁 Para regalar' : '💰 En venta'}
+                  {book.listing_type === 'gift' ? t('bookDetails.gift') : t('bookDetails.sale')}
                 </span>
                 {book.listing_comment && (
                   <p className="mt-1 text-sm text-gray-600">{book.listing_comment}</p>
@@ -240,18 +242,18 @@ export function BookDetailsPage() {
                     disabled={returnBook.isPending}
                     className="rounded-md bg-gray-100 px-4 py-2 text-gray-800 hover:bg-gray-200 disabled:opacity-50"
                   >
-                    Marcar como devuelto
+                    {t('bookDetails.markReturned')}
                   </button>
                 ) : (
                   <>
-                    <h4 className="mb-2 font-medium text-gray-900">Prestar a usuario</h4>
+                    <h4 className="mb-2 font-medium text-gray-900">{t('bookDetails.lendToUser')}</h4>
 
                     <select
                       value={selectedUser}
                       onChange={(e) => setSelectedUser(e.target.value)}
                       className="w-full rounded-md border border-gray-300 px-3 py-2"
                     >
-                      <option value="">Selecciona usuario</option>
+                      <option value="">{t('bookDetails.selectUser')}</option>
 
                       {users.filter((u) => u.id !== user?.id).map((u) => (
                         <option key={u.id} value={u.id}>
@@ -264,7 +266,7 @@ export function BookDetailsPage() {
                       onClick={lendToUser}
                       className="mt-2 rounded-md bg-brand px-4 py-2 font-medium text-white hover:opacity-90"
                     >
-                      Prestar 📖
+                      {t('bookDetails.lend')}
                     </button>
                   </>
                 )}
@@ -277,15 +279,15 @@ export function BookDetailsPage() {
                 <p className="mb-2 whitespace-pre-line">{book.description}</p>
               )}
 
-              <p><b>Colección:</b> {book.collection}</p>
-              <p><b>Edad recomendada:</b> {book.age_recommendation}</p>
+              <p><b>{t('bookDetails.collection')}</b> {book.collection}</p>
+              <p><b>{t('bookDetails.ageRecommendation')}</b> {book.age_recommendation}</p>
 
               {book.isbn && (
-                <p><b>ISBN:</b> {book.isbn}</p>
+                <p><b>{t('bookDetails.isbn')}</b> {book.isbn}</p>
               )}
 
               <div>
-                <b>Etiquetas:</b>
+                <b>{t('bookDetails.tags')}</b>
                 <div className="mt-1 max-w-sm">
                   <TagInput
                     value={tagNames}
@@ -299,7 +301,7 @@ export function BookDetailsPage() {
               {book.link && (
                 <p>
                   🔗 <a href={book.link} target="_blank" className="text-brand hover:underline">
-                    Ver enlace
+                    {t('bookDetails.viewLink')}
                   </a>
                 </p>
               )}

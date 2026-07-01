@@ -1,3 +1,5 @@
+import i18n from '../i18n'
+
 export type GoogleBookInfo = {
   title: string
   author: string
@@ -14,12 +16,10 @@ export async function lookupByIsbn(isbn: string): Promise<GoogleBookInfo | null>
   )
 
   if (res.status === 429) {
-    throw new Error(
-      'Google Books ha rechazado la búsqueda por límite de uso. Esto puede pasar sin una clave de API configurada.'
-    )
+    throw new Error(i18n.t('errors.googleBooksRateLimited'))
   }
 
-  if (!res.ok) throw new Error('Error al consultar Google Books')
+  if (!res.ok) throw new Error(i18n.t('errors.googleBooksLookupFailed'))
 
   const data = await res.json()
   const info = data.items?.[0]?.volumeInfo

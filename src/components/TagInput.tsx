@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 type TagInputProps = {
   value: string[]
@@ -8,6 +9,7 @@ type TagInputProps = {
 }
 
 export function TagInput({ value, onChange, suggestions, canRemove = () => true }: TagInputProps) {
+  const { t } = useTranslation()
   const [inputValue, setInputValue] = useState('')
 
   const matches = inputValue.trim()
@@ -65,7 +67,7 @@ export function TagInput({ value, onChange, suggestions, canRemove = () => true 
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Añadir etiqueta..."
+          placeholder={t('tagInput.addPlaceholder')}
           className="min-w-[100px] flex-1 border-0 outline-none"
         />
       </div>

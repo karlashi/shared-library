@@ -1,5 +1,6 @@
 import { supabase } from './supabaseClient'
 import { deleteCoverImage } from './storage'
+import i18n from '../i18n'
 import type { Book } from '../types/Books'
 
 export async function getBooks(): Promise<Book[]> {
@@ -46,7 +47,7 @@ export async function deleteBook(bookId: string, coverUrl?: string | null) {
 
   if (countError) throw countError
   if (count && count > 0) {
-    throw new Error('Este libro tiene historial de préstamos y no se puede eliminar.')
+    throw new Error(i18n.t('errors.bookHasLoanHistory'))
   }
 
   const { error } = await supabase.from('books').delete().eq('id', bookId)

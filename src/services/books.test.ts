@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { deleteBook } from './books'
+import es from '../i18n/locales/es.json'
 
 const mockEq = vi.fn()
 const mockSelect = vi.fn(() => ({ eq: mockEq }))
@@ -27,9 +28,7 @@ describe('deleteBook', () => {
   it('throws a friendly error when the book has loan history', async () => {
     mockEq.mockResolvedValue({ count: 2, error: null })
 
-    await expect(deleteBook('book-1')).rejects.toThrow(
-      'Este libro tiene historial de préstamos y no se puede eliminar.'
-    )
+    await expect(deleteBook('book-1')).rejects.toThrow(es.errors.bookHasLoanHistory)
     expect(mockDelete).not.toHaveBeenCalled()
   })
 

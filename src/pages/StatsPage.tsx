@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useBooks, useAllLoans, useProfiles } from '../services/queries'
 import { Header } from '../components/Header'
 
@@ -11,6 +12,7 @@ function StatCard({ label, value }: { label: string; value: number }) {
 }
 
 export function StatsPage() {
+  const { t } = useTranslation()
   const { data: books = [] } = useBooks()
   const { data: loans = [] } = useAllLoans()
   const { data: profiles = [] } = useProfiles()
@@ -25,15 +27,15 @@ export function StatsPage() {
       <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
         <Header />
 
-        <h1 className="mb-5 text-2xl font-semibold text-gray-900">📊 Estadísticas</h1>
+        <h1 className="mb-5 text-2xl font-semibold text-gray-900">{t('stats.heading')}</h1>
 
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-          <StatCard label="Libros activos" value={activeBooks.length} />
-          <StatCard label="Libros archivados" value={archivedBooks.length} />
-          <StatCard label="Miembros" value={profiles.length} />
-          <StatCard label="Préstamos totales" value={loans.length} />
-          <StatCard label="Préstamos activos" value={activeLoans.length} />
-          <StatCard label="Para regalar/vender" value={listedBooks.length} />
+          <StatCard label={t('stats.activeBooks')} value={activeBooks.length} />
+          <StatCard label={t('stats.archivedBooks')} value={archivedBooks.length} />
+          <StatCard label={t('stats.members')} value={profiles.length} />
+          <StatCard label={t('stats.totalLoans')} value={loans.length} />
+          <StatCard label={t('stats.activeLoans')} value={activeLoans.length} />
+          <StatCard label={t('stats.listedBooks')} value={listedBooks.length} />
         </div>
       </div>
     </div>

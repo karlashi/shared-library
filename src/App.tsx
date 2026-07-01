@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { AuthProvider } from './contexts/AuthContext'
 import { useBooks } from './services/queries'
 import { BookCard } from './components/BookCard'
@@ -16,6 +17,7 @@ import { BookDetailsPage } from './pages/BookDetailsPage'
 import { EditBookPage } from './pages/EditBookPage'
 
 function Home() {
+  const { t } = useTranslation()
   const { data: books = [] } = useBooks()
 
   const [search, setSearch] = useState('')
@@ -54,14 +56,14 @@ function Home() {
 
         <Link to="/add">
           <button className="mb-6 rounded-md bg-brand px-4 py-2 font-medium text-white hover:opacity-90">
-            ➕ Añadir libro
+            {t('home.addBook')}
           </button>
         </Link>
 
         {/* SEARCH + FILTER */}
         <div className="mb-6 flex flex-col gap-3 sm:flex-row">
           <input
-            placeholder="Buscar por título, autor o etiqueta..."
+            placeholder={t('home.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded-md border border-gray-300 px-3 py-2 sm:w-64"
@@ -72,10 +74,10 @@ function Home() {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="rounded-md border border-gray-300 px-3 py-2"
           >
-            <option value="all">Todos</option>
-            <option value="available">Disponibles</option>
-            <option value="borrowed">Prestados</option>
-            <option value="blocked">Fuera de circulación</option>
+            <option value="all">{t('home.all')}</option>
+            <option value="available">{t('home.available')}</option>
+            <option value="borrowed">{t('home.borrowed')}</option>
+            <option value="blocked">{t('home.blocked')}</option>
           </select>
 
           <select
@@ -83,8 +85,8 @@ function Home() {
             onChange={(e) => setSortBy(e.target.value as 'recent' | 'title')}
             className="rounded-md border border-gray-300 px-3 py-2"
           >
-            <option value="recent">Más recientes</option>
-            <option value="title">Título (A-Z)</option>
+            <option value="recent">{t('home.sortRecent')}</option>
+            <option value="title">{t('home.sortTitle')}</option>
           </select>
         </div>
 
