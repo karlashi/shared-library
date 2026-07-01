@@ -22,9 +22,11 @@ function Home() {
   }
 
   const filteredBooks = books.filter((book) => {
+    const searchTerm = search.toLowerCase()
     const matchesSearch =
-      book.title.toLowerCase().includes(search.toLowerCase()) ||
-      book.author.toLowerCase().includes(search.toLowerCase())
+      book.title.toLowerCase().includes(searchTerm) ||
+      book.author.toLowerCase().includes(searchTerm) ||
+      (book.tags ?? []).some((tag) => tag.includes(searchTerm))
 
     const matchesStatus =
       statusFilter === 'all' ||
@@ -66,7 +68,7 @@ function Home() {
         }}
       >
         <input
-          placeholder="Buscar por título o autor..."
+          placeholder="Buscar por título, autor o etiqueta..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           style={{
