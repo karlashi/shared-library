@@ -225,6 +225,8 @@
     "fetchData": "🔄 Buscar datos",
     "fetchingData": "Buscando...",
     "fetchDataError": "Error al buscar datos para este libro.",
+    "fetchNoResult": "No se encontró ningún libro con esos datos.",
+    "fetchNoNewData": "Se encontró el libro, pero no hay portada ni descripción nuevas que añadir.",
     "saveAll": "Guardar todos los cambios",
     "savingAll": "Guardando...",
     "saveSummary": "Guardados {{saved}} de {{total}} libros.",

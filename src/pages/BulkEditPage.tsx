@@ -53,12 +53,23 @@ export function BulkEditPage() {
       const result = book.isbn
         ? await lookupBookInfo(book.isbn)
         : await lookupBookInfoByTitleAuthor(book.title, book.author)
-      if (!result) return
+
+      if (!result) {
+        alert(t('bulkEdit.fetchNoResult'))
+        return
+      }
+
       const current = getRowState(book)
-      updateRow(book, {
-        description: current.description || result.description,
-        cover_url: current.cover_url || result.coverUrl,
-      })
+      const description = current.description || result.description
+      const cover_url = current.cover_url || result.coverUrl
+      const foundSomethingNew = description !== current.description || cover_url !== current.cover_url
+
+      if (!foundSomethingNew) {
+        alert(t('bulkEdit.fetchNoNewData'))
+        return
+      }
+
+      updateRow(book, { description, cover_url })
     } catch (err) {
       console.error(err)
       alert(err instanceof Error ? err.message : t('bulkEdit.fetchDataError'))
