@@ -5,6 +5,7 @@ import { useBooks } from './services/queries'
 import { BookCard } from './components/BookCard'
 import { RequireAuth } from './components/RequireAuth'
 import { LoginPage } from './pages/LoginPage'
+import { AboutPage } from './pages/AboutPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { AddBookPage } from './pages/AddBookPage'
 import { BookDetailsPage } from './pages/BookDetailsPage'
@@ -16,29 +17,35 @@ function Home() {
 
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [sortBy, setSortBy] = useState<'recent' | 'title'>('recent')
 
   const logout = async () => {
     await signOut()
   }
 
-  const filteredBooks = books.filter((book) => {
-    const searchTerm = search.toLowerCase()
-    const matchesSearch =
-      book.title.toLowerCase().includes(searchTerm) ||
-      book.author.toLowerCase().includes(searchTerm) ||
-      (book.tags ?? []).some((tag) => tag.includes(searchTerm))
+  const filteredBooks = books
+    .filter((book) => {
+      const searchTerm = search.toLowerCase()
+      const matchesSearch =
+        book.title.toLowerCase().includes(searchTerm) ||
+        book.author.toLowerCase().includes(searchTerm) ||
+        (book.tags ?? []).some((tag) => tag.includes(searchTerm))
 
-    const matchesStatus =
-      statusFilter === 'all' ||
-      (statusFilter === 'available' &&
-        !book.isBorrowed &&
-        book.status !== 'Fuera de circulación') ||
-      (statusFilter === 'borrowed' && book.isBorrowed) ||
-      (statusFilter === 'blocked' &&
-        book.status === 'Fuera de circulación')
+      const matchesStatus =
+        statusFilter === 'all' ||
+        (statusFilter === 'available' &&
+          !book.isBorrowed &&
+          book.status !== 'Fuera de circulación') ||
+        (statusFilter === 'borrowed' && book.isBorrowed) ||
+        (statusFilter === 'blocked' &&
+          book.status === 'Fuera de circulación')
 
-    return matchesSearch && matchesStatus
-  })
+      return matchesSearch && matchesStatus
+    })
+    .sort((a, b) => {
+      if (sortBy === 'title') return a.title.localeCompare(b.title, 'es')
+      return (b.created_at ?? '').localeCompare(a.created_at ?? '')
+    })
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -52,6 +59,11 @@ function Home() {
             <Link to="/profile">
               <button className="rounded-md bg-gray-100 px-4 py-2 text-gray-800 hover:bg-gray-200">
                 Mi perfil
+              </button>
+            </Link>
+            <Link to="/about">
+              <button className="rounded-md bg-gray-100 px-4 py-2 text-gray-800 hover:bg-gray-200">
+                Acerca de
               </button>
             </Link>
             <button
@@ -88,6 +100,15 @@ function Home() {
             <option value="borrowed">Prestados</option>
             <option value="blocked">Fuera de circulación</option>
           </select>
+
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as 'recent' | 'title')}
+            className="rounded-md border border-gray-300 px-3 py-2"
+          >
+            <option value="recent">Más recientes</option>
+            <option value="title">Título (A-Z)</option>
+          </select>
         </div>
 
         {/* BOOK GRID */}
@@ -110,6 +131,7 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/about" element={<AboutPage />} />
           <Route path="/" element={<RequireAuth><Home /></RequireAuth>} />
           <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth>} />
           <Route path="/add" element={<RequireAuth><AddBookPage /></RequireAuth>} />

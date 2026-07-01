@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { signIn, signUp } from '../services/auth'
@@ -132,6 +132,13 @@ export function LoginPage() {
         >
           {mode === 'login' ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}
         </button>
+
+        <Link
+          to="/about"
+          className="mt-2 block w-full text-center text-sm text-gray-500 hover:underline"
+        >
+          Acerca de este sitio
+        </Link>
       </div>
     </div>
   )

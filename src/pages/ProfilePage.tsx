@@ -124,20 +124,38 @@ export function ProfilePage() {
         {borrowedByMe.length === 0 ? (
           <p className="mb-8 text-gray-600">No has pedido prestado ningún libro todavía.</p>
         ) : (
-          <ul className="mb-8 space-y-1 pl-5 text-gray-700">
+          <ul className="mb-8 space-y-3">
             {borrowedByMe.map((loan) => {
               const book = getBookById(loan.book_id)
               return (
-                <li key={loan.id}>
-                  <b>{book?.title ?? 'Libro desconocido'}</b>
-                  {book && ` — ${book.author}`}
-                  {' · '}
-                  Propietario: {book ? getProfileName(book.owner_id ?? '') : 'Desconocido'}
-                  {' · '}
-                  {loan.returned_at ? 'Devuelto' : 'Activo'}
-                  {' · '}
-                  Prestado: {formatDate(loan.borrowed_at)}
-                  {loan.returned_at && ` · Devuelto: ${formatDate(loan.returned_at)}`}
+                <li key={loan.id} className="rounded-lg border border-gray-200 p-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="font-semibold text-gray-900">
+                      {book?.title ?? 'Libro desconocido'}
+                      {book && <span className="font-normal text-gray-600"> — {book.author}</span>}
+                    </p>
+                    {loan.returned_at ? (
+                      <span className="rounded-md bg-green-100 px-2 py-0.5 text-sm text-green-800">Devuelto</span>
+                    ) : (
+                      <span className="rounded-md bg-red-100 px-2 py-0.5 text-sm text-red-800">Activo</span>
+                    )}
+                  </div>
+                  <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-gray-700 sm:grid-cols-3">
+                    <div>
+                      <dt className="text-gray-500">Propietario</dt>
+                      <dd>{book ? getProfileName(book.owner_id ?? '') : 'Desconocido'}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-gray-500">Prestado</dt>
+                      <dd>{formatDate(loan.borrowed_at)}</dd>
+                    </div>
+                    {loan.returned_at && (
+                      <div>
+                        <dt className="text-gray-500">Devuelto</dt>
+                        <dd>{formatDate(loan.returned_at)}</dd>
+                      </div>
+                    )}
+                  </dl>
                 </li>
               )
             })}
@@ -149,32 +167,44 @@ export function ProfilePage() {
         {lentByMe.length === 0 ? (
           <p className="text-gray-600">No has prestado ningún libro todavía.</p>
         ) : (
-          <ul className="space-y-1 pl-5 text-gray-700">
+          <ul className="space-y-3">
             {lentByMe.map((loan) => {
               const book = getBookById(loan.book_id)
               return (
-                <li key={loan.id}>
-                  <b>{book?.title ?? 'Libro desconocido'}</b>
-                  {' · '}
-                  Prestado a: {getProfileName(loan.borrower_id)}
-                  {' · '}
-                  {loan.returned_at ? (
-                    'Devuelto'
-                  ) : (
-                    <>
-                      Activo{' '}
-                      <button
-                        onClick={() => handleReturn(loan.id)}
-                        disabled={returnBook.isPending}
-                        className="ml-2 rounded-md bg-gray-100 px-2 py-0.5 text-sm text-gray-800 hover:bg-gray-200 disabled:opacity-50"
-                      >
-                        Marcar como devuelto
-                      </button>
-                    </>
+                <li key={loan.id} className="rounded-lg border border-gray-200 p-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="font-semibold text-gray-900">{book?.title ?? 'Libro desconocido'}</p>
+                    {loan.returned_at ? (
+                      <span className="rounded-md bg-green-100 px-2 py-0.5 text-sm text-green-800">Devuelto</span>
+                    ) : (
+                      <span className="rounded-md bg-red-100 px-2 py-0.5 text-sm text-red-800">Activo</span>
+                    )}
+                  </div>
+                  <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-gray-700 sm:grid-cols-3">
+                    <div>
+                      <dt className="text-gray-500">Prestado a</dt>
+                      <dd>{getProfileName(loan.borrower_id)}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-gray-500">Prestado</dt>
+                      <dd>{formatDate(loan.borrowed_at)}</dd>
+                    </div>
+                    {loan.returned_at && (
+                      <div>
+                        <dt className="text-gray-500">Devuelto</dt>
+                        <dd>{formatDate(loan.returned_at)}</dd>
+                      </div>
+                    )}
+                  </dl>
+                  {!loan.returned_at && (
+                    <button
+                      onClick={() => handleReturn(loan.id)}
+                      disabled={returnBook.isPending}
+                      className="mt-3 rounded-md bg-gray-100 px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-200 disabled:opacity-50"
+                    >
+                      Marcar como devuelto
+                    </button>
                   )}
-                  {' · '}
-                  Prestado: {formatDate(loan.borrowed_at)}
-                  {loan.returned_at && ` · Devuelto: ${formatDate(loan.returned_at)}`}
                 </li>
               )
             })}

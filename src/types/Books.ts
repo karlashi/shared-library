@@ -11,6 +11,7 @@ export type Book = {
   tags?: string[]
   isbn?: string
   description?: string
+  created_at?: string
 
   isBorrowed?: boolean
   borrowedBy?: string | null

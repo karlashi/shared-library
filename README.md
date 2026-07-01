@@ -1,75 +1,75 @@
-# React + TypeScript + Vite
+# 📚 Biblioteca Compartida
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A shared library app for a small private group: list your own books, borrow from other
+members, and keep track of who has what. Built with React, TypeScript, and Supabase.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Accounts** — email/password login and registration, gated behind auth (no public
+  browsing)
+- **Books** — add, edit, and delete books you own, with cover image upload
+- **ISBN lookup** — fill in title, author, description, and cover automatically from an
+  ISBN via the Google Books API
+- **Tags** — autocomplete/suggestions from tags already used across the library
+- **Lending** — owners lend books to other members and mark them returned; a book can't
+  be lent out twice at once, and can't be deleted if it has any borrow history
+  (protects everyone else's records)
+- **Profile page** — edit your display name, see your own books, and view your full
+  borrow/lending history
+- **Search & sort** — search by title, author, or tag; sort by most recently added or
+  alphabetically
 
-## React Compiler
+## Tech stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) +
+  [Vite](https://vite.dev/)
+- [Tailwind CSS v4](https://tailwindcss.com/) for styling
+- [Supabase](https://supabase.com/) — Postgres database, auth, and file storage
+- [TanStack Query](https://tanstack.com/query) for data fetching/caching
+- [react-hook-form](https://react-hook-form.com/) for form state and validation
+- [Vitest](https://vitest.dev/) + [React Testing Library](https://testing-library.com/)
+  for tests
 
-## Expanding the ESLint configuration
+## Getting started
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+git clone <this repo>
+cd biblioteca
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Copy `.env.example` to `.env.local` and fill in your own values:
 
 ```
+VITE_SUPABASE_URL=
+VITE_SUPABASE_ANON_KEY=
+VITE_GOOGLE_BOOKS_API_KEY=
+```
+
+- Supabase URL/anon key come from your Supabase project's API settings.
+- The Google Books API key is optional (ISBN lookup works without one at low volume, but
+  a free key avoids rate-limit errors) — see
+  [Google Cloud Console](https://console.cloud.google.com/) → enable "Books API" → create
+  an API key.
+
+Then start the dev server:
+
+```bash
+npm run dev
+```
+
+## Scripts
+
+| Command | What it does |
+|---|---|
+| `npm run dev` | Start the local dev server |
+| `npm run build` | Typecheck and build for production |
+| `npm run test` | Run the test suite once |
+| `npm run lint` | Run ESLint |
+| `npm run preview` | Preview a production build locally |
+
+## Deployment
+
+Deployed on [Vercel](https://vercel.com/), connected to this repo's `main` branch.
+Remember to set the same environment variables from `.env.local` in the Vercel project's
+Environment Variables settings — the app fails fast at startup if they're missing.
