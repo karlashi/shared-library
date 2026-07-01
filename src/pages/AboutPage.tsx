@@ -28,6 +28,18 @@ export function AboutPage() {
             usar la biblioteca.
           </p>
 
+          <div>
+            <b>Privacidad</b>
+            <p className="mt-1">
+              Guardamos tu nombre, tu email y la actividad de la biblioteca que generas
+              (libros que añades, préstamos) para poder ofrecer el servicio. Los datos se
+              alojan en Supabase, en un centro de datos dentro de la UE (Irlanda). Puedes
+              eliminar tu cuenta en cualquier momento desde tu perfil — tu nombre se
+              anonimiza y dejas de poder iniciar sesión, aunque el historial de préstamos
+              con otros miembros se conserva para no afectar sus propios registros.
+            </p>
+          </div>
+
           <p>
             Creado por <b>Carla Shinzato</b>.
             <br />

@@ -192,6 +192,15 @@ export function useRemoveTag() {
   })
 }
 
+export function useDeleteAccount() {
+  return useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.rpc('delete_own_account')
+      if (error) throw error
+    },
+  })
+}
+
 export function useUpdateProfile() {
   const queryClient = useQueryClient()
   return useMutation({

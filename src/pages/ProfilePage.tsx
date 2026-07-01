@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { useAuth } from '../contexts/AuthContext'
 import {
@@ -7,6 +8,7 @@ import {
   useAllLoans,
   useUpdateProfile,
   useReturnBook,
+  useDeleteAccount,
 } from '../services/queries'
 import { BookCard } from '../components/BookCard'
 import { Header } from '../components/Header'
@@ -16,7 +18,8 @@ type FormValues = {
 }
 
 export function ProfilePage() {
-  const { user, profile } = useAuth()
+  const navigate = useNavigate()
+  const { user, profile, signOut } = useAuth()
 
   const { data: books = [] } = useBooks()
   const { data: profiles = [] } = useProfiles()
@@ -24,6 +27,7 @@ export function ProfilePage() {
 
   const updateProfile = useUpdateProfile()
   const returnBook = useReturnBook()
+  const deleteAccount = useDeleteAccount()
 
   const {
     register,
@@ -72,6 +76,27 @@ export function ProfilePage() {
       onError: (error) => {
         console.error(error)
         alert('Error al marcar el libro como devuelto')
+      },
+    })
+  }
+
+  const handleDeleteAccount = () => {
+    if (
+      !window.confirm(
+        '¿Seguro que quieres eliminar tu cuenta? Tu nombre se anonimizará, tus libros se archivarán y no podrás volver a iniciar sesión. Esta acción no se puede deshacer.'
+      )
+    ) {
+      return
+    }
+
+    deleteAccount.mutate(undefined, {
+      onSuccess: async () => {
+        await signOut()
+        navigate('/login')
+      },
+      onError: (error) => {
+        console.error(error)
+        alert(error instanceof Error ? error.message : 'Error al eliminar la cuenta')
       },
     })
   }
@@ -217,6 +242,23 @@ export function ProfilePage() {
             })}
           </ul>
         )}
+
+        {/* DANGER ZONE */}
+        <div className="mt-10 rounded-lg border border-red-300 p-4">
+          <h2 className="mb-2 text-lg font-semibold text-gray-900">Eliminar mi cuenta</h2>
+          <p className="mb-3 text-sm text-gray-600">
+            Tu nombre se anonimizará, tus libros se archivarán (dejan de ser visibles pero
+            no se borra su historial de préstamos) y no podrás volver a iniciar sesión.
+            Esta acción no se puede deshacer.
+          </p>
+          <button
+            onClick={handleDeleteAccount}
+            disabled={deleteAccount.isPending}
+            className="rounded-md border border-red-300 px-4 py-2 text-red-700 hover:bg-red-50 disabled:opacity-50"
+          >
+            {deleteAccount.isPending ? 'Eliminando...' : 'Eliminar mi cuenta 🗑️'}
+          </button>
+        </div>
       </div>
     </div>
   )
