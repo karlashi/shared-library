@@ -10,9 +10,17 @@ members, and keep track of who has what. Built with React, TypeScript, and Supab
   archives your books, and disables login — see the privacy notice on the About page)
 - **Books** — add, edit, archive, or delete books you own, with cover image upload
 - **ISBN lookup** — fill in title, author, description, and cover automatically from an
-  ISBN via the Google Books API, either typed in or scanned with your device's camera
+  ISBN via the Google Books API, either typed in or scanned with your device's camera;
+  falls back to Open Library for a missing cover/description when Google Books doesn't
+  have one
+- **Fast bulk scanning** — "Guardar y añadir otro" on Add Book saves and resets the form
+  (refocusing the ISBN field) so the next scan can start immediately, without navigating
+  away. Books missing a cover, description, age recommendation, or tags get a ⚠️ badge and
+  a "Solo incompletos" filter on the home grid, plus a dedicated bulk editor (`/bulk-edit`)
+  to fill in the gaps for several books at once, with a per-book "retry the lookup" button
 - **Tags** — collaborative: any member can tag any book, with autocomplete/suggestions
-  from tags already used across the library
+  from tags already used across the library, fully keyboard-navigable (arrow keys/Tab to
+  highlight a suggestion, Enter to confirm)
 - **Lending** — owners lend books to other members and mark them returned; a book can't
   be lent out twice at once, and can't be deleted if it has any borrow history
   (protects everyone else's records)
@@ -25,7 +33,8 @@ members, and keep track of who has what. Built with React, TypeScript, and Supab
 - **Stats page** — a quick overview of the library: active/archived books, members,
   and loan counts
 - **Search & sort** — search by title, author, or tag; sort by most recently added or
-  alphabetically
+  alphabetically; toggle "Solo incompletos" and "Ocultar mis libros" (on by default, so the
+  home grid focuses on what you could borrow from others) narrow the grid further
 - **Admin roles** — designated admins can edit, archive, delete, or force-return any
   book/loan in the library (for cleaning up after an inactive member), granted manually
   via the database — there's no self-service way to become an admin
@@ -37,6 +46,9 @@ members, and keep track of who has what. Built with React, TypeScript, and Supab
   the `resources` object in `src/i18n/index.ts`. (The About/Changelog pages' prose and the
   `books.status` database values are intentionally left as plain Spanish rather than pulled
   into the dictionary — that content is specific to this deployment, not reusable UI text.)
+- **Reliability** — a top-level error boundary catches unexpected render errors and shows
+  a friendly reload screen instead of a blank page; the barcode scanner is lazy-loaded so
+  its dependency doesn't bloat the initial page load
 
 ## Tech stack
 
@@ -48,6 +60,8 @@ members, and keep track of who has what. Built with React, TypeScript, and Supab
 - [react-hook-form](https://react-hook-form.com/) for form state and validation
 - [react-i18next](https://react.i18next.com/) for the translation dictionary
 - [html5-qrcode](https://github.com/mebjas/html5-qrcode) for the camera barcode scanner
+- [Open Library](https://openlibrary.org/dev/docs/api/books) as a free fallback source for
+  covers/descriptions Google Books doesn't have — no API key needed
 - [Vitest](https://vitest.dev/) + [React Testing Library](https://testing-library.com/)
   for tests
 
