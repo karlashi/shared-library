@@ -6,7 +6,7 @@ import { useProfiles, useLendBook, useReturnBook } from '../services/queries'
 import { isBookIncomplete } from '../utils/bookCompleteness'
 import type { Book } from '../types/Books'
 
-export function BookCard({ book }: { book: Book }) {
+export function BookCard({ book, navList }: { book: Book; navList?: string[] }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
 
@@ -49,7 +49,10 @@ export function BookCard({ book }: { book: Book }) {
   return (
     <div className="rounded-lg border border-gray-200 p-3 shadow-sm">
       {/* CLICK CARD */}
-      <div onClick={() => navigate(`/book/${book.id}`)} className="cursor-pointer">
+      <div
+        onClick={() => navigate(`/book/${book.id}`, navList ? { state: { navList } } : undefined)}
+        className="cursor-pointer"
+      >
         <div className="flex items-start justify-between gap-1">
           <h4 className="font-semibold text-gray-900 truncate">{book.title}</h4>
           {!book.archived && isBookIncomplete(book) && (

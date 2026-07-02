@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/AuthContext'
 import {
   useBook,
+  useBooks,
   useProfile,
   useProfiles,
   useBookLoan,
@@ -27,10 +28,12 @@ export function BookDetailsPage() {
   const { t } = useTranslation()
   const { id } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
 
   const { user, profile } = useAuth()
   const isAdmin = !!profile?.is_admin
   const { data: book, isLoading: isBookLoading } = useBook(id)
+  const { data: allBooks = [] } = useBooks()
   const { data: owner } = useProfile(book?.owner_id)
   const { data: loan } = useBookLoan(id)
   const { data: borrower } = useProfile(loan?.borrower_id)
@@ -65,6 +68,18 @@ export function BookDetailsPage() {
   const isBlocked = book.status === 'Fuera de circulación'
   const isOwner = book.owner_id === user?.id
   const isWishlisted = wishlist.includes(book.id)
+
+  const stateNavList = (location.state as { navList?: string[] } | null)?.navList
+  const fallbackList = allBooks
+    .filter((b) => !b.archived)
+    .sort((a, b) => (b.created_at ?? '').localeCompare(a.created_at ?? ''))
+    .map((b) => b.id)
+  const navList = stateNavList ?? fallbackList
+  const currentIndex = navList.indexOf(book.id)
+  const prevId = currentIndex > 0 ? navList[currentIndex - 1] : null
+  const nextId = currentIndex >= 0 && currentIndex < navList.length - 1 ? navList[currentIndex + 1] : null
+
+  const goTo = (targetId: string) => navigate(`/book/${targetId}`, { state: { navList } })
 
   const getStatus = () => {
     if (isBlocked) return 'blocked'
@@ -240,13 +255,37 @@ export function BookDetailsPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
-        {/* BACK */}
-        <button
-          onClick={() => navigate('/')}
-          className="mb-5 rounded-md bg-gray-100 px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-200"
-        >
-          {t('bookDetails.back')}
-        </button>
+        {/* BACK + PREV/NEXT */}
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
+          <button
+            onClick={() => navigate('/')}
+            className="rounded-md bg-gray-100 px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-200"
+          >
+            {t('bookDetails.back')}
+          </button>
+
+          {currentIndex >= 0 && navList.length > 1 && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => prevId && goTo(prevId)}
+                disabled={!prevId}
+                className="rounded-md bg-gray-100 px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-200 disabled:opacity-50"
+              >
+                {t('bookDetails.previous')}
+              </button>
+              <span className="text-sm text-gray-500">
+                {t('bookDetails.positionIndicator', { current: currentIndex + 1, total: navList.length })}
+              </span>
+              <button
+                onClick={() => nextId && goTo(nextId)}
+                disabled={!nextId}
+                className="rounded-md bg-gray-100 px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-200 disabled:opacity-50"
+              >
+                {t('bookDetails.next')}
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* MAIN LAYOUT */}
         <div className="flex flex-col gap-6 md:flex-row">
