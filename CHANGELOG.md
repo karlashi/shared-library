@@ -20,6 +20,13 @@ Spanish, see the in-app "Novedades" page (`/changelog`). For full detail on any 
   `l.borrower_id` alongside the existing `b.owner_id` one, in the same
   `delete_own_account()` function — no application code changes needed, since the
   frontend already surfaces the raised Postgres exception message directly.
+- **Book comments** — descoped from a full star-rated review system to free-text personal
+  reactions on a book's detail page, alongside the existing API-sourced description. New
+  `book_comments` table (`book_id` cascades on book delete, mirroring `book_tags`).
+  Permissions are deliberately narrower than tags: only the comment's author can edit or
+  delete it, plus an admin can delete (moderation) — the book's *owner* has no special
+  rights here, unlike tags, since this is meant to be a personal voice, not something the
+  owner curates.
 
 ## 2026-07-01
 
