@@ -7,6 +7,7 @@ import type { Book } from '../types/Books'
 import type { Profile } from '../types/Profile'
 import type { Loan } from '../types/Loan'
 import type { BookTag } from '../types/BookTag'
+import type { BookComment } from '../types/BookComment'
 
 export function useBooks() {
   return useQuery({
@@ -204,6 +205,66 @@ export function useRemoveTag() {
       queryClient.invalidateQueries({ queryKey: ['book_tags', vars.bookId] })
       queryClient.invalidateQueries({ queryKey: ['books'] })
       queryClient.invalidateQueries({ queryKey: ['tags'] })
+    },
+  })
+}
+
+export function useBookComments(bookId: string | undefined) {
+  return useQuery({
+    queryKey: ['book_comments', bookId],
+    queryFn: async (): Promise<BookComment[]> => {
+      const { data, error } = await supabase
+        .from('book_comments')
+        .select('*')
+        .eq('book_id', bookId)
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      return data ?? []
+    },
+    enabled: !!bookId,
+  })
+}
+
+export function useAddComment() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (vars: { bookId: string; userId: string; comment: string }) => {
+      const { error } = await supabase
+        .from('book_comments')
+        .insert({ book_id: vars.bookId, user_id: vars.userId, comment: vars.comment })
+      if (error) throw error
+    },
+    onSuccess: (_data, vars) => {
+      queryClient.invalidateQueries({ queryKey: ['book_comments', vars.bookId] })
+    },
+  })
+}
+
+export function useUpdateComment() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (vars: { id: string; bookId: string; comment: string }) => {
+      const { error } = await supabase
+        .from('book_comments')
+        .update({ comment: vars.comment, updated_at: new Date().toISOString() })
+        .eq('id', vars.id)
+      if (error) throw error
+    },
+    onSuccess: (_data, vars) => {
+      queryClient.invalidateQueries({ queryKey: ['book_comments', vars.bookId] })
+    },
+  })
+}
+
+export function useDeleteComment() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (vars: { id: string; bookId: string }) => {
+      const { error } = await supabase.from('book_comments').delete().eq('id', vars.id)
+      if (error) throw error
+    },
+    onSuccess: (_data, vars) => {
+      queryClient.invalidateQueries({ queryKey: ['book_comments', vars.bookId] })
     },
   })
 }

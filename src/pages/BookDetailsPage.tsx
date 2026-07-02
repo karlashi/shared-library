@@ -16,6 +16,10 @@ import {
   useWishlist,
   useToggleWishlist,
   useTransferBook,
+  useBookComments,
+  useAddComment,
+  useUpdateComment,
+  useDeleteComment,
 } from '../services/queries'
 import { TagInput } from '../components/TagInput'
 
@@ -40,9 +44,16 @@ export function BookDetailsPage() {
   const { data: wishlist = [] } = useWishlist(user?.id)
   const toggleWishlist = useToggleWishlist()
   const transferBook = useTransferBook()
+  const { data: comments = [] } = useBookComments(id)
+  const addComment = useAddComment()
+  const updateComment = useUpdateComment()
+  const deleteComment = useDeleteComment()
 
   const [selectedUser, setSelectedUser] = useState('')
   const [selectedTransferUser, setSelectedTransferUser] = useState('')
+  const [newComment, setNewComment] = useState('')
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null)
+  const [editingCommentText, setEditingCommentText] = useState('')
 
   if (isBookLoading) return <p>{t('common.loading')}</p>
   if (!book) return <p>{t('bookDetails.notFound')}</p>
@@ -117,6 +128,71 @@ export function BookDetailsPage() {
         onError: (error) => {
           console.error(error)
           alert(t('bookDetails.wishlistError'))
+        },
+      }
+    )
+  }
+
+  const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString('de-DE', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    })
+
+  const handleAddComment = () => {
+    if (!id || !user || !newComment.trim()) return
+
+    addComment.mutate(
+      { bookId: id, userId: user.id, comment: newComment.trim() },
+      {
+        onSuccess: () => setNewComment(''),
+        onError: (error) => {
+          console.error(error)
+          alert(t('comments.addError'))
+        },
+      }
+    )
+  }
+
+  const handleStartEditComment = (commentId: string, currentText: string) => {
+    setEditingCommentId(commentId)
+    setEditingCommentText(currentText)
+  }
+
+  const handleCancelEditComment = () => {
+    setEditingCommentId(null)
+    setEditingCommentText('')
+  }
+
+  const handleSaveEditComment = () => {
+    if (!id || !editingCommentId || !editingCommentText.trim()) return
+
+    updateComment.mutate(
+      { id: editingCommentId, bookId: id, comment: editingCommentText.trim() },
+      {
+        onSuccess: () => {
+          setEditingCommentId(null)
+          setEditingCommentText('')
+        },
+        onError: (error) => {
+          console.error(error)
+          alert(t('comments.updateError'))
+        },
+      }
+    )
+  }
+
+  const handleDeleteComment = (commentId: string) => {
+    if (!id) return
+    if (!window.confirm(t('comments.deleteConfirm'))) return
+
+    deleteComment.mutate(
+      { id: commentId, bookId: id },
+      {
+        onError: (error) => {
+          console.error(error)
+          alert(t('comments.deleteError'))
         },
       }
     )
@@ -358,6 +434,101 @@ export function BookDetailsPage() {
               )}
             </div>
           </div>
+        </div>
+
+        {/* COMMENTS */}
+        <div className="mt-6">
+          <h2 className="mb-3 text-lg font-semibold text-gray-900">{t('comments.heading')}</h2>
+
+          <div className="mb-4 flex flex-col gap-2 sm:flex-row">
+            <textarea
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder={t('comments.placeholder')}
+              rows={2}
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+            />
+            <button
+              onClick={handleAddComment}
+              disabled={addComment.isPending || !newComment.trim()}
+              className="shrink-0 rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
+            >
+              {t('comments.add')}
+            </button>
+          </div>
+
+          {comments.length === 0 ? (
+            <p className="text-sm text-gray-600">{t('comments.empty')}</p>
+          ) : (
+            <ul className="space-y-3">
+              {comments.map((c) => {
+                const commenterName = users.find((u) => u.id === c.user_id)?.name ?? t('common.unknown')
+                const isCommentAuthor = c.user_id === user?.id
+                const isEditing = editingCommentId === c.id
+
+                return (
+                  <li key={c.id} className="rounded-lg border border-gray-200 p-3">
+                    <div className="mb-1 flex flex-wrap items-center justify-between gap-2 text-sm">
+                      <p className="font-semibold text-gray-900">
+                        {commenterName}
+                        <span className="ml-2 font-normal text-gray-500">
+                          {formatDate(c.created_at)}
+                          {c.updated_at !== c.created_at && ` ${t('comments.edited')}`}
+                        </span>
+                      </p>
+                      {(isCommentAuthor || isAdmin) && !isEditing && (
+                        <div className="flex gap-2">
+                          {isCommentAuthor && (
+                            <button
+                              onClick={() => handleStartEditComment(c.id, c.comment)}
+                              className="text-xs text-gray-600 hover:underline"
+                            >
+                              {t('comments.edit')}
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleDeleteComment(c.id)}
+                            disabled={deleteComment.isPending}
+                            className="text-xs text-red-600 hover:underline disabled:opacity-50"
+                          >
+                            {t('comments.delete')}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {isEditing ? (
+                      <div className="flex flex-col gap-2">
+                        <textarea
+                          value={editingCommentText}
+                          onChange={(e) => setEditingCommentText(e.target.value)}
+                          rows={2}
+                          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            onClick={handleSaveEditComment}
+                            disabled={updateComment.isPending || !editingCommentText.trim()}
+                            className="rounded-md bg-brand px-3 py-1.5 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
+                          >
+                            {t('comments.save')}
+                          </button>
+                          <button
+                            onClick={handleCancelEditComment}
+                            className="rounded-md bg-gray-100 px-3 py-1.5 text-sm text-gray-800 hover:bg-gray-200"
+                          >
+                            {t('comments.cancel')}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="whitespace-pre-line text-sm text-gray-700">{c.comment}</p>
+                    )}
+                  </li>
+                )
+              })}
+            </ul>
+          )}
         </div>
       </div>
     </div>

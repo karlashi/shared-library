@@ -236,5 +236,20 @@
     "savingAll": "Guardando...",
     "saveSummary": "Guardados {{saved}} de {{total}} libros.",
     "saveAllError": "Hubo un error al guardar algunos libros."
+  },
+  "comments": {
+    "heading": "💬 Comentarios",
+    "placeholder": "Escribe un comentario...",
+    "add": "Comentar",
+    "edit": "Editar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edited": "(editado)",
+    "empty": "Todavía no hay comentarios. ¡Sé el primero!",
+    "deleteConfirm": "¿Seguro que quieres eliminar este comentario?",
+    "addError": "Error al añadir el comentario",
+    "updateError": "Error al actualizar el comentario",
+    "deleteError": "Error al eliminar el comentario"
   }
 }
