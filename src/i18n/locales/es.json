@@ -160,7 +160,12 @@
     "tags": "Etiquetas:",
     "viewLink": "Ver enlace",
     "addTagError": "Error al añadir la etiqueta",
-    "removeTagError": "Error al eliminar la etiqueta"
+    "removeTagError": "Error al eliminar la etiqueta",
+    "transferTo": "Transferir a...",
+    "transfer": "Transferir",
+    "transferConfirm": "¿Seguro que quieres transferir la propiedad de este libro? Se quitará cualquier marca de regalo/venta. Esta acción no se puede deshacer.",
+    "transferSuccess": "Libro transferido correctamente",
+    "transferError": "Error al transferir el libro"
   },
   "bookCard": {
     "lentTo": "Prestado a:",

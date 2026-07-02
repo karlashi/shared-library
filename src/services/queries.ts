@@ -127,6 +127,22 @@ export function useSetArchived() {
   })
 }
 
+export function useTransferBook() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (vars: { bookId: string; newOwnerId: string }) => {
+      const { error } = await supabase
+        .from('books')
+        .update({ owner_id: vars.newOwnerId, listing_type: null, listing_comment: null })
+        .eq('id', vars.bookId)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['books'] })
+    },
+  })
+}
+
 export function useAllTags() {
   return useQuery({
     queryKey: ['tags'],

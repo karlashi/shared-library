@@ -15,6 +15,7 @@ import {
   useRemoveTag,
   useWishlist,
   useToggleWishlist,
+  useTransferBook,
 } from '../services/queries'
 import { TagInput } from '../components/TagInput'
 
@@ -38,8 +39,10 @@ export function BookDetailsPage() {
   const removeTag = useRemoveTag()
   const { data: wishlist = [] } = useWishlist(user?.id)
   const toggleWishlist = useToggleWishlist()
+  const transferBook = useTransferBook()
 
   const [selectedUser, setSelectedUser] = useState('')
+  const [selectedTransferUser, setSelectedTransferUser] = useState('')
 
   if (isBookLoading) return <p>{t('common.loading')}</p>
   if (!book) return <p>{t('bookDetails.notFound')}</p>
@@ -84,6 +87,25 @@ export function BookDetailsPage() {
         alert(t('bookDetails.markReturnedError'))
       },
     })
+  }
+
+  const handleTransfer = () => {
+    if (!selectedTransferUser || !id) return alert(t('bookDetails.selectUserAlert'))
+    if (!window.confirm(t('bookDetails.transferConfirm'))) return
+
+    transferBook.mutate(
+      { bookId: id, newOwnerId: selectedTransferUser },
+      {
+        onSuccess: () => {
+          alert(t('bookDetails.transferSuccess'))
+          setSelectedTransferUser('')
+        },
+        onError: (error) => {
+          console.error(error)
+          alert(t('bookDetails.transferError'))
+        },
+      }
+    )
   }
 
   const handleToggleWishlist = () => {
@@ -270,6 +292,34 @@ export function BookDetailsPage() {
                   className="mt-2 rounded-md bg-brand px-4 py-2 font-medium text-white hover:opacity-90"
                 >
                   {t('bookDetails.lend')}
+                </button>
+              </div>
+            )}
+
+            {(isOwner || isAdmin) && !isBorrowed && (
+              <div className="mt-5">
+                <h4 className="mb-2 font-medium text-gray-900">{t('bookDetails.transferTo')}</h4>
+
+                <select
+                  value={selectedTransferUser}
+                  onChange={(e) => setSelectedTransferUser(e.target.value)}
+                  className="w-full rounded-md border border-gray-300 px-3 py-2"
+                >
+                  <option value="">{t('bookDetails.selectUser')}</option>
+
+                  {users.filter((u) => u.id !== book.owner_id).map((u) => (
+                    <option key={u.id} value={u.id}>
+                      {u.name}
+                    </option>
+                  ))}
+                </select>
+
+                <button
+                  onClick={handleTransfer}
+                  disabled={transferBook.isPending}
+                  className="mt-2 rounded-md bg-gray-100 px-4 py-2 text-gray-800 hover:bg-gray-200 disabled:opacity-50"
+                >
+                  {t('bookDetails.transfer')}
                 </button>
               </div>
             )}
