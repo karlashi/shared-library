@@ -35,6 +35,8 @@ and self-host their own instance.
   dictionary; adding a new language is copying one file and translating it, not hunting
   through the codebase
 
+<img width="1125" height="925" alt="image" src="https://github.com/user-attachments/assets/31e6e026-f63c-4452-adf1-41044b517f15" />
+
 ## Features
 
 - **Accounts** — email/password login and registration, gated behind auth (no public
