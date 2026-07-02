@@ -13,6 +13,13 @@ Spanish, see the in-app "Novedades" page (`/changelog`). For full detail on any 
   expensive Spanish-language books in Germany) instead of opening straight into a feature
   list; added a Roadmap section.
 - Replaced the leftover scaffold favicon/tab title with the app's own branding.
+- **Account deletion now also blocks while borrowing.** The original guard only checked
+  outbound loans (books you own that are lent out); a user could delete their account
+  while still holding someone else's borrowed book, leaving the owner unable to tell who
+  has it once the borrower's name was anonymized. Added a symmetric check on
+  `l.borrower_id` alongside the existing `b.owner_id` one, in the same
+  `delete_own_account()` function — no application code changes needed, since the
+  frontend already surfaces the raised Postgres exception message directly.
 
 ## 2026-07-01
 
