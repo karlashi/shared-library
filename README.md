@@ -151,3 +151,8 @@ Environment Variables settings — the app fails fast at startup if they're miss
       matches)
 - [ ] Availability/reservation status once a library has enough members for it to matter
 - [ ] A second language file, once there's a community ready to use it
+
+## History
+
+See [CHANGELOG.md](./CHANGELOG.md) for a technical history of what's been built and why.
+(There's also a Spanish, user-facing version in the app itself, under "Novedades".)
