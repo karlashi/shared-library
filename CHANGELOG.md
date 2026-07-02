@@ -92,7 +92,3 @@ feature passes, each planned, built, and verified independently.
 - Tag autocomplete, derived from existing books' tags (no new table yet — that came
   later with collaborative tags).
 
-## Can this go on GitHub?
-
-Yes — it's a plain file in the repo (`CHANGELOG.md`), same as this README. Once the
-repository is public, it renders and is browsable there like any other Markdown file.
