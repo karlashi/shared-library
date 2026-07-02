@@ -27,6 +27,13 @@ Spanish, see the in-app "Novedades" page (`/changelog`). For full detail on any 
   delete it, plus an admin can delete (moderation) — the book's *owner* has no special
   rights here, unlike tags, since this is meant to be a personal voice, not something the
   owner curates.
+- **Prev/next navigation on the book detail page.** Browsing the gallery meant click a
+  book, "Volver" back to the grid, find your place, click the next one. `BookCard` now
+  passes the current gallery order (post search/filter/sort) as router state on
+  navigation; the detail page reads it to show Anterior/Siguiente plus a "3 de 12"
+  position indicator, stepping through exactly what was on screen. Falls back to all
+  active books, most-recent-first, when there's no router state (direct link, shared URL,
+  or a page refresh).
 
 ## 2026-07-01
 
