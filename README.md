@@ -1,7 +1,39 @@
 # 📚 Biblioteca Compartida
 
-A shared library app for a small private group: list your own books, borrow from other
-members, and keep track of who has what. Built with React, TypeScript, and Supabase.
+**Share physical books with your community — in your own language.**
+
+This started from a simple, annoying problem: finding books in Spanish in Germany is
+hard and expensive. I met a small group of Spanish speakers near where I live and wanted
+a way for us to pool what we already own, lend books to each other, and actually keep
+track of who has what — without turning it into a marketplace, and without losing a book
+to "I forgot who I lent that to six months ago."
+
+It's built to outgrow that one group. The translation groundwork exists because a
+Brazilian community nearby could use the exact same thing in Portuguese — and the idea
+generalizes to any group that shares a language, a building, a classroom, or a
+neighborhood, and would rather borrow a book from someone nearby than pay import prices
+for one they'll read once. The project is currently private while it's still just my own
+group using it day to day, but the plan is to open it up so other communities can fork
+and self-host their own instance.
+
+## Highlights
+
+- 📚 **Community library** — a shared catalog, multiple members, lending with a full
+  loan history, wishlists, and gift/sale marking with a one-click ownership transfer once
+  a book actually changes hands
+- 📖 **Rich book metadata with minimal typing** — scan a barcode or type an ISBN to
+  auto-fill title, author, cover, and description (Google Books, with an Open Library
+  fallback); collaborative tags anyone can add; a bulk editor that surfaces every
+  incomplete book so gaps get filled instead of forgotten
+- 🔍 **Easy discovery** — search by title, author, or tag; filter by availability or
+  gift/sale status; sort by newest or alphabetical; hide your own books by default so the
+  grid shows what you could actually borrow
+- 👤 **Community management** — email/password accounts, profiles, admin roles for
+  cleaning up after an inactive member, and self-service account deletion that respects
+  everyone else's loan history
+- 🌐 **Built to be forked into another language** — all UI text lives in one translation
+  dictionary; adding a new language is copying one file and translating it, not hunting
+  through the codebase
 
 ## Features
 
@@ -24,17 +56,19 @@ members, and keep track of who has what. Built with React, TypeScript, and Supab
 - **Lending** — owners lend books to other members and mark them returned; a book can't
   be lent out twice at once, and can't be deleted if it has any borrow history
   (protects everyone else's records)
-- **Gift/sale marking** — mark a book as free-to-take or for sale, with an optional
-  comment, visible on its card and detail page
+- **Gift/sale marking & ownership transfer** — mark a book as free-to-take or for sale,
+  with an optional comment; once it's actually handed off, the owner (or an admin) can
+  transfer it to the new owner in one action, which also clears the listing
 - **Wishlist** — privately mark any book you'd like to borrow eventually; only you can
   see your own list, from your profile page
 - **Profile page** — edit your display name, see your own books (including archived and
   wishlisted ones), and view your full borrow/lending history
 - **Stats page** — a quick overview of the library: active/archived books, members,
   and loan counts
-- **Search & sort** — search by title, author, or tag; sort by most recently added or
-  alphabetically; toggle "Solo incompletos" and "Ocultar mis libros" (on by default, so the
-  home grid focuses on what you could borrow from others) narrow the grid further
+- **Search & sort** — search by title, author, or tag; filter by availability status or
+  gift/sale marking; sort by most recently added or alphabetically; toggle "Solo
+  incompletos" and "Ocultar mis libros" (on by default, so the home grid focuses on what
+  you could borrow from others) narrow the grid further
 - **Admin roles** — designated admins can edit, archive, delete, or force-return any
   book/loan in the library (for cleaning up after an inactive member), granted manually
   via the database — there's no self-service way to become an admin
@@ -42,7 +76,7 @@ members, and keep track of who has what. Built with React, TypeScript, and Supab
   to About
 - **Translatable UI** — all interactive text lives in `src/i18n/` as a dictionary
   (`react-i18next`), currently shipping Spanish only. To add another language: copy
-  `src/i18n/locales/es.json` to e.g. `en.json`, translate the values, and register it in
+  `src/i18n/locales/es.json` to e.g. `pt.json`, translate the values, and register it in
   the `resources` object in `src/i18n/index.ts`. (The About/Changelog pages' prose and the
   `books.status` database values are intentionally left as plain Spanish rather than pulled
   into the dictionary — that content is specific to this deployment, not reusable UI text.)
@@ -108,3 +142,12 @@ npm run dev
 Deployed on [Vercel](https://vercel.com/), connected to this repo's `main` branch.
 Remember to set the same environment variables from `.env.local` in the Vercel project's
 Environment Variables settings — the app fails fast at startup if they're missing.
+
+## Roadmap
+
+- [x] Transfer ownership when a book is given away or sold
+- [ ] Let a member signal they'd like to borrow a book, visible to its owner
+- [ ] Better search matching (typos, accents, description text — not just exact tag
+      matches)
+- [ ] Availability/reservation status once a library has enough members for it to matter
+- [ ] A second language file, once there's a community ready to use it
