@@ -41,6 +41,12 @@ Spanish, see the in-app "Novedades" page (`/changelog`). For full detail on any 
   single-value, and curated; tags stay free-form and multi-value. Done directly via SQL,
   not through any automated/LLM process — no Add/Edit form field or Home filter yet, that's
   intentionally a separate, later pass.
+- **Cover uploads moved into the bulk editor itself.** Filling a missing cover from
+  "Completar libros" meant leaving for that book's Edit page, which discarded any unsaved
+  edits on every other row (all local component state). The "Sin portada" placeholder is
+  now a file input that uploads inline, reusing the same `validateImageFile`/
+  `uploadCoverImage` used on Add/Edit Book, writing into the same per-row local state as
+  description/age/tags so it saves together with everything else.
 
 ## 2026-07-01
 
