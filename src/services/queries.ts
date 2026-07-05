@@ -44,7 +44,7 @@ export function useProfiles() {
   return useQuery({
     queryKey: ['profiles'],
     queryFn: async (): Promise<Profile[]> => {
-      const { data, error } = await supabase.from('profiles').select('*')
+      const { data, error } = await supabase.from('profiles').select('id, name, is_admin, approved')
       if (error) throw error
       return data ?? []
     },
@@ -325,6 +325,22 @@ export function useUpdateProfile() {
         .from('profiles')
         .update({ name: vars.name })
         .eq('id', vars.userId)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profiles'] })
+    },
+  })
+}
+
+export function useApproveProfile() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (userId: string) => {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ approved: true })
+        .eq('id', userId)
       if (error) throw error
     },
     onSuccess: () => {

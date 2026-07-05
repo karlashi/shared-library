@@ -21,8 +21,9 @@ import { BulkEditPage } from './pages/BulkEditPage'
 
 function Home() {
   const { t } = useTranslation()
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
   const { data: books = [] } = useBooks()
+  const isApproved = !!profile?.approved
 
   const [search, setSearch] = useState('')
   const [filterValue, setFilterValue] = useState('all')
@@ -88,18 +89,26 @@ function Home() {
       <div className="max-w-6xl mx-auto px-4 py-6 sm:px-6">
         <Header />
 
-        <div className="mb-6 flex flex-wrap gap-2">
-          <Link to="/add">
-            <button className="rounded-md bg-brand px-4 py-2 font-medium text-white hover:opacity-90">
-              {t('home.addBook')}
-            </button>
-          </Link>
-          <Link to="/bulk-edit">
-            <button className="rounded-md bg-gray-100 px-4 py-2 font-medium text-gray-800 hover:bg-gray-200">
-              {t('home.bulkEdit')}
-            </button>
-          </Link>
-        </div>
+        {profile && !isApproved && (
+          <div className="mb-6 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            {t('home.pendingApproval')}
+          </div>
+        )}
+
+        {isApproved && (
+          <div className="mb-6 flex flex-wrap gap-2">
+            <Link to="/add">
+              <button className="rounded-md bg-brand px-4 py-2 font-medium text-white hover:opacity-90">
+                {t('home.addBook')}
+              </button>
+            </Link>
+            <Link to="/bulk-edit">
+              <button className="rounded-md bg-gray-100 px-4 py-2 font-medium text-gray-800 hover:bg-gray-200">
+                {t('home.bulkEdit')}
+              </button>
+            </Link>
+          </div>
+        )}
 
         {/* SEARCH + FILTER */}
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">

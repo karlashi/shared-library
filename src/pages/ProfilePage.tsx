@@ -11,6 +11,7 @@ import {
   useReturnBook,
   useDeleteAccount,
   useWishlist,
+  useApproveProfile,
 } from '../services/queries'
 import { BookCard } from '../components/BookCard'
 import { Header } from '../components/Header'
@@ -23,6 +24,7 @@ export function ProfilePage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { user, profile, signOut } = useAuth()
+  const isAdmin = !!profile?.is_admin
 
   const { data: books = [] } = useBooks()
   const { data: profiles = [] } = useProfiles()
@@ -32,6 +34,18 @@ export function ProfilePage() {
   const updateProfile = useUpdateProfile()
   const returnBook = useReturnBook()
   const deleteAccount = useDeleteAccount()
+  const approveProfile = useApproveProfile()
+
+  const pendingProfiles = profiles.filter((p) => !p.approved)
+
+  const handleApprove = (userId: string) => {
+    approveProfile.mutate(userId, {
+      onError: (error) => {
+        console.error(error)
+        alert(t('profile.approveError'))
+      },
+    })
+  }
 
   const {
     register,
@@ -127,6 +141,30 @@ export function ProfilePage() {
             {updateProfile.isPending ? t('profile.saving') : t('profile.saveChanges')}
           </button>
         </form>
+
+        {/* PENDING MEMBER APPROVAL (admin only) */}
+        {isAdmin && pendingProfiles.length > 0 && (
+          <div className="mb-8">
+            <h2 className="mb-3 text-lg font-semibold text-gray-900">{t('profile.pendingMembers')}</h2>
+            <ul className="space-y-2">
+              {pendingProfiles.map((p) => (
+                <li
+                  key={p.id}
+                  className="flex items-center justify-between rounded-lg border border-gray-200 p-3"
+                >
+                  <span className="font-medium text-gray-900">{p.name}</span>
+                  <button
+                    onClick={() => handleApprove(p.id)}
+                    disabled={approveProfile.isPending}
+                    className="rounded-md bg-brand px-3 py-1.5 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
+                  >
+                    {t('profile.approve')}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {/* MY BOOKS */}
         <h2 className="mb-3 text-lg font-semibold text-gray-900">{t('profile.myBooks')}</h2>

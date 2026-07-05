@@ -9,6 +9,14 @@ export function ChangelogPage() {
 
         <div className="space-y-8 text-gray-700">
           <div>
+            <h2 className="mb-2 font-semibold text-gray-900">5 de julio de 2026</h2>
+            <ul className="list-disc space-y-1 pl-5">
+              <li>🔐 Mejoras de seguridad: reforzamos varios permisos internos de la aplicación.</li>
+              <li>✅ Aprobación de nuevos miembros: las cuentas nuevas ahora quedan pendientes de aprobación. Mientras esperan, pueden explorar y buscar en la biblioteca con normalidad, pero necesitan que un administrador las apruebe para poder pedir prestado, comentar, añadir etiquetas o añadir libros.</li>
+            </ul>
+          </div>
+
+          <div>
             <h2 className="mb-2 font-semibold text-gray-900">2 de julio de 2026</h2>
             <ul className="list-disc space-y-1 pl-5">
               <li>🔄 Transferir un libro: si regalas o vendes un libro, ahora puedes transferirle la propiedad a quien lo recibe directamente desde la página del libro (no disponible mientras el libro esté prestado).</li>

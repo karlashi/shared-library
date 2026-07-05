@@ -5,7 +5,7 @@ import type { Profile } from '../types/Profile'
 export async function getProfile(userId: string): Promise<Profile | null> {
   const { data, error } = await supabase
     .from('profiles')
-    .select('*')
+    .select('id, name, is_admin, approved')
     .eq('id', userId)
     .single()
 
@@ -27,7 +27,7 @@ export async function getOrCreateProfile(user: User): Promise<Profile | null> {
   const { data, error } = await supabase
     .from('profiles')
     .insert({ id: user.id, name: fallbackName })
-    .select()
+    .select('id, name, is_admin, approved')
     .single()
 
   if (error) {

@@ -32,6 +32,7 @@ export function BookDetailsPage() {
 
   const { user, profile } = useAuth()
   const isAdmin = !!profile?.is_admin
+  const isApproved = !!profile?.approved
   const { data: book, isLoading: isBookLoading } = useBook(id)
   const { data: allBooks = [] } = useBooks()
   const { data: owner } = useProfile(book?.owner_id)
@@ -322,7 +323,7 @@ export function BookDetailsPage() {
             </p>
 
             {/* WISHLIST TOGGLE */}
-            {!isOwner && !book.archived && (
+            {isApproved && !isOwner && !book.archived && (
               <button
                 onClick={handleToggleWishlist}
                 disabled={toggleWishlist.isPending}
@@ -372,7 +373,7 @@ export function BookDetailsPage() {
             )}
 
             {/* OWNER/ADMIN LENDING / RETURN CONTROL */}
-            {(isOwner || isAdmin) && isBorrowed && (
+            {isApproved && (isOwner || isAdmin) && isBorrowed && (
               <div className="mt-5">
                 <button
                   onClick={markAsReturned}
@@ -384,7 +385,7 @@ export function BookDetailsPage() {
               </div>
             )}
 
-            {isOwner && !isBorrowed && (
+            {isApproved && isOwner && !isBorrowed && (
               <div className="mt-5">
                 <h4 className="mb-2 font-medium text-gray-900">{t('bookDetails.lendToUser')}</h4>
 
@@ -411,7 +412,7 @@ export function BookDetailsPage() {
               </div>
             )}
 
-            {(isOwner || isAdmin) && !isBorrowed && (
+            {isApproved && (isOwner || isAdmin) && !isBorrowed && (
               <div className="mt-5">
                 <h4 className="mb-2 font-medium text-gray-900">{t('bookDetails.transferTo')}</h4>
 
@@ -460,6 +461,7 @@ export function BookDetailsPage() {
                     onChange={handleTagsChange}
                     suggestions={allTags}
                     canRemove={canRemoveTag}
+                    readOnly={!isApproved}
                   />
                 </div>
               </div>
@@ -479,22 +481,24 @@ export function BookDetailsPage() {
         <div className="mt-6">
           <h2 className="mb-3 text-lg font-semibold text-gray-900">{t('comments.heading')}</h2>
 
-          <div className="mb-4 flex flex-col gap-2 sm:flex-row">
-            <textarea
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder={t('comments.placeholder')}
-              rows={2}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-            />
-            <button
-              onClick={handleAddComment}
-              disabled={addComment.isPending || !newComment.trim()}
-              className="shrink-0 rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
-            >
-              {t('comments.add')}
-            </button>
-          </div>
+          {isApproved && (
+            <div className="mb-4 flex flex-col gap-2 sm:flex-row">
+              <textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder={t('comments.placeholder')}
+                rows={2}
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+              />
+              <button
+                onClick={handleAddComment}
+                disabled={addComment.isPending || !newComment.trim()}
+                className="shrink-0 rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
+              >
+                {t('comments.add')}
+              </button>
+            </div>
+          )}
 
           {comments.length === 0 ? (
             <p className="text-sm text-gray-600">{t('comments.empty')}</p>

@@ -6,9 +6,10 @@ type TagInputProps = {
   onChange: (tags: string[]) => void
   suggestions: string[]
   canRemove?: (tag: string) => boolean
+  readOnly?: boolean
 }
 
-export function TagInput({ value, onChange, suggestions, canRemove = () => true }: TagInputProps) {
+export function TagInput({ value, onChange, suggestions, canRemove = () => true, readOnly = false }: TagInputProps) {
   const { t } = useTranslation()
   const [inputValue, setInputValue] = useState('')
   const [highlightedIndex, setHighlightedIndex] = useState(-1)
@@ -67,6 +68,21 @@ export function TagInput({ value, onChange, suggestions, canRemove = () => true 
       const lastTag = value[value.length - 1]
       if (canRemove(lastTag)) removeTag(lastTag)
     }
+  }
+
+  if (readOnly) {
+    return (
+      <div className="flex flex-wrap gap-1.5">
+        {value.map((tag) => (
+          <span
+            key={tag}
+            className="rounded bg-gray-100 px-2 py-0.5 text-sm text-gray-800"
+          >
+            {tag}
+          </span>
+        ))}
+      </div>
+    )
   }
 
   return (

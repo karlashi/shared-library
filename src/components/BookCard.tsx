@@ -18,6 +18,7 @@ export function BookCard({ book, navList }: { book: Book; navList?: string[] }) 
 
   const isOwner = book.owner_id === user?.id
   const isAdmin = !!profile?.is_admin
+  const isApproved = !!profile?.approved
   const borrowerName = users.find((u) => u.id === book.borrowedBy)?.name ?? t('bookCard.someone')
 
   const lendToUser = () => {
@@ -103,7 +104,7 @@ export function BookCard({ book, navList }: { book: Book; navList?: string[] }) 
       )}
 
       {/* OWNER/ADMIN RETURN CONTROL */}
-      {(isOwner || isAdmin) && book.isBorrowed && (
+      {isApproved && (isOwner || isAdmin) && book.isBorrowed && (
         <div className="mt-2">
           <button
             onClick={markAsReturned}
@@ -116,7 +117,7 @@ export function BookCard({ book, navList }: { book: Book; navList?: string[] }) 
       )}
 
       {/* OWNER LEND CONTROL */}
-      {isOwner && !book.isBorrowed && (
+      {isApproved && isOwner && !book.isBorrowed && (
         <div className="mt-2">
           <select
             value={selectedUser}

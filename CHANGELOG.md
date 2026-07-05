@@ -4,6 +4,36 @@ A technical history of this project, grouped by day. For a user-facing summary i
 Spanish, see the in-app "Novedades" page (`/changelog`). For full detail on any entry,
 `git log` has the complete commit messages this file summarizes.
 
+## 2026-07-05
+
+- **Fixed a live privilege-escalation hole.** Any authenticated user could set their own
+  `profiles.is_admin` to `true` — the update policy only checked `auth.uid() = id`, with
+  no restriction on which columns could change, and RLS/column grants don't stop a client
+  from calling the API directly regardless of what the UI exposes. Confirmed the hole was
+  real by signing in as a disposable test account and running the update directly against
+  the API. Fixed with a `before update` trigger on `profiles` that reverts any change to
+  `is_admin` made by the `authenticated` role, leaving direct/service-role SQL (how admin
+  status is granted today) unaffected. Verified the same disposable-account attack no
+  longer works post-fix.
+- **Fixed member email exposure.** While testing the above, discovered `profiles` has an
+  `email` column the app's TypeScript types didn't declare — since `useProfiles()` did
+  `select('*')` and the table's SELECT policy is permissive for any authenticated member,
+  every member's real email was reachable by any other member via the network response,
+  even though the UI never displayed it. Switched all `profiles` queries to explicit
+  safe columns (`id, name, is_admin, approved`) and locked it down at the grant level:
+  `revoke select on profiles from authenticated, anon` + `grant select (id, name,
+  is_admin, approved)` — a plain per-column `revoke` turned out to be a no-op against a
+  pre-existing table-wide grant, confirmed by checking `pg_attribute.attacl` directly.
+- **New-member approval gate, read-only until approved.** Registration was previously
+  wide open with no review step. Added `profiles.approved` (existing members
+  grandfathered to `true`), and required it in the `with check` of every write-causing
+  insert policy — `books`, `book_tags`, `book_comments`, `loans`, `wishlist` — enforced at
+  the database layer, not just hidden in the UI. Reads stay open to any authenticated
+  member, by design: an unapproved member can fully browse/search/filter the catalog, just
+  can't add books, lend/borrow, tag, or comment until approved, so the wait doesn't kill
+  their interest. New "Miembros pendientes de aprobación" section on the Profile page
+  (admin-only) lists anyone awaiting approval with a one-click "Aprobar" button.
+
 ## 2026-07-02
 
 - **Transfer ownership** — owner or admin can hand a book to another member from its

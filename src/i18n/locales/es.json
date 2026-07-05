@@ -52,6 +52,9 @@
     "nameRequired": "El nombre es obligatorio",
     "saving": "Guardando...",
     "saveChanges": "Guardar cambios",
+    "pendingMembers": "🕓 Miembros pendientes de aprobación",
+    "approve": "Aprobar",
+    "approveError": "Error al aprobar el miembro",
     "myBooks": "📚 Mis libros",
     "noBooksYet": "Todavía no has añadido ningún libro.",
     "archived": "📦 Archivados",
@@ -221,7 +224,8 @@
     "sortRecent": "Más recientes",
     "sortTitle": "Título (A-Z)",
     "incompleteOnly": "Solo incompletos",
-    "hideMyBooks": "Ocultar mis libros"
+    "hideMyBooks": "Ocultar mis libros",
+    "pendingApproval": "Tu cuenta está pendiente de aprobación. Mientras tanto puedes explorar la biblioteca; podrás pedir prestado, comentar o añadir libros una vez aprobada."
   },
   "categories": {
     "infantil": "Infantil",
