@@ -15,7 +15,7 @@ export function ChangelogPage() {
               <li>🔒 Eliminar cuenta: ahora también se bloquea si tienes libros de otras personas pedidos prestados, no solo si tú tienes libros prestados a otros.</li>
               <li>💬 Comentarios en los libros: comparte tu opinión o reacción sobre un libro ("a mi hija le encantó", "daba un poco de miedo") en su página de detalle.</li>
               <li>↔️ Navegación anterior/siguiente: en la página de un libro, puedes pasar al siguiente o anterior de la lista que estabas viendo, sin volver a la biblioteca cada vez.</li>
-              <li>🏷️ Categorías grandes: hemos empezado a categorizar los libros (Infantil, Juvenil, Adultos, Cómic, Poesía, Arte, Aprendizaje de idiomas). Todavía no se puede filtrar por categoría desde la app, pero ya está la base para hacerlo pronto.</li>
+              <li>🏷️ Categorías: los libros ahora tienen una categoría (Infantil, Juvenil, Adultos, Cómic, Poesía, Arte, Aprendizaje de idiomas), visible como etiqueta en cada libro. Puedes filtrar la biblioteca por categoría, y elegirla o cambiarla al añadir o editar un libro.</li>
             </ul>
           </div>
 

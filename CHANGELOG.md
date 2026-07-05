@@ -47,6 +47,15 @@ Spanish, see the in-app "Novedades" page (`/changelog`). For full detail on any 
   now a file input that uploads inline, reusing the same `validateImageFile`/
   `uploadCoverImage` used on Add/Edit Book, writing into the same per-row local state as
   description/age/tags so it saves together with everything else.
+- **Category filter, card badge, and Add/Edit form field** — the UI layer on top of the
+  categorization pass above. Migrated the stored values from literal Spanish text to
+  stable codes (`infantil`, `juvenil`, etc.), matching how `listing_type` already works,
+  so labels route through i18n instead of being baked into the database. Home now has a
+  third, separate filter dropdown for category (kept distinct from the existing status
+  filter — different axis, confirmed with the user rather than folding it in); each book
+  card shows a small category badge; Add/Edit Book both gained a category `<select>` so
+  new books get categorized going forward and existing ones can be corrected without a
+  manual SQL pass.
 
 ## 2026-07-01
 

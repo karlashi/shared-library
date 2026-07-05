@@ -15,6 +15,7 @@ export type Book = {
   listing_type?: 'gift' | 'sale' | null
   listing_comment?: string | null
   archived?: boolean
+  category?: string | null
 
   isBorrowed?: boolean
   borrowedBy?: string | null

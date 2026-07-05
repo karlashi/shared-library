@@ -100,7 +100,9 @@
     "saving": "Guardando...",
     "createdSuccess": "Libro creado 📚",
     "mustBeLoggedIn": "Debes iniciar sesión",
-    "saveError": "Error al guardar el libro"
+    "saveError": "Error al guardar el libro",
+    "category": "Categoría",
+    "categoryNone": "Sin categoría"
   },
   "editBook": {
     "heading": "Editar libro",
@@ -109,6 +111,8 @@
     "author": "Autor",
     "description": "Descripción",
     "isbn": "ISBN",
+    "category": "Categoría",
+    "categoryNone": "Sin categoría",
     "tagsHint": "Las etiquetas se gestionan desde la página del libro, donde cualquier miembro puede añadir las suyas.",
     "cover": "Portada (imagen)",
     "uploadImageError": "Error subiendo imagen",
@@ -215,6 +219,15 @@
     "sortTitle": "Título (A-Z)",
     "incompleteOnly": "Solo incompletos",
     "hideMyBooks": "Ocultar mis libros"
+  },
+  "categories": {
+    "infantil": "Infantil",
+    "juvenil": "Juvenil",
+    "adultos": "Adultos",
+    "comic": "Cómic / Novela gráfica",
+    "poesia": "Poesía",
+    "arte": "Arte",
+    "idiomas": "Aprendizaje de idiomas"
   },
   "errorBoundary": {
     "heading": "Algo salió mal",

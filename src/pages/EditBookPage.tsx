@@ -18,6 +18,7 @@ type FormValues = {
   link: string
   listing_type: '' | 'gift' | 'sale'
   listing_comment: string
+  category: string
 }
 
 export function EditBookPage() {
@@ -44,7 +45,7 @@ export function EditBookPage() {
     defaultValues: {
       title: '', author: '', description: '', isbn: '',
       collection: '', age_recommendation: '', link: '',
-      listing_type: '', listing_comment: '',
+      listing_type: '', listing_comment: '', category: '',
     },
   })
 
@@ -63,6 +64,7 @@ export function EditBookPage() {
       link: book.link || '',
       listing_type: book.listing_type || '',
       listing_comment: book.listing_comment || '',
+      category: book.category || '',
     })
     setCoverUrl(book.cover_url || '')
   }, [book, reset])
@@ -82,6 +84,7 @@ export function EditBookPage() {
           link: values.link,
           listing_type: values.listing_type || null,
           listing_comment: values.listing_type ? values.listing_comment : null,
+          category: values.category || null,
         })
         .eq('id', id)
 
@@ -242,6 +245,23 @@ export function EditBookPage() {
               {...register('link')}
               className="w-full rounded-md border border-gray-300 px-3 py-2"
             />
+          </label>
+
+          <label className="block">
+            <span className="mb-1 block text-sm font-medium text-gray-700">{t('editBook.category')}</span>
+            <select
+              {...register('category')}
+              className="w-full rounded-md border border-gray-300 px-3 py-2"
+            >
+              <option value="">{t('editBook.categoryNone')}</option>
+              <option value="infantil">{t('categories.infantil')}</option>
+              <option value="juvenil">{t('categories.juvenil')}</option>
+              <option value="adultos">{t('categories.adultos')}</option>
+              <option value="comic">{t('categories.comic')}</option>
+              <option value="poesia">{t('categories.poesia')}</option>
+              <option value="arte">{t('categories.arte')}</option>
+              <option value="idiomas">{t('categories.idiomas')}</option>
+            </select>
           </label>
 
           <label className="block">

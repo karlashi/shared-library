@@ -23,6 +23,7 @@ type FormValues = {
   link: string
   age: string
   tags: string[]
+  category: string
 }
 
 export function AddBookPage() {
@@ -49,7 +50,7 @@ export function AddBookPage() {
   } = useForm<FormValues>({
     defaultValues: {
       title: '', author: '', description: '', isbn: '',
-      collection: '', link: '', age: '', tags: [],
+      collection: '', link: '', age: '', tags: [], category: '',
     },
   })
 
@@ -101,6 +102,7 @@ export function AddBookPage() {
         link: values.link,
         age_recommendation: values.age,
         cover_url: coverUrl,
+        category: values.category || null,
         owner_id: user.id,
         status: 'Disponible'
       }).select('id').single()
@@ -269,6 +271,23 @@ export function AddBookPage() {
                 <TagInput value={field.value} onChange={field.onChange} suggestions={allTags} />
               )}
             />
+          </label>
+
+          <label className="block">
+            <span className="mb-1 block text-sm font-medium text-gray-700">{t('addBook.category')}</span>
+            <select
+              {...register('category')}
+              className="w-full rounded-md border border-gray-300 px-3 py-2"
+            >
+              <option value="">{t('addBook.categoryNone')}</option>
+              <option value="infantil">{t('categories.infantil')}</option>
+              <option value="juvenil">{t('categories.juvenil')}</option>
+              <option value="adultos">{t('categories.adultos')}</option>
+              <option value="comic">{t('categories.comic')}</option>
+              <option value="poesia">{t('categories.poesia')}</option>
+              <option value="arte">{t('categories.arte')}</option>
+              <option value="idiomas">{t('categories.idiomas')}</option>
+            </select>
           </label>
 
           <label className="block">

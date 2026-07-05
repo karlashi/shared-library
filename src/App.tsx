@@ -25,6 +25,7 @@ function Home() {
 
   const [search, setSearch] = useState('')
   const [filterValue, setFilterValue] = useState('all')
+  const [categoryFilter, setCategoryFilter] = useState('all')
   const [sortBy, setSortBy] = useState<'recent' | 'title'>('recent')
   const [incompleteOnly, setIncompleteOnly] = useState(false)
   const [hideMyBooks, setHideMyBooks] = useState(true)
@@ -49,10 +50,11 @@ function Home() {
         (filterValue === 'gift' && book.listing_type === 'gift') ||
         (filterValue === 'sale' && book.listing_type === 'sale')
 
+      const matchesCategory = categoryFilter === 'all' || book.category === categoryFilter
       const matchesIncomplete = !incompleteOnly || isBookIncomplete(book)
       const matchesOwnBooks = !hideMyBooks || book.owner_id !== user?.id
 
-      return matchesSearch && matchesFilter && matchesIncomplete && matchesOwnBooks
+      return matchesSearch && matchesFilter && matchesCategory && matchesIncomplete && matchesOwnBooks
     })
     .sort((a, b) => {
       if (sortBy === 'title') return a.title.localeCompare(b.title, 'es')
@@ -99,6 +101,21 @@ function Home() {
             <option value="blocked">{t('home.blocked')}</option>
             <option value="gift">{t('bookCard.gift')}</option>
             <option value="sale">{t('bookCard.sale')}</option>
+          </select>
+
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="rounded-md border border-gray-300 px-3 py-2"
+          >
+            <option value="all">{t('home.all')}</option>
+            <option value="infantil">{t('categories.infantil')}</option>
+            <option value="juvenil">{t('categories.juvenil')}</option>
+            <option value="adultos">{t('categories.adultos')}</option>
+            <option value="comic">{t('categories.comic')}</option>
+            <option value="poesia">{t('categories.poesia')}</option>
+            <option value="arte">{t('categories.arte')}</option>
+            <option value="idiomas">{t('categories.idiomas')}</option>
           </select>
 
           <select

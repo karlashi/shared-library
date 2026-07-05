@@ -63,6 +63,14 @@ export function BookCard({ book, navList }: { book: Book; navList?: string[] }) 
         </div>
         <p className="text-sm text-gray-600 truncate">{book.author}</p>
 
+        {book.category && (
+          <p className="mt-1 text-xs">
+            <span className="rounded bg-gray-100 px-1.5 py-0.5 text-gray-700">
+              {t(`categories.${book.category}`)}
+            </span>
+          </p>
+        )}
+
         {book.cover_url && (
           <img
             src={book.cover_url}
