@@ -9,6 +9,17 @@ export function ChangelogPage() {
 
         <div className="space-y-8 text-gray-700">
           <div>
+            <h2 className="mb-2 font-semibold text-gray-900">2 de julio de 2026</h2>
+            <ul className="list-disc space-y-1 pl-5">
+              <li>🔄 Transferir un libro: si regalas o vendes un libro, ahora puedes transferirle la propiedad a quien lo recibe directamente desde la página del libro (no disponible mientras el libro esté prestado).</li>
+              <li>🔒 Eliminar cuenta: ahora también se bloquea si tienes libros de otras personas pedidos prestados, no solo si tú tienes libros prestados a otros.</li>
+              <li>💬 Comentarios en los libros: comparte tu opinión o reacción sobre un libro ("a mi hija le encantó", "daba un poco de miedo") en su página de detalle.</li>
+              <li>↔️ Navegación anterior/siguiente: en la página de un libro, puedes pasar al siguiente o anterior de la lista que estabas viendo, sin volver a la biblioteca cada vez.</li>
+              <li>🏷️ Categorías grandes: hemos empezado a categorizar los libros (Infantil, Juvenil, Adultos, Cómic, Poesía, Arte, Aprendizaje de idiomas). Todavía no se puede filtrar por categoría desde la app, pero ya está la base para hacerlo pronto.</li>
+            </ul>
+          </div>
+
+          <div>
             <h2 className="mb-2 font-semibold text-gray-900">1 de julio de 2026</h2>
             <ul className="list-disc space-y-1 pl-5">
               <li>➕ Añadir varios libros rápido: el botón "Guardar y añadir otro" guarda el libro y deja el formulario listo para el siguiente escaneo, sin volver a la biblioteca cada vez.</li>

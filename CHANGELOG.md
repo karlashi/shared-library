@@ -34,6 +34,13 @@ Spanish, see the in-app "Novedades" page (`/changelog`). For full detail on any 
   position indicator, stepping through exactly what was on screen. Falls back to all
   active books, most-recent-first, when there's no router state (direct link, shared URL,
   or a page refresh).
+- **Book categories (data only, no UI yet).** Added a plain `category` column to `books`
+  and hand-categorized the full active catalog (53 books) into a small curated set —
+  Infantil, Juvenil, Adultos, Cómic/Novela gráfica, Poesía, Arte, Aprendizaje de idiomas —
+  deliberately separate from the existing collaborative `tags`: categories are broad,
+  single-value, and curated; tags stay free-form and multi-value. Done directly via SQL,
+  not through any automated/LLM process — no Add/Edit form field or Home filter yet, that's
+  intentionally a separate, later pass.
 
 ## 2026-07-01
 
