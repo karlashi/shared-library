@@ -56,6 +56,21 @@ Spanish, see the in-app "Novedades" page (`/changelog`). For full detail on any 
   card shows a small category badge; Add/Edit Book both gained a category `<select>` so
   new books get categorized going forward and existing ones can be corrected without a
   manual SQL pass.
+- **Fuzzy, multi-field search.** At 50+ books, exact substring matching against
+  title/author/tags was missing real hits — tags came from ChatGPT's original suggestions
+  rather than a controlled vocabulary, so a search for "miedo" wouldn't find a book only
+  tagged "terror". Replaced the matching logic with `Fuse.js`, weighted across
+  title/author/tags plus, newly, `description` (natural-language text tends to carry more
+  of the synonyms someone might actually type than a handful of curated tags). Fuse is
+  used only to decide inclusion, not to reorder results, so the existing recent/title sort
+  — and therefore the prev/next `navList` order on the detail page — is unaffected. Also
+  fixes a latent case-sensitivity bug in the old tag matching. Explicitly not attempting
+  synonym mapping or embedding-based semantic search — flagged as unnecessary complexity
+  at this catalog size.
+- **Clearer filter dropdowns.** The status and category filters both defaulted to showing
+  "Todos" with no visual indication of which axis each one filtered. Added a small label
+  above each (`Estado` / `Categoría`), distinct "all" option text per dropdown, and an
+  `aria-label` on each `<select>` (previously unlabeled for screen readers).
 
 ## 2026-07-01
 

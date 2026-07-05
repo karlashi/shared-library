@@ -16,6 +16,8 @@ export function ChangelogPage() {
               <li>💬 Comentarios en los libros: comparte tu opinión o reacción sobre un libro ("a mi hija le encantó", "daba un poco de miedo") en su página de detalle.</li>
               <li>↔️ Navegación anterior/siguiente: en la página de un libro, puedes pasar al siguiente o anterior de la lista que estabas viendo, sin volver a la biblioteca cada vez.</li>
               <li>🏷️ Categorías: los libros ahora tienen una categoría (Infantil, Juvenil, Adultos, Cómic, Poesía, Arte, Aprendizaje de idiomas), visible como etiqueta en cada libro. Puedes filtrar la biblioteca por categoría, y elegirla o cambiarla al añadir o editar un libro.</li>
+              <li>🔍 Búsqueda mejorada: ahora la búsqueda también revisa la descripción del libro, no solo título, autor y etiquetas, y tolera pequeños errores de escritura.</li>
+              <li>🏷️ Los filtros de "Estado" y "Categoría" ahora tienen su propia etiqueta, para que quede claro qué filtra cada uno.</li>
             </ul>
           </div>
 

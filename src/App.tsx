@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import Fuse from 'fuse.js'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { useBooks } from './services/queries'
 import { BookCard } from './components/BookCard'
@@ -30,14 +31,33 @@ function Home() {
   const [incompleteOnly, setIncompleteOnly] = useState(false)
   const [hideMyBooks, setHideMyBooks] = useState(true)
 
-  const filteredBooks = books
-    .filter((book) => !book.archived)
+  const activeBooks = books.filter((book) => !book.archived)
+
+  const fuse = useMemo(
+    () =>
+      new Fuse(activeBooks, {
+        keys: [
+          { name: 'title', weight: 0.4 },
+          { name: 'author', weight: 0.3 },
+          { name: 'tags', weight: 0.2 },
+          { name: 'description', weight: 0.1 },
+        ],
+        threshold: 0.4,
+        ignoreLocation: true,
+        minMatchCharLength: 2,
+      }),
+    [activeBooks]
+  )
+
+  const matchedIds = useMemo(() => {
+    const term = search.trim()
+    if (!term) return null
+    return new Set(fuse.search(term).map((result) => result.item.id))
+  }, [fuse, search])
+
+  const filteredBooks = activeBooks
     .filter((book) => {
-      const searchTerm = search.toLowerCase()
-      const matchesSearch =
-        book.title.toLowerCase().includes(searchTerm) ||
-        book.author.toLowerCase().includes(searchTerm) ||
-        (book.tags ?? []).some((tag) => tag.includes(searchTerm))
+      const matchesSearch = !matchedIds || matchedIds.has(book.id)
 
       const matchesFilter =
         filterValue === 'all' ||
@@ -90,33 +110,41 @@ function Home() {
             className="w-full rounded-md border border-gray-300 px-3 py-2 sm:w-64"
           />
 
-          <select
-            value={filterValue}
-            onChange={(e) => setFilterValue(e.target.value)}
-            className="rounded-md border border-gray-300 px-3 py-2"
-          >
-            <option value="all">{t('home.all')}</option>
-            <option value="available">{t('home.available')}</option>
-            <option value="borrowed">{t('home.borrowed')}</option>
-            <option value="blocked">{t('home.blocked')}</option>
-            <option value="gift">{t('bookCard.gift')}</option>
-            <option value="sale">{t('bookCard.sale')}</option>
-          </select>
+          <label className="flex flex-col gap-1 text-xs text-gray-500">
+            {t('home.statusFilterLabel')}
+            <select
+              value={filterValue}
+              onChange={(e) => setFilterValue(e.target.value)}
+              aria-label={t('home.statusFilterLabel')}
+              className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
+            >
+              <option value="all">{t('home.allStatus')}</option>
+              <option value="available">{t('home.available')}</option>
+              <option value="borrowed">{t('home.borrowed')}</option>
+              <option value="blocked">{t('home.blocked')}</option>
+              <option value="gift">{t('bookCard.gift')}</option>
+              <option value="sale">{t('bookCard.sale')}</option>
+            </select>
+          </label>
 
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="rounded-md border border-gray-300 px-3 py-2"
-          >
-            <option value="all">{t('home.all')}</option>
-            <option value="infantil">{t('categories.infantil')}</option>
-            <option value="juvenil">{t('categories.juvenil')}</option>
-            <option value="adultos">{t('categories.adultos')}</option>
-            <option value="comic">{t('categories.comic')}</option>
-            <option value="poesia">{t('categories.poesia')}</option>
-            <option value="arte">{t('categories.arte')}</option>
-            <option value="idiomas">{t('categories.idiomas')}</option>
-          </select>
+          <label className="flex flex-col gap-1 text-xs text-gray-500">
+            {t('home.categoryFilterLabel')}
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              aria-label={t('home.categoryFilterLabel')}
+              className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
+            >
+              <option value="all">{t('home.allCategories')}</option>
+              <option value="infantil">{t('categories.infantil')}</option>
+              <option value="juvenil">{t('categories.juvenil')}</option>
+              <option value="adultos">{t('categories.adultos')}</option>
+              <option value="comic">{t('categories.comic')}</option>
+              <option value="poesia">{t('categories.poesia')}</option>
+              <option value="arte">{t('categories.arte')}</option>
+              <option value="idiomas">{t('categories.idiomas')}</option>
+            </select>
+          </label>
 
           <select
             value={sortBy}

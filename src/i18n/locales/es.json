@@ -210,8 +210,11 @@
   "home": {
     "addBook": "➕ Añadir libro",
     "bulkEdit": "✏️ Completar libros",
-    "searchPlaceholder": "Buscar por título, autor o etiqueta...",
-    "all": "Todos",
+    "searchPlaceholder": "Buscar por título, autor, etiqueta o descripción...",
+    "statusFilterLabel": "Estado",
+    "categoryFilterLabel": "Categoría",
+    "allStatus": "Todos los estados",
+    "allCategories": "Todas las categorías",
     "available": "Disponibles",
     "borrowed": "Prestados",
     "blocked": "Fuera de circulación",
