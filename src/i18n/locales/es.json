@@ -226,7 +226,7 @@
     "backToLibrary": "← Volver a la biblioteca",
     "noIncompleteBooks": "No hay libros incompletos. ¡Todo al día! 🎉",
     "missingCover": "⚠️ Sin portada",
-    "editCoverLink": "Editar portada",
+    "uploadCoverError": "Error al subir la portada.",
     "description": "Descripción",
     "ageRecommendation": "Edad recomendada",
     "tags": "Etiquetas",

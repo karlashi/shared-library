@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useBooks, useAllTags } from '../services/queries'
 import { supabase } from '../services/supabaseClient'
 import { lookupBookInfo, lookupBookInfoByTitleAuthor } from '../services/bookLookup'
+import { validateImageFile, uploadCoverImage } from '../services/storage'
 import { isBookIncomplete } from '../utils/bookCompleteness'
 import { TagInput } from '../components/TagInput'
 import { Header } from '../components/Header'
@@ -37,6 +38,7 @@ export function BulkEditPage() {
 
   const [edits, setEdits] = useState<Record<string, RowState>>({})
   const [fetchingId, setFetchingId] = useState<string | null>(null)
+  const [uploadingId, setUploadingId] = useState<string | null>(null)
 
   const incompleteBooks = books.filter((b) => !b.archived && isBookIncomplete(b))
 
@@ -75,6 +77,27 @@ export function BulkEditPage() {
       alert(err instanceof Error ? err.message : t('bulkEdit.fetchDataError'))
     } finally {
       setFetchingId(null)
+    }
+  }
+
+  const handleCoverUpload = async (book: Book, file: File | undefined) => {
+    if (!file) return
+
+    const validationError = validateImageFile(file)
+    if (validationError) {
+      alert(validationError)
+      return
+    }
+
+    setUploadingId(book.id)
+    try {
+      const coverUrl = await uploadCoverImage(file)
+      updateRow(book, { cover_url: coverUrl })
+    } catch (err) {
+      console.error(err)
+      alert(t('bulkEdit.uploadCoverError'))
+    } finally {
+      setUploadingId(null)
     }
   }
 
@@ -159,12 +182,19 @@ export function BulkEditPage() {
                         className="h-24 w-16 shrink-0 rounded object-cover"
                       />
                     ) : (
-                      <Link
-                        to={`/book/${book.id}/edit`}
-                        className="flex h-24 w-16 shrink-0 flex-col items-center justify-center rounded border border-dashed border-gray-300 p-1 text-center text-[10px] text-gray-500 hover:bg-gray-50"
-                      >
-                        {t('bulkEdit.missingCover')}
-                      </Link>
+                      <label className="flex h-24 w-16 shrink-0 cursor-pointer flex-col items-center justify-center rounded border border-dashed border-gray-300 p-1 text-center text-[10px] text-gray-500 hover:bg-gray-50">
+                        {uploadingId === book.id ? t('common.loading') : t('bulkEdit.missingCover')}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          disabled={uploadingId === book.id}
+                          onChange={(e) => {
+                            handleCoverUpload(book, e.target.files?.[0])
+                            e.target.value = ''
+                          }}
+                        />
+                      </label>
                     )}
 
                     <div className="flex-1 space-y-2">
