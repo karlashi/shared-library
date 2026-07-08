@@ -9,6 +9,13 @@ export function ChangelogPage() {
 
         <div className="space-y-8 text-gray-700">
           <div>
+            <h2 className="mb-2 font-semibold text-gray-900">8 de julio de 2026</h2>
+            <ul className="list-disc space-y-1 pl-5">
+              <li>📋 Movimientos (solo administradores): una nueva página muestra todos los préstamos de la biblioteca en un solo lugar, no solo los tuyos.</li>
+            </ul>
+          </div>
+
+          <div>
             <h2 className="mb-2 font-semibold text-gray-900">5 de julio de 2026</h2>
             <ul className="list-disc space-y-1 pl-5">
               <li>🔐 Mejoras de seguridad: reforzamos varios permisos internos de la aplicación.</li>

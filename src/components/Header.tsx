@@ -17,7 +17,10 @@ export function Header() {
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
 
-  const navItems = navKeys.map((item) => ({ to: item.to, label: t(item.key) }))
+  const navItems = [
+    ...navKeys.map((item) => ({ to: item.to, label: t(item.key) })),
+    ...(profile?.is_admin ? [{ to: '/activity', label: t('nav.activity') }] : []),
+  ]
 
   const logout = async () => {
     setMenuOpen(false)

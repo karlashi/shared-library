@@ -18,6 +18,7 @@ import { AddBookPage } from './pages/AddBookPage'
 import { BookDetailsPage } from './pages/BookDetailsPage'
 import { EditBookPage } from './pages/EditBookPage'
 import { BulkEditPage } from './pages/BulkEditPage'
+import { ActivityPage } from './pages/ActivityPage'
 
 function Home() {
   const { t } = useTranslation()
@@ -209,6 +210,7 @@ export default function App() {
           <Route path="/" element={<RequireAuth><Home /></RequireAuth>} />
           <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth>} />
           <Route path="/stats" element={<RequireAuth><StatsPage /></RequireAuth>} />
+          <Route path="/activity" element={<RequireAuth><ActivityPage /></RequireAuth>} />
           <Route path="/add" element={<RequireAuth><AddBookPage /></RequireAuth>} />
           <Route path="/bulk-edit" element={<RequireAuth><BulkEditPage /></RequireAuth>} />
           <Route path="/book/:id" element={<RequireAuth><BookDetailsPage /></RequireAuth>} />

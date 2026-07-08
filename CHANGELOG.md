@@ -4,6 +4,19 @@ A technical history of this project, grouped by day. For a user-facing summary i
 Spanish, see the in-app "Novedades" page (`/changelog`). For full detail on any entry,
 `git log` has the complete commit messages this file summarizes.
 
+## 2026-07-08
+
+- **Admin activity page (`/activity`).** All loan history was previously only visible
+  per-user, split across each member's own Profile page. Added a page listing every loan
+  across the whole library (book, owner, borrower, borrowed/returned dates, active/
+  returned status), sorted most-recent-first, admin-only (nav link and route both gated
+  on `profile.is_admin`, same pattern as `EditBookPage`'s owner-or-admin guard). No new
+  queries needed — reuses `useAllLoans()` (already unscoped to the current user) plus the
+  same `getBookById`/`getProfileName`/`formatDate` helpers already used in
+  `ProfilePage.tsx`. Ownership-transfer history explicitly out of scope for this pass —
+  transfers currently overwrite `owner_id` with no history kept, so that would need a new
+  audit table.
+
 ## 2026-07-05
 
 - **Fixed a live privilege-escalation hole.** Any authenticated user could set their own

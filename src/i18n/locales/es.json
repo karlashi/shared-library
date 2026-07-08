@@ -9,6 +9,7 @@
     "home": "Inicio",
     "profile": "Mi perfil",
     "stats": "Estadísticas",
+    "activity": "Movimientos",
     "changelog": "Novedades",
     "about": "Acerca de",
     "login": "Iniciar sesión",
@@ -199,6 +200,11 @@
     "totalLoans": "Préstamos totales",
     "activeLoans": "Préstamos activos",
     "listedBooks": "Para regalar/vender"
+  },
+  "activity": {
+    "heading": "📋 Movimientos",
+    "borrower": "Prestado a",
+    "empty": "Todavía no hay ningún préstamo registrado."
   },
   "barcodeScanner": {
     "heading": "Escanear código de barras",
