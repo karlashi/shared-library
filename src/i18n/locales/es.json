@@ -8,6 +8,7 @@
   "nav": {
     "home": "Inicio",
     "profile": "Mi perfil",
+    "myBooks": "Mis libros",
     "stats": "Estadísticas",
     "activity": "Movimientos",
     "changelog": "Novedades",
@@ -80,6 +81,9 @@
     "deleteAccountButton": "Eliminar mi cuenta 🗑️",
     "deletingAccount": "Eliminando...",
     "deleteAccountError": "Error al eliminar la cuenta"
+  },
+  "myBooks": {
+    "heading": "📚 Mis libros"
   },
   "addBook": {
     "heading": "➕ Añadir libro",
@@ -174,6 +178,9 @@
     "transferConfirm": "¿Seguro que quieres transferir la propiedad de este libro? Se quitará cualquier marca de regalo/venta. Esta acción no se puede deshacer.",
     "transferSuccess": "Libro transferido correctamente",
     "transferError": "Error al transferir el libro",
+    "markUnavailable": "🚫 Marcar fuera de circulación",
+    "markAvailable": "✅ Volver a poner en circulación",
+    "setStatusError": "Error al actualizar el estado del libro",
     "previous": "← Anterior",
     "next": "Siguiente →",
     "positionIndicator": "{{current}} de {{total}}"
@@ -218,7 +225,7 @@
   },
   "home": {
     "addBook": "➕ Añadir libro",
-    "bulkEdit": "✏️ Completar libros",
+    "bulkEdit": "✏️ Completar datos de libros",
     "searchPlaceholder": "Buscar por título, autor, etiqueta o descripción...",
     "statusFilterLabel": "Estado",
     "categoryFilterLabel": "Categoría",
@@ -248,7 +255,7 @@
     "reload": "Recargar página"
   },
   "bulkEdit": {
-    "heading": "✏️ Completar libros",
+    "heading": "✏️ Completar datos de libros",
     "backToLibrary": "← Volver a la biblioteca",
     "noIncompleteBooks": "No hay libros incompletos. ¡Todo al día! 🎉",
     "missingCover": "⚠️ Sin portada",

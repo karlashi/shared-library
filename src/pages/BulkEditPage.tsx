@@ -17,6 +17,7 @@ type RowState = {
   age: string
   tags: string[]
   cover_url: string
+  category: string
 }
 
 function defaultRowState(book: Book): RowState {
@@ -25,6 +26,7 @@ function defaultRowState(book: Book): RowState {
     age: book.age_recommendation ?? '',
     tags: book.tags ?? [],
     cover_url: book.cover_url ?? '',
+    category: book.category ?? '',
   }
 }
 
@@ -117,6 +119,7 @@ export function BulkEditPage() {
               description: state.description,
               age_recommendation: state.age,
               cover_url: state.cover_url,
+              category: state.category || null,
             })
             .eq('id', book.id)
           if (error) throw error
@@ -242,6 +245,24 @@ export function BulkEditPage() {
                           onChange={(tags) => updateRow(book, { tags })}
                           suggestions={allTags}
                         />
+                      </label>
+
+                      <label className="block">
+                        <span className="mb-1 block text-xs font-medium text-gray-700">{t('addBook.category')}</span>
+                        <select
+                          value={state.category}
+                          onChange={(e) => updateRow(book, { category: e.target.value })}
+                          className="w-full rounded-md border border-gray-300 px-2 py-1 text-sm"
+                        >
+                          <option value="">{t('addBook.categoryNone')}</option>
+                          <option value="infantil">{t('categories.infantil')}</option>
+                          <option value="juvenil">{t('categories.juvenil')}</option>
+                          <option value="adultos">{t('categories.adultos')}</option>
+                          <option value="comic">{t('categories.comic')}</option>
+                          <option value="poesia">{t('categories.poesia')}</option>
+                          <option value="arte">{t('categories.arte')}</option>
+                          <option value="idiomas">{t('categories.idiomas')}</option>
+                        </select>
                       </label>
                     </div>
                   </div>

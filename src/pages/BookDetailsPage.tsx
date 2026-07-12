@@ -17,6 +17,7 @@ import {
   useWishlist,
   useToggleWishlist,
   useTransferBook,
+  useSetBookStatus,
   useBookComments,
   useAddComment,
   useUpdateComment,
@@ -48,6 +49,7 @@ export function BookDetailsPage() {
   const { data: wishlist = [] } = useWishlist(user?.id)
   const toggleWishlist = useToggleWishlist()
   const transferBook = useTransferBook()
+  const setBookStatus = useSetBookStatus()
   const { data: comments = [] } = useBookComments(id)
   const addComment = useAddComment()
   const updateComment = useUpdateComment()
@@ -130,6 +132,20 @@ export function BookDetailsPage() {
         onError: (error) => {
           console.error(error)
           alert(t('bookDetails.transferError'))
+        },
+      }
+    )
+  }
+
+  const handleToggleStatus = () => {
+    if (!id) return
+
+    setBookStatus.mutate(
+      { bookId: id, status: isBlocked ? 'Disponible' : 'Fuera de circulación' },
+      {
+        onError: (error) => {
+          console.error(error)
+          alert(t('bookDetails.setStatusError'))
         },
       }
     )
@@ -436,6 +452,18 @@ export function BookDetailsPage() {
                   className="mt-2 rounded-md bg-gray-100 px-4 py-2 text-gray-800 hover:bg-gray-200 disabled:opacity-50"
                 >
                   {t('bookDetails.transfer')}
+                </button>
+              </div>
+            )}
+
+            {isApproved && isOwner && !isBorrowed && (
+              <div className="mt-5">
+                <button
+                  onClick={handleToggleStatus}
+                  disabled={setBookStatus.isPending}
+                  className="rounded-md bg-gray-100 px-4 py-2 text-gray-800 hover:bg-gray-200 disabled:opacity-50"
+                >
+                  {isBlocked ? t('bookDetails.markAvailable') : t('bookDetails.markUnavailable')}
                 </button>
               </div>
             )}

@@ -4,6 +4,28 @@ A technical history of this project, grouped by day. For a user-facing summary i
 Spanish, see the in-app "Novedades" page (`/changelog`). For full detail on any entry,
 `git log` has the complete commit messages this file summarizes.
 
+## 2026-07-12
+
+- **Split "Mis libros" out of the Profile page into its own page (`/my-books`).**
+  Scrolling past a growing book collection to reach loan history at the bottom of Mi
+  Perfil was getting annoying. Moved the owned/archived book grids verbatim into a new
+  `MyBooksPage.tsx`; `ProfilePage.tsx` keeps the name form, pending-approval admin
+  section, wishlist, borrow/lend history, and account deletion. New nav item positioned
+  right after "Mi perfil".
+- **Quick "🚫 Marcar fuera de circulación" toggle on the book detail page.** That status
+  already existed (filterable on Home, shown as a badge) but nothing in the UI ever set
+  it — confirmed only `AddBookPage` writes `status`, always as `'Disponible'`. Added an
+  owner-only toggle (only when the book isn't currently out on loan) via a new
+  `useSetBookStatus` mutation mirroring `useSetArchived`, so an owner can flag "I'm
+  reading this right now, don't ask to borrow it" and revert it just as easily.
+- **Renamed "Completar libros" → "Completar datos de libros."** The original name read
+  like completing a collection rather than filling in missing book data.
+- **Category added to the Bulk Editor.** `isBookIncomplete()` now also flags a missing
+  `category`, so books lacking one surface on `/bulk-edit` alongside the existing
+  cover/description/age/tags checks (a no-op for the current catalog — all existing books
+  already have a category — but means future books added without one get caught here
+  automatically). Same category `<select>` already used on Add/Edit Book, reused as-is.
+
 ## 2026-07-08
 
 - **Admin activity page (`/activity`).** All loan history was previously only visible

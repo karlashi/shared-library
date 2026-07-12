@@ -10,11 +10,16 @@ const completeBook: Book = {
   description: 'A description',
   age_recommendation: '8+',
   tags: ['aventura'],
+  category: 'infantil',
 }
 
 describe('isBookIncomplete', () => {
-  it('returns false when cover, description, age, and tags are all present', () => {
+  it('returns false when cover, description, age, tags, and category are all present', () => {
     expect(isBookIncomplete(completeBook)).toBe(false)
+  })
+
+  it('returns true when category is missing', () => {
+    expect(isBookIncomplete({ ...completeBook, category: undefined })).toBe(true)
   })
 
   it('returns true when cover_url is missing', () => {

@@ -9,6 +9,16 @@ export function ChangelogPage() {
 
         <div className="space-y-8 text-gray-700">
           <div>
+            <h2 className="mb-2 font-semibold text-gray-900">12 de julio de 2026</h2>
+            <ul className="list-disc space-y-1 pl-5">
+              <li>📚 Mis libros ahora tiene su propia página en el menú, separada de Mi perfil, para no tener que hacer tanto scroll.</li>
+              <li>🚫 En la página de un libro, el propietario ahora puede marcarlo como "fuera de circulación" con un botón (por ejemplo, mientras lo está leyendo), y volver a ponerlo disponible cuando quiera.</li>
+              <li>✏️ "Completar libros" ahora se llama "Completar datos de libros", para que quede claro que es para rellenar información que falta.</li>
+              <li>🏷️ Esa misma página ahora también permite completar la categoría de un libro.</li>
+            </ul>
+          </div>
+
+          <div>
             <h2 className="mb-2 font-semibold text-gray-900">8 de julio de 2026</h2>
             <ul className="list-disc space-y-1 pl-5">
               <li>📋 Movimientos (solo administradores): una nueva página muestra todos los préstamos de la biblioteca en un solo lugar, no solo los tuyos.</li>

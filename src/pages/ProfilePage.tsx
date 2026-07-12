@@ -68,8 +68,6 @@ export function ProfilePage() {
       year: 'numeric',
     })
 
-  const myBooks = books.filter((b) => b.owner_id === user?.id && !b.archived)
-  const myArchivedBooks = books.filter((b) => b.owner_id === user?.id && b.archived)
   const wishlistedBooks = books.filter((b) => wishlist.includes(b.id))
 
   const borrowedByMe = loans.filter((l) => l.borrower_id === user?.id)
@@ -164,30 +162,6 @@ export function ProfilePage() {
               ))}
             </ul>
           </div>
-        )}
-
-        {/* MY BOOKS */}
-        <h2 className="mb-3 text-lg font-semibold text-gray-900">{t('profile.myBooks')}</h2>
-        {myBooks.length === 0 ? (
-          <p className="mb-8 text-gray-600">{t('profile.noBooksYet')}</p>
-        ) : (
-          <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-            {myBooks.map((book) => (
-              <BookCard key={book.id} book={book} />
-            ))}
-          </div>
-        )}
-
-        {/* ARCHIVED BOOKS */}
-        {myArchivedBooks.length > 0 && (
-          <>
-            <h2 className="mb-3 text-lg font-semibold text-gray-900">{t('profile.archived')}</h2>
-            <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-              {myArchivedBooks.map((book) => (
-                <BookCard key={book.id} book={book} />
-              ))}
-            </div>
-          </>
         )}
 
         {/* WISHLIST */}

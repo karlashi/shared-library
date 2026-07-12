@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext'
 const navKeys = [
   { to: '/', key: 'nav.home' },
   { to: '/profile', key: 'nav.profile' },
+  { to: '/my-books', key: 'nav.myBooks' },
   { to: '/stats', key: 'nav.stats' },
   { to: '/changelog', key: 'nav.changelog' },
   { to: '/about', key: 'nav.about' },

@@ -128,6 +128,22 @@ export function useSetArchived() {
   })
 }
 
+export function useSetBookStatus() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (vars: { bookId: string; status: string }) => {
+      const { error } = await supabase
+        .from('books')
+        .update({ status: vars.status })
+        .eq('id', vars.bookId)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['books'] })
+    },
+  })
+}
+
 export function useTransferBook() {
   const queryClient = useQueryClient()
   return useMutation({
