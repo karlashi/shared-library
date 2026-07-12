@@ -15,6 +15,7 @@ export function ChangelogPage() {
               <li>🚫 En la página de un libro, el propietario ahora puede marcarlo como "fuera de circulación" con un botón (por ejemplo, mientras lo está leyendo), y volver a ponerlo disponible cuando quiera.</li>
               <li>✏️ "Completar libros" ahora se llama "Completar datos de libros", para que quede claro que es para rellenar información que falta.</li>
               <li>🏷️ Esa misma página ahora también permite completar la categoría de un libro.</li>
+              <li>🖼️ Corregido un error al subir portadas cuyo archivo tenía tildes, ñ o espacios en el nombre (por ejemplo "tiburón.jfif").</li>
             </ul>
           </div>
 

@@ -11,7 +11,8 @@ export function validateImageFile(file: File): string | null {
 }
 
 export async function uploadCoverImage(file: File): Promise<string> {
-  const fileName = `${crypto.randomUUID()}-${file.name}`
+  const extensionMatch = file.name.match(/\.([a-zA-Z0-9]+)$/)
+  const fileName = extensionMatch ? `${crypto.randomUUID()}.${extensionMatch[1]}` : crypto.randomUUID()
 
   const { error } = await supabase.storage.from(BUCKET).upload(fileName, file)
   if (error) throw error

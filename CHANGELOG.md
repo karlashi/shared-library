@@ -25,6 +25,15 @@ Spanish, see the in-app "Novedades" page (`/changelog`). For full detail on any 
   cover/description/age/tags checks (a no-op for the current catalog — all existing books
   already have a category — but means future books added without one get caught here
   automatically). Same category `<select>` already used on Add/Edit Book, reused as-is.
+- **Fixed cover uploads silently failing for filenames with accents or spaces.**
+  `uploadCoverImage` (`src/services/storage.ts`) built the storage key as
+  `${uuid}-${file.name}` — Supabase Storage rejects keys containing non-ASCII characters
+  (ó, ñ, etc.) or spaces with `Invalid key`, so any cover whose original filename had them
+  (extremely common for Spanish-named files) failed, surfacing only a generic "error
+  saving book" alert with no indication the filename itself was the cause. Fixed by using
+  only the UUID plus the file extension as the key, dropping the original filename
+  entirely — reproduced the exact failure with a real problematic filename and confirmed
+  the fix.
 
 ## 2026-07-08
 
