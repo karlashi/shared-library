@@ -20,6 +20,7 @@ import { EditBookPage } from './pages/EditBookPage'
 import { BulkEditPage } from './pages/BulkEditPage'
 import { ActivityPage } from './pages/ActivityPage'
 import { MyBooksPage } from './pages/MyBooksPage'
+import { LanguageCheckboxes } from './components/LanguageCheckboxes'
 
 function Home() {
   const { t } = useTranslation()
@@ -30,6 +31,7 @@ function Home() {
   const [search, setSearch] = useState('')
   const [filterValue, setFilterValue] = useState('all')
   const [categoryFilter, setCategoryFilter] = useState('all')
+  const [languageFilter, setLanguageFilter] = useState<string[]>([])
   const [sortBy, setSortBy] = useState<'recent' | 'title'>('recent')
   const [incompleteOnly, setIncompleteOnly] = useState(false)
   const [hideMyBooks, setHideMyBooks] = useState(true)
@@ -74,10 +76,12 @@ function Home() {
         (filterValue === 'sale' && book.listing_type === 'sale')
 
       const matchesCategory = categoryFilter === 'all' || book.category === categoryFilter
+      const matchesLanguage =
+        languageFilter.length === 0 || (book.languages ?? []).some((l) => languageFilter.includes(l))
       const matchesIncomplete = !incompleteOnly || isBookIncomplete(book)
       const matchesOwnBooks = !hideMyBooks || book.owner_id !== user?.id
 
-      return matchesSearch && matchesFilter && matchesCategory && matchesIncomplete && matchesOwnBooks
+      return matchesSearch && matchesFilter && matchesCategory && matchesLanguage && matchesIncomplete && matchesOwnBooks
     })
     .sort((a, b) => {
       if (sortBy === 'title') return a.title.localeCompare(b.title, 'es')
@@ -156,6 +160,13 @@ function Home() {
               <option value="idiomas">{t('categories.idiomas')}</option>
             </select>
           </label>
+
+          <div className="flex flex-col gap-1 text-xs text-gray-500">
+            {t('home.languageFilterLabel')}
+            <div className="flex gap-2 rounded-md border border-gray-300 px-2 py-1.5">
+              <LanguageCheckboxes value={languageFilter} onChange={setLanguageFilter} />
+            </div>
+          </div>
 
           <select
             value={sortBy}

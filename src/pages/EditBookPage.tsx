@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Navigate } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../services/supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
 import { useBook, useDeleteBook, useSetArchived } from '../services/queries'
 import { validateImageFile, uploadCoverImage, deleteCoverImage } from '../services/storage'
+import { LanguageCheckboxes } from '../components/LanguageCheckboxes'
 
 type FormValues = {
   title: string
@@ -19,6 +20,7 @@ type FormValues = {
   listing_type: '' | 'gift' | 'sale'
   listing_comment: string
   category: string
+  languages: string[]
 }
 
 export function EditBookPage() {
@@ -38,6 +40,7 @@ export function EditBookPage() {
   const {
     register,
     handleSubmit,
+    control,
     reset,
     watch,
     formState: { errors },
@@ -45,7 +48,7 @@ export function EditBookPage() {
     defaultValues: {
       title: '', author: '', description: '', isbn: '',
       collection: '', age_recommendation: '', link: '',
-      listing_type: '', listing_comment: '', category: '',
+      listing_type: '', listing_comment: '', category: '', languages: [],
     },
   })
 
@@ -65,6 +68,7 @@ export function EditBookPage() {
       listing_type: book.listing_type || '',
       listing_comment: book.listing_comment || '',
       category: book.category || '',
+      languages: book.languages ?? [],
     })
     setCoverUrl(book.cover_url || '')
   }, [book, reset])
@@ -85,6 +89,7 @@ export function EditBookPage() {
           listing_type: values.listing_type || null,
           listing_comment: values.listing_type ? values.listing_comment : null,
           category: values.category || null,
+          languages: values.languages,
         })
         .eq('id', id)
 
@@ -263,6 +268,17 @@ export function EditBookPage() {
               <option value="idiomas">{t('categories.idiomas')}</option>
             </select>
           </label>
+
+          <div className="block">
+            <span className="mb-1 block text-sm font-medium text-gray-700">{t('editBook.languages')}</span>
+            <Controller
+              name="languages"
+              control={control}
+              render={({ field }) => (
+                <LanguageCheckboxes value={field.value} onChange={field.onChange} />
+              )}
+            />
+          </div>
 
           <label className="block">
             <span className="mb-1 block text-sm font-medium text-gray-700">{t('editBook.listingType')}</span>

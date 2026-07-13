@@ -9,6 +9,13 @@ export function ChangelogPage() {
 
         <div className="space-y-8 text-gray-700">
           <div>
+            <h2 className="mb-2 font-semibold text-gray-900">13 de julio de 2026</h2>
+            <ul className="list-disc space-y-1 pl-5">
+              <li>🌐 Idiomas: ahora puedes marcar en qué idiomas está un libro (Español, Alemán, Inglés, Portugués) — un libro puede tener varios a la vez. Se puede elegir al añadir o editar un libro, se muestra como etiqueta en cada libro, y se puede filtrar la biblioteca por idioma.</li>
+            </ul>
+          </div>
+
+          <div>
             <h2 className="mb-2 font-semibold text-gray-900">12 de julio de 2026</h2>
             <ul className="list-disc space-y-1 pl-5">
               <li>📚 Mis libros ahora tiene su propia página en el menú, separada de Mi perfil, para no tener que hacer tanto scroll.</li>

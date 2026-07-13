@@ -9,6 +9,7 @@ import { lookupBookInfo, lookupBookInfoByTitleAuthor } from '../services/bookLoo
 import { validateImageFile, uploadCoverImage } from '../services/storage'
 import { isBookIncomplete } from '../utils/bookCompleteness'
 import { TagInput } from '../components/TagInput'
+import { LanguageCheckboxes } from '../components/LanguageCheckboxes'
 import { Header } from '../components/Header'
 import type { Book } from '../types/Books'
 
@@ -18,6 +19,7 @@ type RowState = {
   tags: string[]
   cover_url: string
   category: string
+  languages: string[]
 }
 
 function defaultRowState(book: Book): RowState {
@@ -27,6 +29,7 @@ function defaultRowState(book: Book): RowState {
     tags: book.tags ?? [],
     cover_url: book.cover_url ?? '',
     category: book.category ?? '',
+    languages: book.languages ?? [],
   }
 }
 
@@ -120,6 +123,7 @@ export function BulkEditPage() {
               age_recommendation: state.age,
               cover_url: state.cover_url,
               category: state.category || null,
+              languages: state.languages,
             })
             .eq('id', book.id)
           if (error) throw error
@@ -264,6 +268,14 @@ export function BulkEditPage() {
                           <option value="idiomas">{t('categories.idiomas')}</option>
                         </select>
                       </label>
+
+                      <div className="block">
+                        <span className="mb-1 block text-xs font-medium text-gray-700">{t('bulkEdit.languages')}</span>
+                        <LanguageCheckboxes
+                          value={state.languages}
+                          onChange={(languages) => updateRow(book, { languages })}
+                        />
+                      </div>
                     </div>
                   </div>
                 )

@@ -9,6 +9,7 @@ import { lookupBookInfo } from '../services/bookLookup'
 import { validateImageFile, uploadCoverImage } from '../services/storage'
 import { useAllTags } from '../services/queries'
 import { TagInput } from '../components/TagInput'
+import { LanguageCheckboxes } from '../components/LanguageCheckboxes'
 
 const BarcodeScannerModal = lazy(() =>
   import('../components/BarcodeScannerModal').then((m) => ({ default: m.BarcodeScannerModal }))
@@ -24,6 +25,7 @@ type FormValues = {
   age: string
   tags: string[]
   category: string
+  languages: string[]
 }
 
 export function AddBookPage() {
@@ -50,7 +52,7 @@ export function AddBookPage() {
   } = useForm<FormValues>({
     defaultValues: {
       title: '', author: '', description: '', isbn: '',
-      collection: '', link: '', age: '', tags: [], category: '',
+      collection: '', link: '', age: '', tags: [], category: '', languages: [],
     },
   })
 
@@ -103,6 +105,7 @@ export function AddBookPage() {
         age_recommendation: values.age,
         cover_url: coverUrl,
         category: values.category || null,
+        languages: values.languages,
         owner_id: user.id,
         status: 'Disponible'
       }).select('id').single()
@@ -289,6 +292,17 @@ export function AddBookPage() {
               <option value="idiomas">{t('categories.idiomas')}</option>
             </select>
           </label>
+
+          <div className="block">
+            <span className="mb-1 block text-sm font-medium text-gray-700">{t('addBook.languages')}</span>
+            <Controller
+              name="languages"
+              control={control}
+              render={({ field }) => (
+                <LanguageCheckboxes value={field.value} onChange={field.onChange} />
+              )}
+            />
+          </div>
 
           <label className="block">
             <span className="mb-1 block text-sm font-medium text-gray-700">{t('addBook.cover')}</span>

@@ -110,7 +110,8 @@
     "mustBeLoggedIn": "Debes iniciar sesión",
     "saveError": "Error al guardar el libro",
     "category": "Categoría",
-    "categoryNone": "Sin categoría"
+    "categoryNone": "Sin categoría",
+    "languages": "Idiomas"
   },
   "editBook": {
     "heading": "Editar libro",
@@ -121,6 +122,7 @@
     "isbn": "ISBN",
     "category": "Categoría",
     "categoryNone": "Sin categoría",
+    "languages": "Idiomas",
     "tagsHint": "Las etiquetas se gestionan desde la página del libro, donde cualquier miembro puede añadir las suyas.",
     "cover": "Portada (imagen)",
     "uploadImageError": "Error subiendo imagen",
@@ -229,6 +231,7 @@
     "searchPlaceholder": "Buscar por título, autor, etiqueta o descripción...",
     "statusFilterLabel": "Estado",
     "categoryFilterLabel": "Categoría",
+    "languageFilterLabel": "Idioma",
     "allStatus": "Todos los estados",
     "allCategories": "Todas las categorías",
     "available": "Disponibles",
@@ -249,6 +252,12 @@
     "arte": "Arte",
     "idiomas": "Aprendizaje de idiomas"
   },
+  "languages": {
+    "es": "Español",
+    "de": "Alemán",
+    "en": "Inglés",
+    "pt": "Portugués"
+  },
   "errorBoundary": {
     "heading": "Algo salió mal",
     "message": "Ha ocurrido un error inesperado. Intenta recargar la página.",
@@ -263,6 +272,7 @@
     "description": "Descripción",
     "ageRecommendation": "Edad recomendada",
     "tags": "Etiquetas",
+    "languages": "Idiomas",
     "fetchData": "🔄 Buscar datos",
     "fetchingData": "Buscando...",
     "fetchDataError": "Error al buscar datos para este libro.",

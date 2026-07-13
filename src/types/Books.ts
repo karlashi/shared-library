@@ -16,6 +16,7 @@ export type Book = {
   listing_comment?: string | null
   archived?: boolean
   category?: string | null
+  languages?: string[]
 
   isBorrowed?: boolean
   borrowedBy?: string | null

@@ -72,6 +72,16 @@ export function BookCard({ book, navList }: { book: Book; navList?: string[] }) 
           </p>
         )}
 
+        {book.languages && book.languages.length > 0 && (
+          <p className="mt-1 flex flex-wrap gap-1 text-xs">
+            {book.languages.map((lang) => (
+              <span key={lang} className="rounded bg-blue-50 px-1.5 py-0.5 text-blue-700">
+                {t(`languages.${lang}`)}
+              </span>
+            ))}
+          </p>
+        )}
+
         {book.cover_url && (
           <img
             src={book.cover_url}

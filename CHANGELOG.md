@@ -4,6 +4,27 @@ A technical history of this project, grouped by day. For a user-facing summary i
 Spanish, see the in-app "Novedades" page (`/changelog`). For full detail on any entry,
 `git log` has the complete commit messages this file summarizes.
 
+## 2026-07-13
+
+- **Multi-select language field (filter + badge + forms).** Books can be in more than one
+  language (e.g. a bilingual edition), so unlike `category` (single-value dropdown) this
+  needed a checkbox multi-select. Added `books.languages text[]` (codes `es`/`de`/`en`/
+  `pt`, routed through i18n like category); a new reusable
+  `src/components/LanguageCheckboxes.tsx` used identically across Add/Edit/Bulk Edit
+  forms, a Home filter (match-*any*-selected-language), and one badge per language on
+  each book card. Deliberately not folded into `isBookIncomplete()` — all 53 existing
+  books would've instantly flipped to "incomplete" overnight, unlike category which was a
+  no-op there; the checkboxes still appear on Bulk Edit rows regardless. Also **not**
+  backfilling existing books' languages — unlike category, guessing every book's
+  language(s) from title/author isn't reliable enough to do unattended.
+- **Fixed invalid nested-`<label>` HTML found while building the above.** Wrapping the new
+  checkbox group in the same `<label className="block">` pattern used for every other
+  form field (fine for a single `<select>`/`<input>`) put a field-level label around
+  several already-labelled checkboxes — invalid HTML, and it broke each checkbox's
+  accessible name (the first checkbox absorbed the whole group's text). Fixed by using a
+  plain `<div>` for the field wrapper in these three spots specifically, since each
+  checkbox already has its own correct inner `<label>`.
+
 ## 2026-07-12
 
 - **Split "Mis libros" out of the Profile page into its own page (`/my-books`).**
