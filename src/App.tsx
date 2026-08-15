@@ -83,9 +83,9 @@ function Home() {
         languageFilter.length === 0 || (book.languages ?? []).some((l) => languageFilter.includes(l))
       const matchesIncomplete = !incompleteOnly || isBookIncomplete(book)
       const matchesOwnBooks = !hideMyBooks || book.owner_id !== user?.id
+      const matchesOwner = ownerFilter === 'all' || book.owner_id === ownerFilter
 
       return matchesSearch && matchesFilter && matchesCategory && matchesLanguage && matchesIncomplete && matchesOwnBooks && matchesOwner
-    })
     .sort((a, b) => {
       if (sortBy === 'title') return a.title.localeCompare(b.title, 'es')
       return (b.created_at ?? '').localeCompare(a.created_at ?? '')
