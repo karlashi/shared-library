@@ -20,4 +20,17 @@ if (!supabaseUrl || isLikelyPlaceholder(supabaseAnonKey)) {
   throw new Error('Supabase configuration error: ' + guidance)
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Log the Base URL and a masked anon key presence for quick runtime debugging (mask full key)
+const mask = (s?: string) => (s ? `${s.slice(0, 4)}…(${s.length} chars)` : 'missing')
+// eslint-disable-next-line no-console
+console.info(`[supabase] URL=${mask(supabaseUrl)}, anonKey=${mask(supabaseAnonKey)}`)
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  global: {
+    // Ensure the anon key is sent with every request. This is safe for the anon key (public client key).
+    headers: {
+      apikey: supabaseAnonKey,
+      Authorization: `Bearer ${supabaseAnonKey}`,
+    },
+  },
+})
