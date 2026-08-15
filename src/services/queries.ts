@@ -44,7 +44,7 @@ export function useProfiles() {
   return useQuery({
     queryKey: ['profiles'],
     queryFn: async (): Promise<Profile[]> => {
-      const { data, error } = await supabase.from('profiles').select('id, name, is_admin, approved')
+      const { data, error } = await supabase.from('profiles').select('id, name, email, is_admin, approved')
       if (error) throw error
       return data ?? []
     },

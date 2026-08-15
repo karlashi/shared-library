@@ -412,7 +412,7 @@ export function BookDetailsPage() {
                 >
                   <option value="">{t('bookDetails.selectUser')}</option>
 
-                  {users.filter((u) => u.id !== user?.id).map((u) => (
+                  {users.filter((u) => u.id !== user?.id && u.email).map((u) => (
                     <option key={u.id} value={u.id}>
                       {u.name}
                     </option>
@@ -439,7 +439,7 @@ export function BookDetailsPage() {
                 >
                   <option value="">{t('bookDetails.selectUser')}</option>
 
-                  {users.filter((u) => u.id !== book.owner_id).map((u) => (
+                  {users.filter((u) => u.id !== book.owner_id && u.email).map((u) => (
                     <option key={u.id} value={u.id}>
                       {u.name}
                     </option>
