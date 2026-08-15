@@ -3,7 +3,7 @@ import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import { signIn, signUp } from '../services/auth'
+import { signIn, signUp, requestPasswordReset } from '../services/auth'
 
 type FormValues = {
   name?: string
@@ -17,8 +17,9 @@ export function LoginPage() {
   const location = useLocation()
   const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname || '/'
 
-  const [mode, setMode] = useState<'login' | 'register'>('login')
+  const [mode, setMode] = useState<'login' | 'register' | 'forgot'>('login')
   const [info, setInfo] = useState('')
+  const [resetEmail, setResetEmail] = useState('')
 
   const {
     register,
@@ -51,6 +52,15 @@ export function LoginPage() {
     },
   })
 
+  const resetMutation = useMutation({
+    mutationFn: (email: string) => requestPasswordReset(email),
+    onSuccess: () => setInfo(t('login.resetEmailSent')),
+    onError: (error) => {
+      console.error(error)
+      alert(t('login.resetError'))
+    },
+  })
+
   const onSubmit = (values: FormValues) => {
     setInfo('')
     if (mode === 'login') {
@@ -69,71 +79,129 @@ export function LoginPage() {
           {t('common.appName')}
         </h1>
         <h2 className="text-lg text-gray-600 text-center mb-6">
-          {mode === 'login' ? t('login.signIn') : t('login.createAccount')}
+          {mode === 'login' && t('login.signIn')}
+          {mode === 'register' && t('login.createAccount')}
+          {mode === 'forgot' && t('login.forgotPassword')}
         </h2>
 
         {info && <p className="mb-4 text-sm text-gray-700">{info}</p>}
 
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-          {mode === 'register' && (
+        {mode === 'forgot' ? (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              resetMutation.mutate(resetEmail)
+            }}
+            className="flex flex-col gap-4"
+          >
             <label className="block">
-              <span className="mb-1 block text-sm font-medium text-gray-700">{t('login.name')}</span>
+              <span className="mb-1 block text-sm font-medium text-gray-700">{t('login.email')}</span>
               <input
-                {...register('name', { required: t('login.nameRequired') })}
+                type="email"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+                required
                 className="w-full rounded-md border border-gray-300 px-3 py-2"
               />
-              {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
             </label>
-          )}
+            <button
+              type="submit"
+              disabled={resetMutation.isPending}
+              className="rounded-md bg-brand px-4 py-2 font-medium text-white hover:opacity-90 disabled:opacity-50"
+            >
+              {resetMutation.isPending ? t('common.loading') : t('login.sendResetLink')}
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+            {mode === 'register' && (
+              <label className="block">
+                <span className="mb-1 block text-sm font-medium text-gray-700">{t('login.name')}</span>
+                <input
+                  {...register('name', { required: t('login.nameRequired') })}
+                  className="w-full rounded-md border border-gray-300 px-3 py-2"
+                />
+                {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
+              </label>
+            )}
 
-          <label className="block">
-            <span className="mb-1 block text-sm font-medium text-gray-700">{t('login.email')}</span>
-            <input
-              type="email"
-              {...register('email', {
-                required: t('login.emailRequired'),
-                pattern: {
-                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: t('login.emailInvalid'),
-                },
-              })}
-              className="w-full rounded-md border border-gray-300 px-3 py-2"
-            />
-            {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
-          </label>
+            <label className="block">
+              <span className="mb-1 block text-sm font-medium text-gray-700">{t('login.email')}</span>
+              <input
+                type="email"
+                {...register('email', {
+                  required: t('login.emailRequired'),
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: t('login.emailInvalid'),
+                  },
+                })}
+                className="w-full rounded-md border border-gray-300 px-3 py-2"
+              />
+              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
+            </label>
 
-          <label className="block">
-            <span className="mb-1 block text-sm font-medium text-gray-700">{t('login.password')}</span>
-            <input
-              type="password"
-              {...register('password', {
-                required: t('login.passwordRequired'),
-                minLength: { value: 6, message: t('login.passwordMinLength') },
-              })}
-              className="w-full rounded-md border border-gray-300 px-3 py-2"
-            />
-            {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>}
-          </label>
+            <label className="block">
+              <span className="mb-1 block text-sm font-medium text-gray-700">{t('login.password')}</span>
+              <input
+                type="password"
+                {...register('password', {
+                  required: t('login.passwordRequired'),
+                  minLength: { value: 6, message: t('login.passwordMinLength') },
+                })}
+                className="w-full rounded-md border border-gray-300 px-3 py-2"
+              />
+              {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>}
+            </label>
 
+            <button
+              type="submit"
+              disabled={pending}
+              className="rounded-md bg-brand px-4 py-2 font-medium text-white hover:opacity-90 disabled:opacity-50"
+            >
+              {pending ? t('common.loading') : mode === 'login' ? t('login.enter') : t('login.createAccount')}
+            </button>
+          </form>
+        )}
+
+        {mode !== 'forgot' && (
           <button
-            type="submit"
-            disabled={pending}
-            className="rounded-md bg-brand px-4 py-2 font-medium text-white hover:opacity-90 disabled:opacity-50"
+            type="button"
+            onClick={() => {
+              setMode(mode === 'login' ? 'register' : 'login')
+              setInfo('')
+            }}
+            className="mt-4 w-full text-center text-sm text-brand hover:underline"
           >
-            {pending ? t('common.loading') : mode === 'login' ? t('login.enter') : t('login.createAccount')}
+            {mode === 'login' ? t('login.toggleToRegister') : t('login.toggleToLogin')}
           </button>
-        </form>
+        )}
 
-        <button
-          type="button"
-          onClick={() => {
-            setMode(mode === 'login' ? 'register' : 'login')
-            setInfo('')
-          }}
-          className="mt-4 w-full text-center text-sm text-brand hover:underline"
-        >
-          {mode === 'login' ? t('login.toggleToRegister') : t('login.toggleToLogin')}
-        </button>
+        {mode === 'login' && (
+          <button
+            type="button"
+            onClick={() => {
+              setMode('forgot')
+              setInfo('')
+            }}
+            className="mt-2 w-full text-center text-sm text-gray-500 hover:underline"
+          >
+            {t('login.forgotPassword')}
+          </button>
+        )}
+
+        {mode === 'forgot' && (
+          <button
+            type="button"
+            onClick={() => {
+              setMode('login')
+              setInfo('')
+            }}
+            className="mt-2 w-full text-center text-sm text-gray-500 hover:underline"
+          >
+            {t('login.backToLogin')}
+          </button>
+        )}
 
         <Link
           to="/about"

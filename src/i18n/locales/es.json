@@ -45,8 +45,21 @@
     "toggleToLogin": "¿Ya tienes cuenta? Inicia sesión",
     "aboutLink": "Acerca de este sitio",
     "wrongCredentials": "Email o contraseña incorrectos",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+  "backToLogin": "Volver a iniciar sesión",
+  "sendResetLink": "Enviar enlace",
+  "resetEmailSent": "Revisa tu correo para restablecer tu contraseña.",
+  "resetError": "No se pudo enviar el correo. Inténtalo de nuevo.",
     "registerError": "Error al crear la cuenta",
     "accountCreatedInfo": "Cuenta creada. Revisa tu correo para confirmarla antes de iniciar sesión."
+  },
+   "resetPassword": {
+    "title": "Restablecer contraseña",
+    "newPassword": "Nueva contraseña",
+    "submit": "Guardar contraseña",
+    "success": "Tu contraseña se actualizó correctamente.",
+    "goToLogin": "Ir a iniciar sesión",
+    "error": "No se pudo actualizar la contraseña. El enlace puede haber caducado."
   },
   "profile": {
     "heading": "👤 Mi perfil",
@@ -232,6 +245,8 @@
     "statusFilterLabel": "Estado",
     "categoryFilterLabel": "Categoría",
     "languageFilterLabel": "Idioma",
+    "ownerFilterLabel": "Dueño",
+    "allOwners": "Todos los dueños",
     "allStatus": "Todos los estados",
     "allCategories": "Todas las categorías",
     "available": "Disponibles",

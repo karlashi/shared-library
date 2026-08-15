@@ -3,13 +3,14 @@ import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Fuse from 'fuse.js'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
-import { useBooks } from './services/queries'
+import { useBooks, useProfiles } from './services/queries'
 import { BookCard } from './components/BookCard'
 import { RequireAuth } from './components/RequireAuth'
 import { Header } from './components/Header'
 import { BackToTop } from './components/BackToTop'
 import { isBookIncomplete } from './utils/bookCompleteness'
 import { LoginPage } from './pages/LoginPage'
+import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { AboutPage } from './pages/AboutPage'
 import { ChangelogPage } from './pages/ChangelogPage'
 import { ProfilePage } from './pages/ProfilePage'
@@ -26,12 +27,14 @@ function Home() {
   const { t } = useTranslation()
   const { user, profile } = useAuth()
   const { data: books = [] } = useBooks()
+  const { data: profiles = [] } = useProfiles()
   const isApproved = !!profile?.approved
 
   const [search, setSearch] = useState('')
   const [filterValue, setFilterValue] = useState('all')
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [languageFilter, setLanguageFilter] = useState<string[]>([])
+  const [ownerFilter, setOwnerFilter] = useState('all')
   const [sortBy, setSortBy] = useState<'recent' | 'title'>('recent')
   const [incompleteOnly, setIncompleteOnly] = useState(false)
   const [hideMyBooks, setHideMyBooks] = useState(true)
@@ -81,7 +84,7 @@ function Home() {
       const matchesIncomplete = !incompleteOnly || isBookIncomplete(book)
       const matchesOwnBooks = !hideMyBooks || book.owner_id !== user?.id
 
-      return matchesSearch && matchesFilter && matchesCategory && matchesLanguage && matchesIncomplete && matchesOwnBooks
+      return matchesSearch && matchesFilter && matchesCategory && matchesLanguage && matchesIncomplete && matchesOwnBooks && matchesOwner
     })
     .sort((a, b) => {
       if (sortBy === 'title') return a.title.localeCompare(b.title, 'es')
@@ -168,6 +171,21 @@ function Home() {
             </div>
           </div>
 
+          <label className="flex flex-col gap-1 text-xs text-gray-500">
+            {t('home.ownerFilterLabel')}
+            <select
+              value={ownerFilter}
+              onChange={(e) => setOwnerFilter(e.target.value)}
+              aria-label={t('home.ownerFilterLabel')}
+              className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
+            >
+              <option value="all">{t('home.allOwners')}</option>
+              {profiles.map((p) => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+          </label>
+
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as 'recent' | 'title')}
@@ -217,6 +235,7 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/changelog" element={<ChangelogPage />} />
           <Route path="/" element={<RequireAuth><Home /></RequireAuth>} />

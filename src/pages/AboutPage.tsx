@@ -43,7 +43,20 @@ export function AboutPage() {
           <p>
             Creado por <b>Carla Shinzato</b>.
             <br />
-            Contacto: <span className="text-gray-500">(próximamente)</span>
+            Contacto:{' '}
+            <a href="mailto:carlaishinzato@gmail.com" className="text-brand hover:underline">
+              carlaishinzato@gmail.com
+            </a>
+            <br />
+            Código fuente:{' '}
+            <a
+              href="https://github.com/karlashi/shared-library"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-brand hover:underline"
+            >
+              GitHub
+            </a>
           </p>
         </div>
       </div>
