@@ -86,6 +86,7 @@ function Home() {
       const matchesOwner = ownerFilter === 'all' || book.owner_id === ownerFilter
 
       return matchesSearch && matchesFilter && matchesCategory && matchesLanguage && matchesIncomplete && matchesOwnBooks && matchesOwner
+    })
     .sort((a, b) => {
       if (sortBy === 'title') return a.title.localeCompare(b.title, 'es')
       return (b.created_at ?? '').localeCompare(a.created_at ?? '')
