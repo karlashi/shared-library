@@ -136,7 +136,7 @@ export function BookCard({ book, navList }: { book: Book; navList?: string[] }) 
           >
             <option value="">{t('bookCard.lendToPlaceholder')}</option>
 
-            {users.filter((u) => u.id !== user?.id && u.email).map((u) => (
+            {users.filter((u) => u.id !== user?.id && !u.deleted).map((u) => (
               <option key={u.id} value={u.id}>
                 {u.name}
               </option>

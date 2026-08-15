@@ -181,7 +181,7 @@ function Home() {
               className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
             >
               <option value="all">{t('home.allOwners')}</option>
-              {profiles.filter((p) => p.email).map((p) => (
+              {profiles.filter((p) => !p.deleted).map((p) => (
                 <option key={p.id} value={p.id}>{p.name}</option>
               ))}
             </select>
