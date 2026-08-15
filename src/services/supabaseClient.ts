@@ -30,7 +30,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     // Ensure the anon key is sent with every request. This is safe for the anon key (public client key).
     headers: {
       apikey: supabaseAnonKey,
-      Authorization: `Bearer ${supabaseAnonKey}`,
+      // Do NOT set Authorization here — supabase-js will attach the user's access token when available.
     },
   },
 })
