@@ -221,7 +221,14 @@
     "members": "Miembros",
     "totalLoans": "Préstamos totales",
     "activeLoans": "Préstamos activos",
-    "listedBooks": "Para regalar/vender"
+    "listedBooks": "Para regalar/vender",
+    "byCategory": "Libros por categoría",
+    "uncategorized": "Sin categoría",
+    "topTags": "Temas más populares",
+    "noTags": "Todavía no hay etiquetas.",
+    "byLanguage": "Libros por idioma",
+    "mostBorrowed": "Los más prestados",
+    "noLoans": "Todavía no hay préstamos."
   },
   "activity": {
     "heading": "📋 Movimientos",
