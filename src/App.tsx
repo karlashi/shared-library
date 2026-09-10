@@ -22,6 +22,7 @@ import { BulkEditPage } from './pages/BulkEditPage'
 import { ActivityPage } from './pages/ActivityPage'
 import { MyBooksPage } from './pages/MyBooksPage'
 import { LanguageCheckboxes } from './components/LanguageCheckboxes'
+import { LANGUAGE_CODES, OTHER_LANGUAGES_VALUE } from './constants/languages'
 
 function Home() {
   const { t } = useTranslation()
@@ -80,7 +81,12 @@ function Home() {
 
       const matchesCategory = categoryFilter === 'all' || book.category === categoryFilter
       const matchesLanguage =
-        languageFilter.length === 0 || (book.languages ?? []).some((l) => languageFilter.includes(l))
+        languageFilter.length === 0 ||
+        (book.languages ?? []).some(
+          (l) =>
+            languageFilter.includes(l) ||
+            (languageFilter.includes(OTHER_LANGUAGES_VALUE) && !(LANGUAGE_CODES as readonly string[]).includes(l))
+        )
       const matchesIncomplete = !incompleteOnly || isBookIncomplete(book)
       const matchesOwnBooks = !hideMyBooks || book.owner_id !== user?.id
       const matchesOwner = ownerFilter === 'all' || book.owner_id === ownerFilter
@@ -168,7 +174,7 @@ function Home() {
           <div className="flex flex-col gap-1 text-xs text-gray-500">
             {t('home.languageFilterLabel')}
             <div className="flex gap-2 rounded-md border border-gray-300 px-2 py-1.5">
-              <LanguageCheckboxes value={languageFilter} onChange={setLanguageFilter} />
+              <LanguageCheckboxes value={languageFilter} onChange={setLanguageFilter} includeOthers />
             </div>
           </div>
 
