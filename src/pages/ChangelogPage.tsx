@@ -9,6 +9,14 @@ export function ChangelogPage() {
 
         <div className="space-y-8 text-gray-700">
           <div>
+            <h2 className="mb-2 font-semibold text-gray-900">10 de septiembre de 2026</h2>
+            <ul className="list-disc space-y-1 pl-5">
+              <li>📊 Estadísticas ampliadas: la página de Estadísticas ahora también muestra libros por categoría (incluye cuántos son infantiles), los temas/etiquetas más usados, libros por idioma y los libros más prestados.</li>
+              <li>🌐 Filtro de idioma "Otros": al buscar, ahora puedes marcar "Otros" para ver libros en un idioma distinto de español, alemán, inglés o portugués.</li>
+            </ul>
+          </div>
+
+          <div>
             <h2 className="mb-2 font-semibold text-gray-900">13 de julio de 2026</h2>
             <ul className="list-disc space-y-1 pl-5">
               <li>🌐 Idiomas: ahora puedes marcar en qué idiomas está un libro (Español, Alemán, Inglés, Portugués) — un libro puede tener varios a la vez. Se puede elegir al añadir o editar un libro, se muestra como etiqueta en cada libro, y se puede filtrar la biblioteca por idioma.</li>

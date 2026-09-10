@@ -278,7 +278,8 @@
     "es": "Español",
     "de": "Alemán",
     "en": "Inglés",
-    "pt": "Portugués"
+    "pt": "Portugués",
+    "others": "Otros"
   },
   "errorBoundary": {
     "heading": "Algo salió mal",

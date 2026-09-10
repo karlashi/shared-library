@@ -65,12 +65,14 @@ and self-host their own instance.
   see your own list, from your profile page
 - **Profile page** — edit your display name, see your own books (including archived and
   wishlisted ones), and view your full borrow/lending history
-- **Stats page** — a quick overview of the library: active/archived books, members,
-  and loan counts
-- **Search & sort** — search by title, author, or tag; filter by availability status or
-  gift/sale marking; sort by most recently added or alphabetically; toggle "Solo
-  incompletos" and "Ocultar mis libros" (on by default, so the home grid focuses on what
-  you could borrow from others) narrow the grid further
+- **Stats page** — active/archived books, members, and loan counts, plus breakdowns by
+  category (small-kids/infantil count included), top tags, language, and the most
+  borrowed books
+- **Search & sort** — search by title, author, or tag; filter by availability status,
+  gift/sale marking, category, or language (including an "Otros" option for anything
+  outside Spanish/German/English/Portuguese); sort by most recently added or
+  alphabetically; toggle "Solo incompletos" and "Ocultar mis libros" (on by default, so
+  the home grid focuses on what you could borrow from others) narrow the grid further
 - **Admin roles** — designated admins can edit, archive, delete, or force-return any
   book/loan in the library (for cleaning up after an inactive member), granted manually
   via the database — there's no self-service way to become an admin

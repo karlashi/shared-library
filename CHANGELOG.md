@@ -4,6 +4,25 @@ A technical history of this project, grouped by day. For a user-facing summary i
 Spanish, see the in-app "Novedades" page (`/changelog`). For full detail on any entry,
 `git log` has the complete commit messages this file summarizes.
 
+## 2026-09-10
+
+- **Extended Stats page: category, top tags, language, and most-borrowed breakdowns.**
+  Added a category bar breakdown (using the existing `categories.*` dictionary, so
+  "infantil" doubles as the small-kids-book count), a top-10 tags list built by counting
+  frequency across every active book's `tags` array, a language breakdown from the
+  existing `languages` field, and a top-5 most-borrowed ranking derived by counting
+  `loans` rows per `book_id`. No schema changes — everything is derived client-side from
+  data already being fetched by `useBooks`/`useAllLoans`/`useProfiles`.
+- **"Otros" (Others) option on the language search filter.** `LanguageCheckboxes` gained
+  an opt-in `includeOthers` prop rather than always showing it, since an "Others" value
+  only makes sense as a filter — it would be meaningless to let someone tag a book's
+  actual language as "others" in Add/Edit/Bulk Edit, so those three call sites
+  deliberately don't pass the new prop. Matching logic in `App.tsx`: a book matches
+  "Otros" if any of its `languages` codes falls outside the known `LANGUAGE_CODES` list.
+  Pulled `LANGUAGE_CODES`/`OTHER_LANGUAGES_VALUE` out into `src/constants/languages.ts`
+  instead of exporting them from the component file — co-exporting constants from a
+  component file breaks Fast Refresh (`react-refresh/only-export-components`).
+
 ## 2026-07-13
 
 - **Multi-select language field (filter + badge + forms).** Books can be in more than one
