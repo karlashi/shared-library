@@ -4,6 +4,48 @@ A technical history of this project, grouped by day. For a user-facing summary i
 Spanish, see the in-app "Novedades" page (`/changelog`). For full detail on any entry,
 `git log` has the complete commit messages this file summarizes.
 
+## 2026-10-19
+
+- **Sort dropdown label and new sort options.** The sort `<select>` on the home page was
+  missing the label wrapper that every other filter already had ("Estado", "Categoría",
+  etc.). Added "Ordenar" label to match. Also added two new sort options: Autor (A-Z) and
+  Dueño (A-Z) alongside the existing Más recientes and Título (A-Z). Owner sort looks up
+  the display name from the already-loaded `useProfiles` result so no extra query is needed.
+
+- **Compact/list view.** A new view toggle (⊞ / ☰) above the book grid switches between
+  the existing card grid and a compact list where each book is a thin row: small cover
+  thumbnail, title, author, owner name, category badge, and status badge on one line.
+  Built as a new `BookRow` component that reuses the same `navList` state for prev/next
+  navigation on the detail page. The preference isn't persisted — it resets to grid on
+  page reload, by design, to keep things simple.
+
+- **Favorites heart on each book card.** A 🤍/❤️ button in the top-right corner of each
+  card lets anyone toggle a book as a favorite without opening the detail page. Uses a new
+  `favorites` table in Supabase (same RLS pattern as the existing `wishlist` table —
+  entries are private to each user). Tapping the heart stops click propagation so it
+  doesn't also navigate to the book.
+  Requires one Supabase migration before the feature is live:
+  ```sql
+  create table favorites (
+    user_id uuid references auth.users on delete cascade,
+    book_id uuid references books on delete cascade,
+    primary key (user_id, book_id)
+  );
+  alter table favorites enable row level security;
+  create policy "Users manage own favorites"
+    on favorites for all using (auth.uid() = user_id)
+    with check (auth.uid() = user_id);
+  ```
+
+- **Database view (`/database`).** New page accessible from a button on the home screen.
+  Shows every active book as an editable table row with a checkbox. Selecting rows reveals
+  a bulk-action bar: mark as gift, mark for sale, mark out of circulation, or restore to
+  available. Title, author, and collection can be edited inline in the row; a "Guardar
+  cambios" bar appears when there are unsaved edits. A search box narrows which rows are
+  shown (and which rows "select all" covers). Deliberately separate from the existing
+  `/bulk-edit` page, which is for filling in missing metadata (cover, description, age,
+  tags) — this one is for status management and quick text corrections.
+
 ## 2026-09-10
 
 - **Extended Stats page: category, top tags, language, and most-borrowed breakdowns.**
