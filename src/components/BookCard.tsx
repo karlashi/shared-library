@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/AuthContext'
-import { useProfiles, useLendBook, useReturnBook } from '../services/queries'
+import { useProfiles, useLendBook, useReturnBook, useFavorites, useToggleFavorite } from '../services/queries'
 import { isBookIncomplete } from '../utils/bookCompleteness'
 import type { Book } from '../types/Books'
 
@@ -14,7 +14,17 @@ export function BookCard({ book, navList }: { book: Book; navList?: string[] }) 
   const { data: users = [] } = useProfiles()
   const lendBook = useLendBook()
   const returnBook = useReturnBook()
+  const { data: favorites = [] } = useFavorites(user?.id)
+  const toggleFavorite = useToggleFavorite()
   const [selectedUser, setSelectedUser] = useState('')
+
+  const isFav = favorites.includes(book.id)
+
+  const handleToggleFavorite = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!user) return
+    toggleFavorite.mutate({ bookId: book.id, userId: user.id, isFav })
+  }
 
   const isOwner = book.owner_id === user?.id
   const isAdmin = !!profile?.is_admin
@@ -56,11 +66,24 @@ export function BookCard({ book, navList }: { book: Book; navList?: string[] }) 
       >
         <div className="flex items-start justify-between gap-1">
           <h4 className="font-semibold text-gray-900 truncate">{book.title}</h4>
-          {!book.archived && isBookIncomplete(book) && (
-            <span title={t('bookCard.incompleteLabel')} aria-label={t('bookCard.incompleteLabel')}>
-              ⚠️
-            </span>
-          )}
+          <div className="flex shrink-0 items-center gap-0.5">
+            {!book.archived && isBookIncomplete(book) && (
+              <span title={t('bookCard.incompleteLabel')} aria-label={t('bookCard.incompleteLabel')}>
+                ⚠️
+              </span>
+            )}
+            {user && (
+              <button
+                type="button"
+                onClick={handleToggleFavorite}
+                aria-label={isFav ? t('bookCard.removeFavorite') : t('bookCard.addFavorite')}
+                title={isFav ? t('bookCard.removeFavorite') : t('bookCard.addFavorite')}
+                className="text-base leading-none text-gray-400 hover:text-red-500 transition-colors"
+              >
+                {isFav ? '❤️' : '🤍'}
+              </button>
+            )}
+          </div>
         </div>
         <p className="text-sm text-gray-600 truncate">{book.author}</p>
 

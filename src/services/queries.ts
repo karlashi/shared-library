@@ -324,6 +324,45 @@ export function useToggleWishlist() {
   })
 }
 
+export function useFavorites(userId: string | undefined) {
+  return useQuery({
+    queryKey: ['favorites', userId],
+    queryFn: async (): Promise<string[]> => {
+      const { data, error } = await supabase
+        .from('favorites')
+        .select('book_id')
+        .eq('user_id', userId)
+      if (error) throw error
+      return (data ?? []).map((row) => row.book_id)
+    },
+    enabled: !!userId,
+  })
+}
+
+export function useToggleFavorite() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (vars: { bookId: string; userId: string; isFav: boolean }) => {
+      if (vars.isFav) {
+        const { error } = await supabase
+          .from('favorites')
+          .delete()
+          .eq('book_id', vars.bookId)
+          .eq('user_id', vars.userId)
+        if (error) throw error
+      } else {
+        const { error } = await supabase
+          .from('favorites')
+          .insert({ book_id: vars.bookId, user_id: vars.userId })
+        if (error && error.code !== '23505') throw error
+      }
+    },
+    onSuccess: (_data, vars) => {
+      queryClient.invalidateQueries({ queryKey: ['favorites', vars.userId] })
+    },
+  })
+}
+
 export function useDeleteAccount() {
   return useMutation({
     mutationFn: async () => {

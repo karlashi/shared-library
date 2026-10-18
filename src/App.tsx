@@ -5,6 +5,7 @@ import Fuse from 'fuse.js'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { useBooks, useProfiles } from './services/queries'
 import { BookCard } from './components/BookCard'
+import { BookRow } from './components/BookRow'
 import { RequireAuth } from './components/RequireAuth'
 import { Header } from './components/Header'
 import { BackToTop } from './components/BackToTop'
@@ -19,6 +20,7 @@ import { AddBookPage } from './pages/AddBookPage'
 import { BookDetailsPage } from './pages/BookDetailsPage'
 import { EditBookPage } from './pages/EditBookPage'
 import { BulkEditPage } from './pages/BulkEditPage'
+import { DatabasePage } from './pages/DatabasePage'
 import { ActivityPage } from './pages/ActivityPage'
 import { MyBooksPage } from './pages/MyBooksPage'
 import { LanguageCheckboxes } from './components/LanguageCheckboxes'
@@ -36,7 +38,8 @@ function Home() {
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [languageFilter, setLanguageFilter] = useState<string[]>([])
   const [ownerFilter, setOwnerFilter] = useState('all')
-  const [sortBy, setSortBy] = useState<'recent' | 'title'>('recent')
+  const [sortBy, setSortBy] = useState<'recent' | 'title' | 'author' | 'owner'>('recent')
+  const [viewMode, setViewMode] = useState<'grid' | 'compact'>('grid')
   const [incompleteOnly, setIncompleteOnly] = useState(false)
   const [hideMyBooks, setHideMyBooks] = useState(true)
 
@@ -95,6 +98,12 @@ function Home() {
     })
     .sort((a, b) => {
       if (sortBy === 'title') return a.title.localeCompare(b.title, 'es')
+      if (sortBy === 'author') return (a.author ?? '').localeCompare(b.author ?? '', 'es')
+      if (sortBy === 'owner') {
+        const nameA = profiles.find((p) => p.id === a.owner_id)?.name ?? ''
+        const nameB = profiles.find((p) => p.id === b.owner_id)?.name ?? ''
+        return nameA.localeCompare(nameB, 'es')
+      }
       return (b.created_at ?? '').localeCompare(a.created_at ?? '')
     })
 
@@ -121,6 +130,11 @@ function Home() {
             <Link to="/bulk-edit">
               <button className="rounded-md bg-gray-100 px-4 py-2 font-medium text-gray-800 hover:bg-gray-200">
                 {t('home.bulkEdit')}
+              </button>
+            </Link>
+            <Link to="/database">
+              <button className="rounded-md bg-gray-100 px-4 py-2 font-medium text-gray-800 hover:bg-gray-200">
+                {t('home.databaseView')}
               </button>
             </Link>
           </div>
@@ -193,14 +207,20 @@ function Home() {
             </select>
           </label>
 
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as 'recent' | 'title')}
-            className="rounded-md border border-gray-300 px-3 py-2"
-          >
-            <option value="recent">{t('home.sortRecent')}</option>
-            <option value="title">{t('home.sortTitle')}</option>
-          </select>
+          <label className="flex flex-col gap-1 text-xs text-gray-500">
+            {t('home.sortLabel')}
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as 'recent' | 'title' | 'author' | 'owner')}
+              aria-label={t('home.sortLabel')}
+              className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
+            >
+              <option value="recent">{t('home.sortRecent')}</option>
+              <option value="title">{t('home.sortTitle')}</option>
+              <option value="author">{t('home.sortAuthor')}</option>
+              <option value="owner">{t('home.sortOwner')}</option>
+            </select>
+          </label>
 
           <label className="flex items-center gap-1.5 text-sm text-gray-700">
             <input
@@ -221,16 +241,49 @@ function Home() {
           </label>
         </div>
 
-        {/* BOOK GRID */}
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-          {filteredBooks.map((book) => (
-            <BookCard
-              key={book.id}
-              book={book}
-              navList={filteredBookIds}
-            />
-          ))}
+        {/* VIEW TOGGLE + BOOK LIST */}
+        <div className="mb-3 flex justify-end gap-2">
+          <button
+            type="button"
+            onClick={() => setViewMode('grid')}
+            title={t('home.viewGrid')}
+            aria-pressed={viewMode === 'grid'}
+            className={`rounded-md px-3 py-1.5 text-sm ${viewMode === 'grid' ? 'bg-brand text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+          >
+            ⊞
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode('compact')}
+            title={t('home.viewCompact')}
+            aria-pressed={viewMode === 'compact'}
+            className={`rounded-md px-3 py-1.5 text-sm ${viewMode === 'compact' ? 'bg-brand text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+          >
+            ☰
+          </button>
         </div>
+
+        {viewMode === 'grid' ? (
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {filteredBooks.map((book) => (
+              <BookCard
+                key={book.id}
+                book={book}
+                navList={filteredBookIds}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col divide-y divide-gray-100 rounded-lg border border-gray-200 bg-white">
+            {filteredBooks.map((book) => (
+              <BookRow
+                key={book.id}
+                book={book}
+                navList={filteredBookIds}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
@@ -252,6 +305,7 @@ export default function App() {
           <Route path="/activity" element={<RequireAuth><ActivityPage /></RequireAuth>} />
           <Route path="/add" element={<RequireAuth><AddBookPage /></RequireAuth>} />
           <Route path="/bulk-edit" element={<RequireAuth><BulkEditPage /></RequireAuth>} />
+          <Route path="/database" element={<RequireAuth><DatabasePage /></RequireAuth>} />
           <Route path="/book/:id" element={<RequireAuth><BookDetailsPage /></RequireAuth>} />
           <Route path="/book/:id/edit" element={<RequireAuth><EditBookPage /></RequireAuth>} />
         </Routes>
