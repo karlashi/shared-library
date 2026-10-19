@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { useAuth } from '../contexts/AuthContext'
 import { useBooks, useProfiles } from '../services/queries'
 import { supabase } from '../services/supabaseClient'
 import { Header } from '../components/Header'
@@ -25,12 +24,9 @@ function defaultEdit(book: Book): InlineEdit {
 export function DatabasePage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { profile } = useAuth()
   const queryClient = useQueryClient()
   const { data: books = [] } = useBooks()
   const { data: profiles = [] } = useProfiles()
-
-  const isAdmin = !!profile?.is_admin
 
   const activeBooks = books.filter((b) => !b.archived)
 
