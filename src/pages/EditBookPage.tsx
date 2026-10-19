@@ -5,9 +5,10 @@ import { useForm, Controller } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../services/supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
-import { useBook, useDeleteBook, useSetArchived } from '../services/queries'
+import { useBook, useDeleteBook, useSetArchived, useBooks } from '../services/queries'
 import { validateImageFile, uploadCoverImage, deleteCoverImage } from '../services/storage'
 import { LanguageCheckboxes } from '../components/LanguageCheckboxes'
+import { LANGUAGE_CODES } from '../constants/languages'
 
 type FormValues = {
   title: string
@@ -32,10 +33,38 @@ export function EditBookPage() {
   const isAdmin = !!profile?.is_admin
 
   const { data: book, isLoading } = useBook(id)
+  const { data: allBooks = [] } = useBooks()
   const deleteBook = useDeleteBook()
   const setArchived = useSetArchived()
 
+  const cleanupLanguages = useMutation({
+    mutationFn: async () => {
+      // Find all books with non-standard language codes
+      const knownCodes = LANGUAGE_CODES as readonly string[]
+      const dirty = allBooks.filter((b) =>
+        (b.languages ?? []).some((l) => !knownCodes.includes(l))
+      )
+      let fixed = 0
+      for (const b of dirty) {
+        const cleaned = (b.languages ?? []).filter((l) => knownCodes.includes(l))
+        const { error } = await supabase
+          .from('books')
+          .update({ languages: cleaned })
+          .eq('id', b.id)
+        if (!error) fixed++
+      }
+      return { total: dirty.length, fixed }
+    },
+    onSuccess: ({ total, fixed }) => {
+      queryClient.invalidateQueries({ queryKey: ['books'] })
+      setCleanupResult(t('editBook.cleanupResult', { total, fixed }))
+    },
+    onError: () => setCleanupResult(t('editBook.cleanupError')),
+  })
+
   const [cover_url, setCoverUrl] = useState('')
+  const [otherLangs, setOtherLangs] = useState('')
+  const [cleanupResult, setCleanupResult] = useState<string | null>(null)
 
   const {
     register,
@@ -71,6 +100,8 @@ export function EditBookPage() {
       languages: book.languages ?? [],
     })
     setCoverUrl(book.cover_url || '')
+    const nonStandard = (book.languages ?? []).filter((l) => !(LANGUAGE_CODES as readonly string[]).includes(l))
+    setOtherLangs(nonStandard.join(', '))
   }, [book, reset])
 
   const updateBook = useMutation({
@@ -103,7 +134,12 @@ export function EditBookPage() {
   })
 
   const onSubmit = (values: FormValues) => {
-    updateBook.mutate(values)
+    const extra = otherLangs
+      .split(',')
+      .map((s) => s.trim().toLowerCase())
+      .filter((s) => s.length > 0 && !(LANGUAGE_CODES as readonly string[]).includes(s))
+    const merged = Array.from(new Set([...values.languages, ...extra]))
+    updateBook.mutate({ ...values, languages: merged })
   }
 
   const handleDelete = () => {
@@ -281,6 +317,16 @@ export function EditBookPage() {
           </div>
 
           <label className="block">
+            <span className="mb-1 block text-sm font-medium text-gray-700">{t('editBook.otherLanguages')}</span>
+            <input
+              value={otherLangs}
+              onChange={(e) => setOtherLangs(e.target.value)}
+              placeholder={t('editBook.otherLanguagesHint')}
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+            />
+          </label>
+
+          <label className="block">
             <span className="mb-1 block text-sm font-medium text-gray-700">{t('editBook.listingType')}</span>
             <select
               {...register('listing_type')}
@@ -342,6 +388,24 @@ export function EditBookPage() {
             {deleteBook.isPending ? t('editBook.deleting') : t('editBook.deleteBook')}
           </button>
         </form>
+
+        {isAdmin && (
+          <div className="mt-8 rounded-md border border-amber-200 bg-amber-50 p-4">
+            <h2 className="mb-2 font-semibold text-amber-900">{t('editBook.adminCleanupTitle')}</h2>
+            <p className="mb-3 text-sm text-amber-800">{t('editBook.adminCleanupDesc')}</p>
+            <button
+              type="button"
+              onClick={() => cleanupLanguages.mutate()}
+              disabled={cleanupLanguages.isPending}
+              className="rounded-md bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 disabled:opacity-50"
+            >
+              {cleanupLanguages.isPending ? t('editBook.adminCleanupRunning') : t('editBook.adminCleanupRun')}
+            </button>
+            {cleanupResult && (
+              <p className="mt-2 text-sm text-amber-900">{cleanupResult}</p>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )

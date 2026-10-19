@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import Fuse from 'fuse.js'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
@@ -9,7 +9,6 @@ import { BookRow } from './components/BookRow'
 import { RequireAuth } from './components/RequireAuth'
 import { Header } from './components/Header'
 import { BackToTop } from './components/BackToTop'
-import { isBookIncomplete } from './utils/bookCompleteness'
 import { LoginPage } from './pages/LoginPage'
 import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { AboutPage } from './pages/AboutPage'
@@ -26,6 +25,36 @@ import { MyBooksPage } from './pages/MyBooksPage'
 import { LanguageCheckboxes } from './components/LanguageCheckboxes'
 import { LANGUAGE_CODES, OTHER_LANGUAGES_VALUE } from './constants/languages'
 
+const SESSION_KEY = 'home_filters'
+
+type FilterState = {
+  search: string
+  filterValue: string
+  categoryFilter: string
+  languageFilter: string[]
+  ownerFilter: string
+  sortBy: 'recent' | 'title' | 'author' | 'owner'
+  viewMode: 'grid' | 'compact'
+  hideMyBooks: boolean
+}
+
+function loadFilters(): Partial<FilterState> {
+  try {
+    const raw = sessionStorage.getItem(SESSION_KEY)
+    return raw ? JSON.parse(raw) : {}
+  } catch {
+    return {}
+  }
+}
+
+function saveFilters(state: FilterState) {
+  try {
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify(state))
+  } catch {
+    // ignore
+  }
+}
+
 function Home() {
   const { t } = useTranslation()
   const { user, profile } = useAuth()
@@ -33,15 +62,21 @@ function Home() {
   const { data: profiles = [] } = useProfiles()
   const isApproved = !!profile?.approved
 
-  const [search, setSearch] = useState('')
-  const [filterValue, setFilterValue] = useState('all')
-  const [categoryFilter, setCategoryFilter] = useState('all')
-  const [languageFilter, setLanguageFilter] = useState<string[]>([])
-  const [ownerFilter, setOwnerFilter] = useState('all')
-  const [sortBy, setSortBy] = useState<'recent' | 'title' | 'author' | 'owner'>('recent')
-  const [viewMode, setViewMode] = useState<'grid' | 'compact'>('grid')
-  const [incompleteOnly, setIncompleteOnly] = useState(false)
-  const [hideMyBooks, setHideMyBooks] = useState(true)
+  const saved = loadFilters()
+
+  const [search, setSearch] = useState(saved.search ?? '')
+  const [filterValue, setFilterValue] = useState(saved.filterValue ?? 'all')
+  const [categoryFilter, setCategoryFilter] = useState(saved.categoryFilter ?? 'all')
+  const [languageFilter, setLanguageFilter] = useState<string[]>(saved.languageFilter ?? [])
+  const [ownerFilter, setOwnerFilter] = useState(saved.ownerFilter ?? 'all')
+  const [sortBy, setSortBy] = useState<'recent' | 'title' | 'author' | 'owner'>(saved.sortBy ?? 'recent')
+  const [viewMode, setViewMode] = useState<'grid' | 'compact'>(saved.viewMode ?? 'grid')
+  const [hideMyBooks, setHideMyBooks] = useState(saved.hideMyBooks ?? true)
+
+  // Persist filters to sessionStorage on every change
+  useEffect(() => {
+    saveFilters({ search, filterValue, categoryFilter, languageFilter, ownerFilter, sortBy, viewMode, hideMyBooks })
+  }, [search, filterValue, categoryFilter, languageFilter, ownerFilter, sortBy, viewMode, hideMyBooks])
 
   const activeBooks = books.filter((book) => !book.archived)
 
@@ -90,11 +125,10 @@ function Home() {
             languageFilter.includes(l) ||
             (languageFilter.includes(OTHER_LANGUAGES_VALUE) && !(LANGUAGE_CODES as readonly string[]).includes(l))
         )
-      const matchesIncomplete = !incompleteOnly || isBookIncomplete(book)
       const matchesOwnBooks = !hideMyBooks || book.owner_id !== user?.id
       const matchesOwner = ownerFilter === 'all' || book.owner_id === ownerFilter
 
-      return matchesSearch && matchesFilter && matchesCategory && matchesLanguage && matchesIncomplete && matchesOwnBooks && matchesOwner
+      return matchesSearch && matchesFilter && matchesCategory && matchesLanguage && matchesOwnBooks && matchesOwner
     })
     .sort((a, b) => {
       if (sortBy === 'title') return a.title.localeCompare(b.title, 'es')
@@ -140,105 +174,100 @@ function Home() {
           </div>
         )}
 
-        {/* SEARCH + FILTER */}
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+        {/* SEARCH + FILTERS — two-line desktop layout */}
+        <div className="mb-6 flex flex-col gap-3">
+          {/* Line 1: search full-width */}
           <input
             placeholder={t('home.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 sm:w-64"
+            className="w-full rounded-md border border-gray-300 px-3 py-2"
           />
 
-          <label className="flex flex-col gap-1 text-xs text-gray-500">
-            {t('home.statusFilterLabel')}
-            <select
-              value={filterValue}
-              onChange={(e) => setFilterValue(e.target.value)}
-              aria-label={t('home.statusFilterLabel')}
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
-            >
-              <option value="all">{t('home.allStatus')}</option>
-              <option value="available">{t('home.available')}</option>
-              <option value="borrowed">{t('home.borrowed')}</option>
-              <option value="blocked">{t('home.blocked')}</option>
-              <option value="gift">{t('bookCard.gift')}</option>
-              <option value="sale">{t('bookCard.sale')}</option>
-            </select>
-          </label>
+          {/* Line 2: all filters in a row */}
+          <div className="flex flex-wrap items-end gap-3">
+            <label className="flex flex-col gap-1 text-xs text-gray-500">
+              {t('home.statusFilterLabel')}
+              <select
+                value={filterValue}
+                onChange={(e) => setFilterValue(e.target.value)}
+                aria-label={t('home.statusFilterLabel')}
+                className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
+              >
+                <option value="all">{t('home.allStatus')}</option>
+                <option value="available">{t('home.available')}</option>
+                <option value="borrowed">{t('home.borrowed')}</option>
+                <option value="blocked">{t('home.blocked')}</option>
+                <option value="gift">{t('bookCard.gift')}</option>
+                <option value="sale">{t('bookCard.sale')}</option>
+              </select>
+            </label>
 
-          <label className="flex flex-col gap-1 text-xs text-gray-500">
-            {t('home.categoryFilterLabel')}
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              aria-label={t('home.categoryFilterLabel')}
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
-            >
-              <option value="all">{t('home.allCategories')}</option>
-              <option value="infantil">{t('categories.infantil')}</option>
-              <option value="juvenil">{t('categories.juvenil')}</option>
-              <option value="adultos">{t('categories.adultos')}</option>
-              <option value="comic">{t('categories.comic')}</option>
-              <option value="poesia">{t('categories.poesia')}</option>
-              <option value="arte">{t('categories.arte')}</option>
-              <option value="idiomas">{t('categories.idiomas')}</option>
-            </select>
-          </label>
+            <label className="flex flex-col gap-1 text-xs text-gray-500">
+              {t('home.categoryFilterLabel')}
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                aria-label={t('home.categoryFilterLabel')}
+                className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
+              >
+                <option value="all">{t('home.allCategories')}</option>
+                <option value="infantil">{t('categories.infantil')}</option>
+                <option value="juvenil">{t('categories.juvenil')}</option>
+                <option value="adultos">{t('categories.adultos')}</option>
+                <option value="comic">{t('categories.comic')}</option>
+                <option value="poesia">{t('categories.poesia')}</option>
+                <option value="arte">{t('categories.arte')}</option>
+                <option value="idiomas">{t('categories.idiomas')}</option>
+              </select>
+            </label>
 
-          <div className="flex flex-col gap-1 text-xs text-gray-500">
-            {t('home.languageFilterLabel')}
-            <div className="flex gap-2 rounded-md border border-gray-300 px-2 py-1.5">
-              <LanguageCheckboxes value={languageFilter} onChange={setLanguageFilter} includeOthers />
+            <div className="flex flex-col gap-1 text-xs text-gray-500">
+              {t('home.languageFilterLabel')}
+              <div className="flex gap-2 rounded-md border border-gray-300 px-2 py-1.5">
+                <LanguageCheckboxes value={languageFilter} onChange={setLanguageFilter} includeOthers />
+              </div>
             </div>
+
+            <label className="flex flex-col gap-1 text-xs text-gray-500">
+              {t('home.ownerFilterLabel')}
+              <select
+                value={ownerFilter}
+                onChange={(e) => setOwnerFilter(e.target.value)}
+                aria-label={t('home.ownerFilterLabel')}
+                className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
+              >
+                <option value="all">{t('home.allOwners')}</option>
+                {profiles.filter((p) => !p.deleted).map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            </label>
+
+            <label className="flex flex-col gap-1 text-xs text-gray-500">
+              {t('home.sortLabel')}
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as 'recent' | 'title' | 'author' | 'owner')}
+                aria-label={t('home.sortLabel')}
+                className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
+              >
+                <option value="recent">{t('home.sortRecent')}</option>
+                <option value="title">{t('home.sortTitle')}</option>
+                <option value="author">{t('home.sortAuthor')}</option>
+                <option value="owner">{t('home.sortOwner')}</option>
+              </select>
+            </label>
+
+            <label className="flex items-center gap-1.5 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                checked={hideMyBooks}
+                onChange={(e) => setHideMyBooks(e.target.checked)}
+              />
+              {t('home.hideMyBooks')}
+            </label>
           </div>
-
-          <label className="flex flex-col gap-1 text-xs text-gray-500">
-            {t('home.ownerFilterLabel')}
-            <select
-              value={ownerFilter}
-              onChange={(e) => setOwnerFilter(e.target.value)}
-              aria-label={t('home.ownerFilterLabel')}
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
-            >
-              <option value="all">{t('home.allOwners')}</option>
-              {profiles.filter((p) => !p.deleted).map((p) => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
-          </label>
-
-          <label className="flex flex-col gap-1 text-xs text-gray-500">
-            {t('home.sortLabel')}
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as 'recent' | 'title' | 'author' | 'owner')}
-              aria-label={t('home.sortLabel')}
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
-            >
-              <option value="recent">{t('home.sortRecent')}</option>
-              <option value="title">{t('home.sortTitle')}</option>
-              <option value="author">{t('home.sortAuthor')}</option>
-              <option value="owner">{t('home.sortOwner')}</option>
-            </select>
-          </label>
-
-          <label className="flex items-center gap-1.5 text-sm text-gray-700">
-            <input
-              type="checkbox"
-              checked={incompleteOnly}
-              onChange={(e) => setIncompleteOnly(e.target.checked)}
-            />
-            {t('home.incompleteOnly')}
-          </label>
-
-          <label className="flex items-center gap-1.5 text-sm text-gray-700">
-            <input
-              type="checkbox"
-              checked={hideMyBooks}
-              onChange={(e) => setHideMyBooks(e.target.checked)}
-            />
-            {t('home.hideMyBooks')}
-          </label>
         </div>
 
         {/* VIEW TOGGLE + BOOK LIST */}
@@ -287,6 +316,7 @@ function Home() {
       </div>
     </div>
   )
+
 }
 
 export default function App() {

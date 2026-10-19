@@ -11,10 +11,10 @@ export function ChangelogPage() {
           <div>
             <h2 className="mb-2 font-semibold text-gray-900">19 de octubre de 2026</h2>
             <ul className="list-disc space-y-1 pl-5">
-              <li>🔤 El selector de ordenación ahora tiene etiqueta ("Ordenar") como el resto de filtros, y se agregaron dos opciones nuevas: por Autor (A-Z) y por Dueño (A-Z).</li>
-              <li>☰ Vista compacta: dos botones sobre la cuadrícula de libros permiten cambiar a una vista en lista, donde cada libro aparece como una fila delgada con portada en miniatura, título, autor, dueño y estado. Útil para ver muchos libros de un vistazo.</li>
+              <li>🗃️ Vista base de datos: nueva página accesible desde la biblioteca con una tabla editable de tus libros (incluyendo archivados). Podés seleccionar varios con casillas y aplicar acciones en lote: marcar para regalar, marcar para vender, fuera de circulación, o volver a poner disponible. También podés editar el título, autor y colección directamente en la fila, y cambiar el estado de cada libro con un desplegable inline.</li>
+              <li>☰ Vista compacta: dos botones sobre la cuadrícula de libros permiten cambiar a una vista en lista, donde cada libro aparece como una fila delgada con portada en miniatura, título, autor, dueño y estado. Útil para ver muchos libros de un vistazo. También disponible en "Mis libros".</li>
               <li>❤️ Favoritos: en la esquina de cada libro hay un botón de corazón (🤍/❤️) para marcarlo como favorito sin necesidad de abrirlo. Solo te lo ves tú.</li>
-              <li>🗃️ Vista base de datos: nueva página accesible desde la biblioteca con una tabla editable de todos los libros. Podés seleccionar varios con casillas y aplicar acciones en lote: marcar para regalar, marcar para vender, fuera de circulación, o volver a poner disponible. También podés editar el título, autor y colección directamente en la fila.</li>
+              <li>🔤 El selector de ordenación ahora tiene etiqueta ("Ordenar") como el resto de filtros, y se agregaron dos opciones nuevas: por Autor (A-Z) y por Dueño (A-Z).</li>
             </ul>
           </div>
 

@@ -159,7 +159,15 @@
     "deletedSuccess": "Libro eliminado",
     "deleting": "Eliminando...",
     "deleteBook": "Eliminar libro 🗑️",
-    "deleteError": "Error al eliminar el libro"
+    "deleteError": "Error al eliminar el libro",
+    "otherLanguages": "Otros idiomas",
+    "otherLanguagesHint": "Escribe los códigos separados por coma, ej: ca, eu, gl",
+    "adminCleanupTitle": "🛠️ Normalizar idiomas (admin)",
+    "adminCleanupDesc": "Elimina valores no estándar del campo idiomas en todos los libros de la biblioteca. Solo conserva: es, de, en, pt.",
+    "adminCleanupRun": "Normalizar ahora",
+    "adminCleanupRunning": "Normalizando...",
+    "cleanupResult": "{{fixed}} de {{total}} libros actualizados.",
+    "cleanupError": "Error al normalizar idiomas"
   },
   "bookDetails": {
     "back": "← Volver",
@@ -214,7 +222,8 @@
     "sale": "💰 En venta",
     "incompleteLabel": "Incompleto",
     "addFavorite": "Añadir a favoritos",
-    "removeFavorite": "Quitar de favoritos"
+    "removeFavorite": "Quitar de favoritos",
+    "favoriteError": "No se pudo actualizar el favorito"
   },
   "database": {
     "heading": "🗃️ Vista base de datos",
@@ -225,8 +234,10 @@
     "colTitle": "Título",
     "colAuthor": "Autor",
     "colCollection": "Colección",
-    "colOwner": "Dueño",
+    "colLanguage": "Idioma",
     "colStatus": "Estado",
+    "statusArchived": "Archivado",
+    "statusUpdateError": "Error al actualizar el estado",
     "markGift": "Marcar para regalar",
     "markSale": "Marcar para vender",
     "markBlocked": "Fuera de circulación",

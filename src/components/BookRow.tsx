@@ -12,6 +12,12 @@ export function BookRow({ book, navList }: { book: Book; navList?: string[] }) {
 
   const ownerName = profiles.find((p) => p.id === book.owner_id)?.name ?? t('common.unknown')
 
+  const handleClick = (e: React.MouseEvent) => {
+    if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) return
+    e.preventDefault()
+    navigate(`/book/${book.id}`, navList ? { state: { navList } } : undefined)
+  }
+
   const statusBadge = () => {
     if (book.status === 'Fuera de circulación') {
       return (
@@ -35,9 +41,10 @@ export function BookRow({ book, navList }: { book: Book; navList?: string[] }) {
   }
 
   return (
-    <div
-      className="flex cursor-pointer items-center gap-3 px-3 py-2 hover:bg-gray-50"
-      onClick={() => navigate(`/book/${book.id}`, navList ? { state: { navList } } : undefined)}
+    <a
+      href={`/book/${book.id}`}
+      onClick={handleClick}
+      className="flex cursor-pointer items-center gap-3 px-3 py-2 hover:bg-gray-50 no-underline text-inherit"
     >
       {/* Cover thumbnail */}
       {book.cover_url ? (
@@ -83,6 +90,6 @@ export function BookRow({ book, navList }: { book: Book; navList?: string[] }) {
           {book.listing_type === 'gift' ? t('bookCard.gift') : t('bookCard.sale')}
         </span>
       )}
-    </div>
+    </a>
   )
 }

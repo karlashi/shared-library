@@ -17,13 +17,31 @@ export function BookCard({ book, navList }: { book: Book; navList?: string[] }) 
   const { data: favorites = [] } = useFavorites(user?.id)
   const toggleFavorite = useToggleFavorite()
   const [selectedUser, setSelectedUser] = useState('')
+  const [favError, setFavError] = useState(false)
 
   const isFav = favorites.includes(book.id)
 
   const handleToggleFavorite = (e: React.MouseEvent) => {
+    e.preventDefault()
     e.stopPropagation()
     if (!user) return
-    toggleFavorite.mutate({ bookId: book.id, userId: user.id, isFav })
+    setFavError(false)
+    toggleFavorite.mutate(
+      { bookId: book.id, userId: user.id, isFav },
+      {
+        onError: () => {
+          setFavError(true)
+          setTimeout(() => setFavError(false), 3000)
+        },
+      }
+    )
+  }
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Only intercept left-clicks without modifier keys so right-click / ctrl+click / middle-click work natively
+    if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) return
+    e.preventDefault()
+    navigate(`/book/${book.id}`, navList ? { state: { navList } } : undefined)
   }
 
   const isOwner = book.owner_id === user?.id
@@ -59,10 +77,13 @@ export function BookCard({ book, navList }: { book: Book; navList?: string[] }) 
 
   return (
     <div className="rounded-lg border border-gray-200 p-3 shadow-sm">
-      {/* CLICK CARD */}
-      <div
-        onClick={() => navigate(`/book/${book.id}`, navList ? { state: { navList } } : undefined)}
-        className="cursor-pointer"
+      {/* Wrap in <a> so right-click / ctrl+click / middle-click open natively */}
+      <a
+        href={`/book/${book.id}`}
+        onClick={handleCardClick}
+        className="block cursor-pointer no-underline"
+        tabIndex={-1}
+        aria-label={book.title}
       >
         <div className="flex items-start justify-between gap-1">
           <h4 className="font-semibold text-gray-900 truncate">{book.title}</h4>
@@ -78,9 +99,9 @@ export function BookCard({ book, navList }: { book: Book; navList?: string[] }) 
                 onClick={handleToggleFavorite}
                 aria-label={isFav ? t('bookCard.removeFavorite') : t('bookCard.addFavorite')}
                 title={isFav ? t('bookCard.removeFavorite') : t('bookCard.addFavorite')}
-                className="text-base leading-none text-gray-400 hover:text-red-500 transition-colors"
+                className={`text-base leading-none transition-colors ${favError ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}
               >
-                {isFav ? '❤️' : '🤍'}
+                {isFav ? '❤️' : favError ? '⚠️' : '🤍'}
               </button>
             )}
           </div>
@@ -109,9 +130,14 @@ export function BookCard({ book, navList }: { book: Book; navList?: string[] }) 
           <img
             src={book.cover_url}
             className="mt-2 w-full rounded-md aspect-[2/3] object-cover"
+            alt={book.title}
           />
         )}
-      </div>
+      </a>
+
+      {favError && (
+        <p className="mt-1 text-xs text-red-600">{t('bookCard.favoriteError')}</p>
+      )}
 
       {/* BORROWED STATUS */}
       {book.isBorrowed && (

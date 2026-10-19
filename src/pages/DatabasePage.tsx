@@ -2,10 +2,13 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { useBooks, useProfiles } from '../services/queries'
+import { useBooks } from '../services/queries'
+import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../services/supabaseClient'
 import { Header } from '../components/Header'
 import type { Book } from '../types/Books'
+
+type SortCol = 'title' | 'author' | 'collection' | 'language' | 'status'
 
 type InlineEdit = {
   title: string
@@ -21,26 +24,50 @@ function defaultEdit(book: Book): InlineEdit {
   }
 }
 
+function bookStatus(book: Book): string {
+  if (book.archived) return 'archived'
+  if (book.status === 'Fuera de circulación') return 'blocked'
+  if (book.isBorrowed) return 'borrowed'
+  if (book.listing_type === 'gift') return 'gift'
+  if (book.listing_type === 'sale') return 'sale'
+  return 'available'
+}
+
 export function DatabasePage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { user } = useAuth()
   const { data: books = [] } = useBooks()
-  const { data: profiles = [] } = useProfiles()
 
-  const activeBooks = books.filter((b) => !b.archived)
+  // Only show current user's books (active + archived)
+  const myBooks = books.filter((b) => b.owner_id === user?.id)
 
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [edits, setEdits] = useState<Record<string, InlineEdit>>({})
   const [search, setSearch] = useState('')
+  const [sortCol, setSortCol] = useState<SortCol>('title')
+  const [sortAsc, setSortAsc] = useState(true)
 
-  const visibleBooks = search
-    ? activeBooks.filter(
-        (b) =>
-          b.title.toLowerCase().includes(search.toLowerCase()) ||
-          b.author.toLowerCase().includes(search.toLowerCase())
-      )
-    : activeBooks
+  const visibleBooks = (
+    search
+      ? myBooks.filter(
+          (b) =>
+            b.title.toLowerCase().includes(search.toLowerCase()) ||
+            b.author.toLowerCase().includes(search.toLowerCase())
+        )
+      : myBooks
+  ).slice().sort((a, b) => {
+    let va = ''
+    let vb = ''
+    if (sortCol === 'title') { va = a.title; vb = b.title }
+    else if (sortCol === 'author') { va = a.author; vb = b.author }
+    else if (sortCol === 'collection') { va = a.collection ?? ''; vb = b.collection ?? '' }
+    else if (sortCol === 'language') { va = (a.languages ?? []).join(','); vb = (b.languages ?? []).join(',') }
+    else if (sortCol === 'status') { va = bookStatus(a); vb = bookStatus(b) }
+    const cmp = va.localeCompare(vb, 'es')
+    return sortAsc ? cmp : -cmp
+  })
 
   const allSelected = visibleBooks.length > 0 && visibleBooks.every((b) => selected.has(b.id))
 
@@ -69,11 +96,55 @@ export function DatabasePage() {
     })
   }
 
+  const handleSortCol = (col: SortCol) => {
+    if (sortCol === col) setSortAsc((v) => !v)
+    else { setSortCol(col); setSortAsc(true) }
+  }
+
+  const sortIndicator = (col: SortCol) => {
+    if (sortCol !== col) return <span className="ml-1 opacity-30">↕</span>
+    return <span className="ml-1">{sortAsc ? '↑' : '↓'}</span>
+  }
+
   const getEdit = (book: Book): InlineEdit => edits[book.id] ?? defaultEdit(book)
 
   const updateEdit = (book: Book, patch: Partial<InlineEdit>) => {
     setEdits((prev) => ({ ...prev, [book.id]: { ...getEdit(book), ...patch } }))
   }
+
+  // Inline status update (saves immediately)
+  const updateStatus = useMutation({
+    mutationFn: async (vars: { bookId: string; value: string }) => {
+      const updates: Record<string, unknown> = {}
+      if (vars.value === 'archived') {
+        updates.archived = true
+      } else if (vars.value === 'available') {
+        updates.status = 'Disponible'
+        updates.listing_type = null
+        updates.archived = false
+      } else if (vars.value === 'blocked') {
+        updates.status = 'Fuera de circulación'
+        updates.archived = false
+      } else if (vars.value === 'gift') {
+        updates.listing_type = 'gift'
+        updates.status = 'Disponible'
+        updates.archived = false
+      } else if (vars.value === 'sale') {
+        updates.listing_type = 'sale'
+        updates.status = 'Disponible'
+        updates.archived = false
+      }
+      const { error } = await supabase.from('books').update(updates).eq('id', vars.bookId)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['books'] })
+    },
+    onError: (err) => {
+      console.error(err)
+      alert(t('database.statusUpdateError'))
+    },
+  })
 
   // Bulk status action
   const bulkAction = useMutation({
@@ -147,6 +218,8 @@ export function DatabasePage() {
 
   const hasEdits = Object.keys(edits).length > 0
   const hasSelection = selected.size > 0
+
+  const thClass = 'px-3 py-3 text-left cursor-pointer select-none whitespace-nowrap hover:bg-gray-100 transition-colors'
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -241,7 +314,7 @@ export function DatabasePage() {
         {/* TABLE */}
         <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
           <table className="w-full text-sm">
-            <thead className="border-b border-gray-200 bg-gray-50 text-left text-xs text-gray-500">
+            <thead className="border-b border-gray-200 bg-gray-50 text-xs text-gray-500 sticky top-0 z-10">
               <tr>
                 <th className="w-10 px-3 py-3">
                   <input
@@ -251,31 +324,33 @@ export function DatabasePage() {
                     aria-label={t('database.selectAll')}
                   />
                 </th>
-                <th className="px-3 py-3">{t('database.colTitle')}</th>
-                <th className="px-3 py-3">{t('database.colAuthor')}</th>
-                <th className="hidden px-3 py-3 sm:table-cell">{t('database.colCollection')}</th>
-                <th className="hidden px-3 py-3 md:table-cell">{t('database.colOwner')}</th>
-                <th className="px-3 py-3">{t('database.colStatus')}</th>
+                <th className={thClass} onClick={() => handleSortCol('title')}>
+                  {t('database.colTitle')}{sortIndicator('title')}
+                </th>
+                <th className={thClass} onClick={() => handleSortCol('author')}>
+                  {t('database.colAuthor')}{sortIndicator('author')}
+                </th>
+                <th className={`hidden sm:table-cell ${thClass}`} onClick={() => handleSortCol('collection')}>
+                  {t('database.colCollection')}{sortIndicator('collection')}
+                </th>
+                <th className={`hidden md:table-cell ${thClass}`} onClick={() => handleSortCol('language')}>
+                  {t('database.colLanguage')}{sortIndicator('language')}
+                </th>
+                <th className={thClass} onClick={() => handleSortCol('status')}>
+                  {t('database.colStatus')}{sortIndicator('status')}
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {visibleBooks.map((book) => {
                 const edit = getEdit(book)
                 const isDirty = !!edits[book.id]
-                const ownerName = profiles.find((p) => p.id === book.owner_id)?.name ?? ''
-
-                const statusText = () => {
-                  if (book.status === 'Fuera de circulación') return t('bookStatus.blocked')
-                  if (book.isBorrowed) return t('bookStatus.borrowed')
-                  if (book.listing_type === 'gift') return t('bookCard.gift')
-                  if (book.listing_type === 'sale') return t('bookCard.sale')
-                  return t('bookStatus.available')
-                }
+                const currentStatus = bookStatus(book)
 
                 return (
                   <tr
                     key={book.id}
-                    className={`${selected.has(book.id) ? 'bg-blue-50' : 'hover:bg-gray-50'} ${isDirty ? 'bg-amber-50' : ''}`}
+                    className={`${selected.has(book.id) ? 'bg-blue-50' : 'hover:bg-gray-50'} ${isDirty ? 'bg-amber-50' : ''} ${book.archived ? 'opacity-60' : ''}`}
                   >
                     <td className="px-3 py-2">
                       <input
@@ -307,10 +382,24 @@ export function DatabasePage() {
                       />
                     </td>
                     <td className="hidden px-3 py-2 text-xs text-gray-500 md:table-cell">
-                      {ownerName}
+                      {(book.languages ?? []).map((l) => l.toUpperCase()).join(', ') || '—'}
                     </td>
-                    <td className="px-3 py-2 text-xs text-gray-600">
-                      {statusText()}
+                    <td className="px-3 py-2">
+                      <select
+                        value={currentStatus === 'borrowed' ? 'borrowed' : currentStatus}
+                        disabled={currentStatus === 'borrowed' || updateStatus.isPending}
+                        onChange={(e) => updateStatus.mutate({ bookId: book.id, value: e.target.value })}
+                        className="rounded border border-gray-200 bg-white px-1.5 py-0.5 text-xs text-gray-700 disabled:opacity-60"
+                      >
+                        <option value="available">{t('bookStatus.available')}</option>
+                        <option value="gift">{t('bookCard.gift')}</option>
+                        <option value="sale">{t('bookCard.sale')}</option>
+                        <option value="blocked">{t('bookStatus.blocked')}</option>
+                        <option value="archived">{t('database.statusArchived')}</option>
+                        {currentStatus === 'borrowed' && (
+                          <option value="borrowed">{t('bookStatus.borrowed')}</option>
+                        )}
+                      </select>
                     </td>
                   </tr>
                 )
@@ -330,3 +419,4 @@ export function DatabasePage() {
     </div>
   )
 }
+

@@ -38,6 +38,11 @@ export function AboutPage() {
               anonimiza y dejas de poder iniciar sesión, aunque el historial de préstamos
               con otros miembros se conserva para no afectar sus propios registros.
             </p>
+            <p className="mt-2">
+              Los datos que guardamos se usan <b>únicamente</b> para el funcionamiento de
+              esta aplicación — no se comparten con terceros ni se usan para ningún otro
+              propósito.
+            </p>
           </div>
 
           <p>
